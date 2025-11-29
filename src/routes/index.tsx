@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GalleryVerticalEnd } from "lucide-react";
+import { LoginForm } from "@/components/login-form";
 
 function LoginPage() {
   return (
@@ -11,6 +12,7 @@ function LoginPage() {
           </div>
           Anokha 2025
         </a>
+        <LoginForm />
       </div>
     </div>
   );
