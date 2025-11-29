@@ -6,13 +6,11 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { useState } from "react";
+import { ModeToggle } from "@/components/ui/theme-toggle"; // Import the ModeToggle
 
 export const Route = createFileRoute("/dashboard")({
     beforeLoad: () => {
-        // const user = secureLocalStorage.getItem("u");
-        // if (!user) {
-        //     throw redirect({ to: "/", replace: true });
-        // }
+        // Auth check is temporarily disabled
     },
     component: DashboardLayout,
 });
@@ -34,8 +32,8 @@ function DashboardLayout() {
         <SidebarProvider>
             <AppSidebar user={user} navItems={navItems} />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-                    <div className="flex items-center gap-2 px-4">
+                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                    <div className="flex items-center gap-2">
                         <SidebarTrigger className="-ml-1" />
                         <Separator
                             orientation="vertical"
@@ -57,8 +55,13 @@ function DashboardLayout() {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </div>
+                    <div className="ml-auto">
+                        <ModeToggle />
+                    </div>
                 </header>
-                <Outlet />
+                <main className="p-4">
+                    <Outlet />
+                </main>
             </SidebarInset>
         </SidebarProvider>
     );

@@ -8,7 +8,7 @@ function EventDetails() {
   const { eventId } = Route.useParams()
 
   return (
-    <div className="p-4">
+    <div>
       <h1 className="text-2xl font-bold">Event Details</h1>
       <p>Details for event with ID: {eventId}</p>
     </div>

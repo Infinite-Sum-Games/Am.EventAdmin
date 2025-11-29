@@ -6,7 +6,7 @@ export const Route = createFileRoute('/dashboard/participants/')({
 
 function ParticipantsOverviewPage() {
   return (
-    <div className="p-4">
+    <div>
       <h1 className="text-2xl font-bold">Participants Overview</h1>
       <p>This is a placeholder page for participants overview (e.g., by event).</p>
       <Link to="/dashboard/participants/search" className="text-blue-500 underline mt-4 block">Search All Participants</Link>

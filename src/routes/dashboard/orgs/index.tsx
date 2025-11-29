@@ -45,7 +45,7 @@ function OrgsPage() {
     };
 
     return (
-        <div className="flex flex-col gap-4 p-4 pt-0">
+        <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-semibold">Organizers</h1>
                 <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

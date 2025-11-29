@@ -114,8 +114,8 @@ function NewEventPage() {
 
     return (
         <>
-            <h1 className="text-2xl font-semibold mx-4">Create New Event</h1>
-            <div className="bg-muted/50 m-4 p-4 rounded-xl flex flex-col gap-4">
+            <h1 className="text-2xl font-semibold">Create New Event</h1>
+            <div className="bg-muted/50 p-4 rounded-xl flex flex-col gap-4">
                 <form className="grid gap-6" onSubmit={e => { e.preventDefault(); addNewEvent(); }}>
                     {/* Event Name */}
                     <div className="grid gap-2">

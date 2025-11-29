@@ -14,7 +14,7 @@ function EditEvent() {
   const { id } = Route.useSearch()
 
   return (
-    <div className="p-4">
+    <div>
       <h1 className="text-2xl font-bold">Edit Event</h1>
       <p>Editing event with ID: {id}</p>
       <p>Form to edit an event will go here.</p>

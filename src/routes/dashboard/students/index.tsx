@@ -6,7 +6,7 @@ export const Route = createFileRoute('/dashboard/students/')({
 
 function StudentsOverviewPage() {
   return (
-    <div className="p-4">
+    <div>
       <h1 className="text-2xl font-bold">Students Overview</h1>
       <p>This is a placeholder page for analytics on registered students.</p>
     </div>

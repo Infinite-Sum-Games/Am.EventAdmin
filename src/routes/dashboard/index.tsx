@@ -45,7 +45,7 @@ function DashboardIndex() {
   }));
 
   return (
-    <div className="flex flex-col gap-8 p-4 pt-0">
+    <div className="flex flex-col gap-8">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatCard title="Total Revenue" value={`₹${totalRevenue.toLocaleString('en-IN')}`} icon={IndianRupee} description="Total revenue generated from all events." />
         <StatCard title="Total Participants" value={`+${totalParticipants.toLocaleString('en-IN')}`} icon={Users} description="Total seats filled across all events." />
