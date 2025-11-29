@@ -28,7 +28,7 @@ function DashboardLayout() {
     });
 
     const routerState = useRouterState();
-    const navItems = generateNavItems(routerState.location.pathname, routerState.location.pathname);
+    const navItems = generateNavItems(routerState.location.pathname);
 
     return (
         <SidebarProvider>

@@ -1,42 +1,47 @@
 import {
-    Bell,
-    Bot,
+    LayoutDashboard,
+    CalendarDays,
+    Users,
+    Megaphone,
     IndianRupee,
-    Settings2,
-    SquareTerminal,
+    Tags,
+    Shield,
+    type LucideIcon
 } from "lucide-react";
 
-const navItems = [
+export const dashboardNavItem = {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: LayoutDashboard,
+};
+
+export const managementNavItems = [
     {
         title: "Events",
-        url: "/dashboard",
-        icon: Bot,
+        url: "/dashboard/events",
+        icon: CalendarDays,
         items: [
             {
                 title: "View Events",
-                url: "/dashboard",
+                url: "/dashboard", // The main dashboard is the event view
             },
             {
                 title: "New Event",
                 url: "/dashboard/events/new",
-            },
-            {
-                title: "Toggle Event Status",
-                url: "/dashboard/events/toggle",
             },
         ],
     },
     {
         title: "Participants",
         url: "/dashboard/participants",
-        icon: Settings2,
+        icon: Users,
         items: [
             {
-                title: "Search",
+                title: "Search All",
                 url: "/dashboard/participants/search",
             },
             {
-                title: "Event-Wise",
+                title: "By Event",
                 url: "/dashboard/participants",
             },
         ],
@@ -44,10 +49,10 @@ const navItems = [
     {
         title: "Announcements",
         url: "/dashboard/announcements",
-        icon: Bell,
+        icon: Megaphone,
         items: [
             {
-                title: "View Announcements",
+                title: "View All",
                 url: "/dashboard/announcements",
             },
             {
@@ -62,11 +67,11 @@ const navItems = [
         icon: IndianRupee,
         items: [
             {
-                title: "Monitor",
+                title: "Overview",
                 url: "/dashboard/revenue",
             },
             {
-                title: "View Transactions",
+                title: "Transactions",
                 url: "/dashboard/revenue/transactions",
             },
         ],
@@ -74,10 +79,10 @@ const navItems = [
     {
         title: "Tags",
         url: "/dashboard/tags",
-        icon: SquareTerminal,
+        icon: Tags,
         items: [
             {
-                title: "View Tags",
+                title: "View All",
                 url: "/dashboard/tags",
             },
             {
@@ -87,12 +92,12 @@ const navItems = [
         ],
     },
     {
-        title: "Event Organizers",
+        title: "Organizers",
         url: "/dashboard/orgs",
-        icon: SquareTerminal,
+        icon: Shield,
         items: [
             {
-                title: "View Organizers",
+                title: "View All",
                 url: "/dashboard/orgs",
             },
             {
@@ -103,16 +108,29 @@ const navItems = [
     },
 ];
 
-export function generateNavItems(itemUrl: string, subItemUrl: string) {
-    return navItems.map((item) => {
-        const isActive = item.url === itemUrl;
+// This function dynamically sets the 'isActive' state based on the current URL
+export function generateNavItems(pathname: string) {
+    
+    // The main dashboard link is active only if the path is exactly "/dashboard"
+    const isDashboardActive = pathname === dashboardNavItem.url;
+
+    const activeManagementItems = managementNavItems.map(item => {
+        // A parent item is active if the current path starts with its base URL,
+        // but is not the main dashboard page (to avoid highlighting "Events" and "Dashboard" at the same time).
+        const isParentActive = pathname.startsWith(item.url) && item.url !== '/dashboard';
+        
         return {
             ...item,
-            isActive,
-            items: item.items?.map((subItem) => ({
+            isActive: isParentActive,
+            items: item.items?.map(subItem => ({
                 ...subItem,
-                isActive: subItem.url === subItemUrl,
+                isActive: subItem.url === pathname,
             })),
         };
     });
+
+    return [
+        { ...dashboardNavItem, isActive: isDashboardActive, items: [] },
+        ...activeManagementItems,
+    ];
 }
