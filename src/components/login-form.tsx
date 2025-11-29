@@ -29,63 +29,26 @@ export function LoginForm({
 
     const handleLogin = async () => {
         setLoading(true);
-        try {
-            const hashedPassword = await hashPassword(password);
-            const response = await fetch(api.LOGIN_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
+
+        // Simulate API call
+        setTimeout(() => {
+            if (email && password) {
+                const DUMMY_TOKEN = "dummy-auth-token";
+                const DUMMY_USER = {
+                    userName: email.split('@')[0],
                     userEmail: email,
-                    userPassword: hashedPassword,
-                }),
-            });
+                };
 
-            switch (response.status) {
-                case 200:
-                    const {
-                        DATA: { roleID, TOKEN, USER },
-                    } = await response.json();
+                secureLocalStorage.clear();
+                secureLocalStorage.setItem("t", DUMMY_TOKEN);
+                secureLocalStorage.setItem("u", JSON.stringify(DUMMY_USER));
 
-                    if (roleID !== 1) {
-                        alert("You are not authorized to access this page");
-                        return;
-                    }
-
-                    secureLocalStorage.clear();
-                    secureLocalStorage.setItem("t", TOKEN);
-                    secureLocalStorage.setItem("u", JSON.stringify(USER));
-
-                    router.navigate({ to: "/dashboard", replace: true });
-                    break;
-                case 400:
-                    const { MESSAGE } = await response.json();
-                    alert(MESSAGE);
-                    break;
-                case 401:
-                    secureLocalStorage.clear();
-                    router.navigate({ to: "/", replace: true });
-                    break;
-                case 500:
-                    alert(
-                        "We are facing some issues at the moment. We are working on it. Please try again later.",
-                    );
-                    break;
-                default:
-                    alert(
-                        "Something went wrong. Please refresh the page and try again later.",
-                    );
-                    break;
+                router.navigate({ to: "/dashboard", replace: true });
+            } else {
+                alert("Please enter email and password.");
             }
-        } catch (error) {
-            console.error(error);
-            alert(
-                "Something went wrong. Please refresh the page and try again later.",
-            );
-        } finally {
             setLoading(false);
-        }
+        }, 1000);
     };
 
     return (
