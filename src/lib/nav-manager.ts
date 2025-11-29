@@ -29,7 +29,7 @@ export const managementNavItems: NavItem[] = [
         url: "/dashboard/events",
         icon: CalendarDays,
         items: [
-            { title: "View All", url: "/dashboard" },
+            { title: "View All", url: "/dashboard/events" },
             { title: "New Event", url: "/dashboard/events/new" },
         ],
     },
