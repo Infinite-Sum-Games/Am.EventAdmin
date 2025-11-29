@@ -1,5 +1,5 @@
 import * as React from "react";
-import { GalleryVerticalEnd, type LucideIcon } from "lucide-react";
+import { GalleryVerticalEnd } from "lucide-react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -10,19 +10,7 @@ import {
     SidebarHeader,
     SidebarRail,
 } from "@/components/ui/sidebar";
-
-// Define a consistent NavItem type to be used across components
-type NavItem = {
-    title: string;
-    url: string;
-    icon?: LucideIcon;
-    isActive?: boolean;
-    items?: {
-        title: string;
-        url: string;
-        isActive?: boolean;
-    }[];
-};
+import type { NavItem } from "@/lib/nav-manager";
 
 export function AppSidebar({
     user,
@@ -34,12 +22,12 @@ export function AppSidebar({
         email: string;
         avatar: string;
     };
-    navItems: NavItem[];
+    navItems: {
+        dashboard: NavItem;
+        management: NavItem[];
+        analytics: NavItem[];
+    };
 } & React.ComponentProps<typeof Sidebar>) {
-    // The first item from our generator is the dashboard link, the rest are management sections
-    const dashboardItem = navItems[0];
-    const managementItems = navItems.slice(1);
-    
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -54,7 +42,11 @@ export function AppSidebar({
                 />
             </SidebarHeader>
             <SidebarContent>
-                <NavMain dashboardItem={dashboardItem} managementItems={managementItems} />
+                <NavMain 
+                    dashboardItem={navItems.dashboard} 
+                    managementItems={navItems.management}
+                    analyticsItems={navItems.analytics}
+                />
             </SidebarContent>
             <SidebarFooter>
                 <NavUser user={user} />
