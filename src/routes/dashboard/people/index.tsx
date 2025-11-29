@@ -91,8 +91,8 @@ function PeoplePage() {
                                 <Button variant="outline" className="w-full" disabled>
                                     <Edit3 className="mr-2 h-4 w-4" /> Edit
                                 </Button>
-                                <Button variant="destructive" className="w-full" onClick={() => deletePerson(person.id)}>
-                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                <Button variant="ghost" className="w-full group text-destructive hover:bg-destructive hover:text-foreground" onClick={() => deletePerson(person.id)}>
+                                    <Trash2 className="mr-2 h-4 w-4 text-destructive group-hover:text-foreground" /> Delete
                                 </Button>
                             </CardFooter>
                         </Card>
