@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Binoculars, PlusCircle } from "lucide-react";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { EventCard } from "@/components/events/event-card";
-import type { Event } from "@/types/events";
+import type { GetAllEventsResponse } from "@/types/events";
 
 // --- Dummy Data ---
-const dummyEvents: Event[] = [
+const dummyEvents: GetAllEventsResponse[] = [
   {
     "event_id": "event-1",
     "event_image_url": "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -80,7 +80,7 @@ function DashboardIndex() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {events.map((event: Event) => (
+          {events.map((event: GetAllEventsResponse) => (
             <EventCard key={event.event_id} event={event} />
           ))}
         </div>

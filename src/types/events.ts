@@ -1,7 +1,8 @@
-export type Event = {
+// This type represents the specific shape of the data returned by the `getAllEvents` API call.
+export type GetAllEventsResponse = {
   event_id: string;
-  event_name: string;
   event_image_url: string;
+  event_name: string;
   event_status: string;
   event_description: string;
   event_date: string;

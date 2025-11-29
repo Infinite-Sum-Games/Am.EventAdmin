@@ -4,14 +4,15 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Notebook, Edit3 } from 'lucide-react';
-import type { Event } from '@/types/events';
+import type { GetAllEventsResponse } from '@/types/events';
 
 interface EventCardProps {
-  event: Event;
+  event: GetAllEventsResponse;
 }
 
 export function EventCard({ event }: EventCardProps) {
   const seatsPercentage = (event.seats_filled / event.max_seats) * 100;
+
 
   return (
     <Card className="flex flex-col overflow-hidden transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg">
