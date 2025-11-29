@@ -1,28 +1,77 @@
-import { type LucideIcon } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
 import type { NavItem } from "@/lib/nav-manager";
 
-// Helper component to render a list of direct nav items
+// This component now intelligently renders either a direct link or a collapsible menu
 function NavItemGroup({ items }: { items: NavItem[] }) {
     return (
         <SidebarMenu>
-            {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                    <Link to={item.url} className="w-full" search={{}} params={{}}> {/* Added search/params for type-safety */}
-                        <SidebarMenuButton isActive={item.isActive} tooltip={item.title}>
-                            {item.icon && <item.icon />}
-                            <span>{item.title}</span>
-                        </SidebarMenuButton>
-                    </Link>
-                </SidebarMenuItem>
-            ))}
+            {items.map((item) => {
+                // If there are no sub-items, render a direct link
+                if (!item.items || item.items.length === 0) {
+                    return (
+                        <SidebarMenuItem key={item.title}>
+                            <Link to={item.url} className="w-full" search={{}} params={{}}>
+                                <SidebarMenuButton isActive={item.isActive} tooltip={item.title}>
+                                    {item.icon && <item.icon />}
+                                    <span>{item.title}</span>
+                                </SidebarMenuButton>
+                            </Link>
+                        </SidebarMenuItem>
+                    );
+                }
+
+                // If there ARE sub-items, render a collapsible menu
+                return (
+                    <Collapsible
+                        key={item.title}
+                        asChild
+                        defaultOpen={item.isActive}
+                        className="group/collapsible"
+                    >
+                        <SidebarMenuItem>
+                            <CollapsibleTrigger asChild>
+                                <SidebarMenuButton tooltip={item.title}>
+                                    {item.icon && <item.icon />}
+                                    <span>{item.title}</span>
+                                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                </SidebarMenuButton>
+                            </CollapsibleTrigger>
+                            <CollapsibleContent>
+                                <SidebarMenuSub>
+                                    {item.items.map((subItem) => (
+                                        <SidebarMenuSubItem key={subItem.title}>
+                                            <SidebarMenuSubButton
+                                                isActive={subItem.isActive}
+                                                asChild
+                                            >
+                                                <Link to={subItem.url} search={{}} params={{}}>
+                                                    <span>{subItem.title}</span>
+                                                </Link>
+                                            </SidebarMenuSubButton>
+                                        </SidebarMenuSubItem>
+                                    ))}
+                                </SidebarMenuSub>
+                            </CollapsibleContent>
+                        </SidebarMenuItem>
+                    </Collapsible>
+                );
+            })}
         </SidebarMenu>
     );
 }
@@ -38,7 +87,7 @@ export function NavMain({
 }) {
     return (
         <>
-            {/* Dashboard Link */}
+            {/* Dashboard Link is always a direct link */}
             <SidebarGroup>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -52,13 +101,11 @@ export function NavMain({
                 </SidebarMenu>
             </SidebarGroup>
 
-            {/* Management Group */}
             <SidebarGroup>
                 <SidebarGroupLabel>Management</SidebarGroupLabel>
                 <NavItemGroup items={managementItems} />
             </SidebarGroup>
 
-            {/* Analytics Group */}
             <SidebarGroup>
                 <SidebarGroupLabel>Analytics</SidebarGroupLabel>
                 <NavItemGroup items={analyticsItems} />

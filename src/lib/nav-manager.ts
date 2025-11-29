@@ -8,6 +8,11 @@ export type NavItem = {
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
+    items?: { // This is now optional
+        title: string;
+        url: string;
+        isActive?: boolean;
+    }[];
 };
 
 export const dashboardNavItem: NavItem = {
@@ -16,11 +21,17 @@ export const dashboardNavItem: NavItem = {
     icon: LayoutDashboard,
 };
 
+// --- Navigation Structure Definition ---
+
 export const managementNavItems: NavItem[] = [
     {
         title: "Events",
-        url: "/dashboard", // Main dashboard is the events view
+        url: "/dashboard/events",
         icon: CalendarDays,
+        items: [
+            { title: "View All", url: "/dashboard" },
+            { title: "New Event", url: "/dashboard/events/new" },
+        ],
     },
     {
         title: "Organizers",
@@ -44,31 +55,52 @@ export const analyticsNavItems: NavItem[] = [
         title: "Revenue",
         url: "/dashboard/revenue",
         icon: IndianRupee,
+        items: [
+            { title: "Overview", url: "/dashboard/revenue" },
+            { title: "Transactions", url: "/dashboard/revenue/transactions" },
+        ],
     },
     {
         title: "Participants",
         url: "/dashboard/participants",
         icon: Users,
+        items: [
+            { title: "By Event", url: "/dashboard/participants" },
+            { title: "Search All", url: "/dashboard/participants/search" },
+        ],
     },
     {
         title: "Students",
         url: "/dashboard/students",
         icon: GraduationCap,
+        items: [
+            { title: "Overview", url: "/dashboard/students" },
+        ],
     },
 ];
 
 export function generateNavItems(pathname: string) {
     const applyActiveState = (items: NavItem[]) => {
         return items.map(item => {
+            // A parent is active if the path starts with its URL.
+            // A special case for "Events" which links to "/dashboard"
+            const isParentActive = item.url === '/dashboard' 
+                ? pathname === '/dashboard' || pathname.startsWith('/dashboard/events')
+                : pathname.startsWith(item.url);
+            
             return {
                 ...item,
-                isActive: pathname === item.url || (pathname.startsWith(item.url) && item.url !== "/dashboard" && item.url !== "/dashboard/events"), // Simplified active check
+                isActive: isParentActive,
+                items: item.items?.map(subItem => ({
+                    ...subItem,
+                    isActive: subItem.url === pathname,
+                })),
             };
         });
     };
 
     return {
-        dashboard: { ...dashboardNavItem, isActive: pathname === dashboardNavItem.url },
+        dashboard: { ...dashboardNavItem, isActive: pathname === dashboardNavItem.url && !pathname.startsWith('/dashboard/events') },
         management: applyActiveState(managementNavItems),
         analytics: applyActiveState(analyticsNavItems),
     };
