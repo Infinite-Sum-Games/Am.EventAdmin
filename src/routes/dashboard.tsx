@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
 import secureLocalStorage from "react-secure-storage";
 import { AppSidebar } from "@/components/app-sidebar";
 import { generateNavItems } from "@/lib/nav-manager";
@@ -9,10 +9,10 @@ import { useState } from "react";
 
 export const Route = createFileRoute("/dashboard")({
     beforeLoad: () => {
-        const user = secureLocalStorage.getItem("u");
-        if (!user) {
-            throw redirect({ to: "/", replace: true });
-        }
+        // const user = secureLocalStorage.getItem("u");
+        // if (!user) {
+        //     throw redirect({ to: "/", replace: true });
+        // }
     },
     component: DashboardLayout,
 });
@@ -27,7 +27,7 @@ function DashboardLayout() {
         avatar: parsedUser?.avatar || "https://gravatar.com/avatar/dd55aeae8806246ac1d0ab0c6baa34f5?&d=robohash&r=x",
     });
 
-    const routerState = Route.useRouterState();
+    const routerState = useRouterState();
     const navItems = generateNavItems(routerState.location.pathname, routerState.location.pathname);
 
     return (
