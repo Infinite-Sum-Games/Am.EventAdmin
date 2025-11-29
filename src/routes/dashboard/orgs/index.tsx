@@ -1,8 +1,11 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Binoculars, PlusCircle, Trash2, Edit3 } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Binoculars, PlusCircle, Trash2, Edit3, Building, Users } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { Organizer } from "@/types/db";
@@ -12,6 +15,7 @@ import { NewOrgForm } from "@/components/orgs/new-org-form";
 const dummyOrgs: Organizer[] = [
     { id: "uuid-org-1", name: "Computer Science and Engineering", email: "cse@univ.edu", org_type: "DEPARTMENT", student_head: "John Doe", faculty_head: "Dr. Smith", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
     { id: "uuid-org-2", name: "Tech Club", email: "tech@univ.edu", org_type: "CLUB", student_head: "Jane Smith", faculty_head: "Dr. Jones", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
+    { id: "uuid-org-3", name: "Mechanical Engineering", email: "mech@univ.edu", org_type: "DEPARTMENT", student_head: "Peter Pan", faculty_head: "Dr. Hook", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
 ];
 
 // --- Data Fetching ---
@@ -26,6 +30,11 @@ export const Route = createFileRoute('/dashboard/orgs/')({
     component: OrgsPage,
 });
 
+// Helper to get initials from a name
+const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+}
+
 function OrgsPage() {
     const queryClient = useQueryClient();
     const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
@@ -33,7 +42,6 @@ function OrgsPage() {
 
     const deleteOrg = (orgId: string) => {
         alert(`(Simulated) Deleting organizer with ID: ${orgId}`);
-        // queryClient.invalidateQueries({ queryKey: ['orgs'] });
     };
 
     return (
@@ -62,27 +70,38 @@ function OrgsPage() {
                     <p className="text-lg font-semibold mt-4">No organizers found</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
-                    {orgs.map((org) => (
-                        <Card key={org.id} className="p-4">
-                            <CardContent className="flex justify-between items-center p-0">
-                                <div className="flex flex-col">
-                                    <h2 className="text-lg font-semibold">{org.name}</h2>
-                                    <p className="text-sm text-muted-foreground">{org.org_type}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">Student Head: {org.student_head}</p>
+                <Card>
+                    <div className="flex flex-col">
+                        {orgs.map((org, index) => (
+                            <div key={org.id}>
+                                <div className="flex items-center gap-4 p-4">
+                                    <Avatar className="h-12 w-12">
+                                        <AvatarFallback>{getInitials(org.name)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="grid gap-1 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold">{org.name}</p>
+                                            <Badge variant={org.org_type === 'DEPARTMENT' ? 'default' : 'secondary'}>
+                                                {org.org_type === 'DEPARTMENT' ? <Building className="mr-1 h-3 w-3"/> : <Users className="mr-1 h-3 w-3" />}
+                                                {org.org_type}
+                                            </Badge>
+                                        </div>
+                                        <p className="text-sm text-muted-foreground">Student Head: {org.student_head}</p>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <Button variant="ghost" size="icon" disabled>
+                                            <Edit3 className="w-5 h-5" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" onClick={() => deleteOrg(org.id)}>
+                                            <Trash2 className="w-5 h-5 text-red-500" />
+                                        </Button>
+                                    </div>
                                 </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="icon" disabled>
-                                        <Edit3 className="w-5 h-5" />
-                                    </Button>
-                                    <Button variant="outline" size="icon" onClick={() => deleteOrg(org.id)}>
-                                        <Trash2 className="w-5 h-5 text-red-500" />
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
+                                {index < orgs.length - 1 && <Separator />}
+                            </div>
+                        ))}
+                    </div>
+                </Card>
             )}
         </div>
     );

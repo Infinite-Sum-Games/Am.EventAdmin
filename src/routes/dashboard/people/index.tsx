@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Binoculars, PlusCircle, Trash2, Edit3 } from "lucide-react";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Binoculars, PlusCircle, Trash2, Edit3, Mail, Phone } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { Person } from "@/types/db";
@@ -12,6 +13,7 @@ import { NewPersonForm } from "@/components/people/new-person-form";
 const dummyPeople: Person[] = [
     { id: "uuid-person-1", name: "Dr. Arjun Rao", email: "arjun.rao@univ.edu", profession: "Professor, CSE", phone_number: "9876543210" },
     { id: "uuid-person-2", name: "Meera Krishnan", email: "meera.k@techcorp.com", profession: "Software Engineer, TechCorp", phone_number: "9876543211" },
+    { id: "uuid-person-3", name: "Sunil Verma", email: "sunil.v@startup.io", profession: "Product Manager, Startup.io", phone_number: "9876543212" },
 ];
 
 // --- Data Fetching ---
@@ -25,6 +27,8 @@ export const Route = createFileRoute('/dashboard/people/')({
         queryClient.ensureQueryData(peopleQueryOptions),
     component: PeoplePage,
 });
+
+const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
 function PeoplePage() {
     const queryClient = useQueryClient();
@@ -61,27 +65,36 @@ function PeoplePage() {
                     <p className="text-lg font-semibold mt-4">No people found</p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {people.map((person) => (
-                        <Card key={person.id} className="p-4">
-                            <CardContent className="flex justify-between items-center p-0">
-                                <div>
-                                    <h2 className="text-lg font-semibold">{person.name}</h2>
-                                    <p className="text-sm text-muted-foreground">{person.profession}</p>
-                                    <div className="flex gap-4 mt-1">
-                                        <a href={`mailto:${person.email}`} className="text-xs text-primary hover:underline">{person.email}</a>
-                                        <a href={`tel:${person.phone_number}`} className="text-xs text-primary hover:underline">{person.phone_number}</a>
-                                    </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button variant="outline" size="icon" disabled>
-                                        <Edit3 className="w-5 h-5" />
-                                    </Button>
-                                    <Button variant="outline" size="icon" onClick={() => deletePerson(person.id)}>
-                                        <Trash2 className="w-5 h-5 text-red-500" />
-                                    </Button>
+                        <Card key={person.id} className="flex flex-col text-center">
+                            <CardHeader className="flex flex-col items-center">
+                                <Avatar className="h-20 w-20 mb-2 text-xl">
+                                    <AvatarFallback>{getInitials(person.name)}</AvatarFallback>
+                                </Avatar>
+                                <h2 className="text-xl font-semibold">{person.name}</h2>
+                                <p className="text-sm text-muted-foreground">{person.profession}</p>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <div className="flex flex-col gap-2 text-sm">
+                                    <a href={`mailto:${person.email}`} className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary">
+                                        <Mail className="h-4 w-4" />
+                                        <span>{person.email}</span>
+                                    </a>
+                                    <a href={`tel:${person.phone_number}`} className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary">
+                                        <Phone className="h-4 w-4" />
+                                        <span>{person.phone_number}</span>
+                                    </a>
                                 </div>
                             </CardContent>
+                            <CardFooter className="flex gap-2 p-4 border-t">
+                                <Button variant="outline" className="w-full" disabled>
+                                    <Edit3 className="mr-2 h-4 w-4" /> Edit
+                                </Button>
+                                <Button variant="destructive" className="w-full" onClick={() => deletePerson(person.id)}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </Button>
+                            </CardFooter>
                         </Card>
                     ))}
                 </div>
