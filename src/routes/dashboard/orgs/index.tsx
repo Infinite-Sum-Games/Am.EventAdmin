@@ -6,8 +6,7 @@ import { Binoculars, PlusCircle, Trash2, Edit3 } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import type { Organizer } from "@/types/db";
-// We will create this form component in the next step
-// import { NewOrgForm } from "@/components/orgs/new-org-form";
+import { NewOrgForm } from "@/components/orgs/new-org-form";
 
 // --- Dummy Data ---
 const dummyOrgs: Organizer[] = [
@@ -49,11 +48,10 @@ function OrgsPage() {
                         <DialogHeader>
                             <DialogTitle>Create a New Organizer</DialogTitle>
                         </DialogHeader>
-                        {/* <NewOrgForm onSuccess={() => {
+                        <NewOrgForm onSuccess={() => {
                             setIsDialogOpen(false);
                             queryClient.invalidateQueries({ queryKey: ['orgs'] });
-                        }} /> */}
-                        <p className="py-4">The form for creating a new organizer will go here.</p>
+                        }} />
                     </DialogContent>
                 </Dialog>
             </div>
