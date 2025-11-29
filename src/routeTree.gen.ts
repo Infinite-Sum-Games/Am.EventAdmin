@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardTagsIndexRouteImport } from './routes/dashboard/tags/index'
+import { Route as DashboardTagsNewRouteImport } from './routes/dashboard/tags/new'
 import { Route as DashboardEventsNewRouteImport } from './routes/dashboard/events/new'
 import { Route as DashboardEventsEditRouteImport } from './routes/dashboard/events/edit'
 import { Route as DashboardEventsEventIdRouteImport } from './routes/dashboard/events/$eventId'
@@ -29,6 +31,16 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTagsIndexRoute = DashboardTagsIndexRouteImport.update({
+  id: '/tags/',
+  path: '/tags/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardTagsNewRoute = DashboardTagsNewRouteImport.update({
+  id: '/tags/new',
+  path: '/tags/new',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardEventsNewRoute = DashboardEventsNewRouteImport.update({
@@ -54,6 +66,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/events/new': typeof DashboardEventsNewRoute
+  '/dashboard/tags/new': typeof DashboardTagsNewRoute
+  '/dashboard/tags': typeof DashboardTagsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,6 +75,8 @@ export interface FileRoutesByTo {
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/events/new': typeof DashboardEventsNewRoute
+  '/dashboard/tags/new': typeof DashboardTagsNewRoute
+  '/dashboard/tags': typeof DashboardTagsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,6 +86,8 @@ export interface FileRoutesById {
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/events/new': typeof DashboardEventsNewRoute
+  '/dashboard/tags/new': typeof DashboardTagsNewRoute
+  '/dashboard/tags/': typeof DashboardTagsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,6 +98,8 @@ export interface FileRouteTypes {
     | '/dashboard/events/$eventId'
     | '/dashboard/events/edit'
     | '/dashboard/events/new'
+    | '/dashboard/tags/new'
+    | '/dashboard/tags'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -87,6 +107,8 @@ export interface FileRouteTypes {
     | '/dashboard/events/$eventId'
     | '/dashboard/events/edit'
     | '/dashboard/events/new'
+    | '/dashboard/tags/new'
+    | '/dashboard/tags'
   id:
     | '__root__'
     | '/'
@@ -95,6 +117,8 @@ export interface FileRouteTypes {
     | '/dashboard/events/$eventId'
     | '/dashboard/events/edit'
     | '/dashboard/events/new'
+    | '/dashboard/tags/new'
+    | '/dashboard/tags/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -123,6 +147,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/tags/': {
+      id: '/dashboard/tags/'
+      path: '/tags'
+      fullPath: '/dashboard/tags'
+      preLoaderRoute: typeof DashboardTagsIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/tags/new': {
+      id: '/dashboard/tags/new'
+      path: '/tags/new'
+      fullPath: '/dashboard/tags/new'
+      preLoaderRoute: typeof DashboardTagsNewRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/events/new': {
@@ -154,6 +192,8 @@ interface DashboardRouteChildren {
   DashboardEventsEventIdRoute: typeof DashboardEventsEventIdRoute
   DashboardEventsEditRoute: typeof DashboardEventsEditRoute
   DashboardEventsNewRoute: typeof DashboardEventsNewRoute
+  DashboardTagsNewRoute: typeof DashboardTagsNewRoute
+  DashboardTagsIndexRoute: typeof DashboardTagsIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -161,6 +201,8 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardEventsEventIdRoute: DashboardEventsEventIdRoute,
   DashboardEventsEditRoute: DashboardEventsEditRoute,
   DashboardEventsNewRoute: DashboardEventsNewRoute,
+  DashboardTagsNewRoute: DashboardTagsNewRoute,
+  DashboardTagsIndexRoute: DashboardTagsIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
