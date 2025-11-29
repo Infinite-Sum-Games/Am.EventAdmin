@@ -41,7 +41,6 @@ export const managementNavItems: NavItem[] = [
         icon: Shield,
         items: [
             { title: "View All", url: "/dashboard/orgs" },
-            { title: "New Organizer", url: "/dashboard/orgs/new" },
         ],
     },
     {
@@ -50,7 +49,6 @@ export const managementNavItems: NavItem[] = [
         icon: Tags,
         items: [
             { title: "View All", url: "/dashboard/tags" },
-            { title: "New Tag", url: "/dashboard/tags/new" },
         ],
     },
     {
@@ -59,7 +57,6 @@ export const managementNavItems: NavItem[] = [
         icon: Contact,
         items: [
             { title: "View All", url: "/dashboard/people" },
-            { title: "New Person", url: "/dashboard/people/new" },
         ],
     },
 ];
