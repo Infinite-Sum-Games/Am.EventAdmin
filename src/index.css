@@ -24,6 +24,7 @@
         --input: 214.3 31.8% 91.4%;
         --ring: 30 95% 55%; /* Blue */
         --radius: 0.5rem;
+        --sidebar-background: 210 40% 98%;
     }
 
     .dark {
@@ -47,6 +48,7 @@
         --input: 240 3.7% 25%;
         --ring: 35 95% 55%;
         --radius: 0.5rem;
+        --sidebar-background: 240 3.7% 15.9%;
     }
 }
 

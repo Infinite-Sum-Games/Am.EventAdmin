@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Binoculars, PlusCircle, Trash2, Edit3, Building, Users } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import type { Organizer } from "@/types/db";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { Organizer, OrganizerType } from "@/types/db";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
 
 // --- Dummy Data ---
@@ -30,15 +31,20 @@ export const Route = createFileRoute('/dashboard/orgs/')({
     component: OrgsPage,
 });
 
-// Helper to get initials from a name
-const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-}
+const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
 function OrgsPage() {
     const queryClient = useQueryClient();
     const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [typeFilter, setTypeFilter] = useState<OrganizerType | 'ALL'>('ALL');
+
+    const filteredOrgs = useMemo(() => {
+        if (typeFilter === 'ALL') {
+            return orgs;
+        }
+        return orgs.filter(org => org.org_type === typeFilter);
+    }, [orgs, typeFilter]);
 
     const deleteOrg = (orgId: string) => {
         alert(`(Simulated) Deleting organizer with ID: ${orgId}`);
@@ -46,33 +52,45 @@ function OrgsPage() {
 
     return (
         <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <h1 className="text-2xl font-semibold">Organizers</h1>
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild>
-                        <Button><PlusCircle className="mr-2 h-4 w-4" /> Create New Organizer</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create a New Organizer</DialogTitle>
-                        </DialogHeader>
-                        <NewOrgForm onSuccess={() => {
-                            setIsDialogOpen(false);
-                            queryClient.invalidateQueries({ queryKey: ['orgs'] });
-                        }} />
-                    </DialogContent>
-                </Dialog>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                    <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as OrganizerType | 'ALL')}>
+                        <SelectTrigger className="w-full sm:w-[180px]">
+                            <SelectValue placeholder="Filter by type..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="ALL">All Organizers</SelectItem>
+                            <SelectItem value="DEPARTMENT">Department</SelectItem>
+                            <SelectItem value="CLUB">Club</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button className="w-full sm:w-auto"><PlusCircle className="mr-2 h-4 w-4" /> Create</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create a New Organizer</DialogTitle>
+                            </DialogHeader>
+                            <NewOrgForm onSuccess={() => {
+                                setIsDialogOpen(false);
+                                queryClient.invalidateQueries({ queryKey: ['orgs'] });
+                            }} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
 
-            {(!orgs || orgs.length === 0) ? (
+            {(!filteredOrgs || filteredOrgs.length === 0) ? (
                 <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-sm py-8 mt-4">
                     <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
-                    <p className="text-lg font-semibold mt-4">No organizers found</p>
+                    <p className="text-lg font-semibold mt-4">No organizers found for this filter.</p>
                 </div>
             ) : (
                 <Card>
                     <div className="flex flex-col">
-                        {orgs.map((org, index) => (
+                        {filteredOrgs.map((org, index) => (
                             <div key={org.id}>
                                 <div className="flex items-center gap-4 p-4">
                                     <Avatar className="h-12 w-12">
@@ -97,7 +115,7 @@ function OrgsPage() {
                                         </Button>
                                     </div>
                                 </div>
-                                {index < orgs.length - 1 && <Separator />}
+                                {index < filteredOrgs.length - 1 && <Separator />}
                             </div>
                         ))}
                     </div>
