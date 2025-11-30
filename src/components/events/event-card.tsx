@@ -23,7 +23,7 @@ export function EventCard({ event }: EventCardProps) {
           className="h-48 w-full object-cover"
         />
       </CardHeader>
-      <CardContent className="flex-grow p-4">
+      <CardContent className="grow p-4">
         <CardTitle className="mb-2 text-xl">{event.event_name}</CardTitle>
         <div className="mb-4 flex flex-wrap gap-2">
           {event.tags.map((tag) => (

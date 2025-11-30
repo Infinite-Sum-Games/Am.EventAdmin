@@ -85,7 +85,7 @@ function PeoplePage() {
             </div>
 
             {(!filteredPeople || filteredPeople.length === 0) ? (
-                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-sm py-8 mt-4">
+                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
                     <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
                     <p className="text-lg font-semibold mt-4">No people found matching your search.</p>
                 </div>
@@ -100,7 +100,7 @@ function PeoplePage() {
                                 <h2 className="text-xl font-semibold">{person.name}</h2>
                                 <p className="text-sm text-muted-foreground">{person.profession}</p>
                             </CardHeader>
-                            <CardContent className="flex-grow">
+                            <CardContent className="grow">
                                 <div className="flex flex-col gap-2 text-sm">
                                     <a href={`mailto:${person.email}`} className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary">
                                         <Mail className="h-4 w-4" />

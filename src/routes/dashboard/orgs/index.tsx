@@ -83,7 +83,7 @@ function OrgsPage() {
             </div>
 
             {(!filteredOrgs || filteredOrgs.length === 0) ? (
-                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-sm py-8 mt-4">
+                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
                     <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
                     <p className="text-lg font-semibold mt-4">No organizers found for this filter.</p>
                 </div>
