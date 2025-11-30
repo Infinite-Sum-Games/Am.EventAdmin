@@ -44,20 +44,20 @@ export function EventCard({ event }: EventCardProps) {
       <CardFooter className="flex gap-2 border-t p-4">
         <Button
           variant="secondary"
-          className="w-full text-center"
+          className="flex-1 text-center"
           asChild
         >
           <Link to="/dashboard/events/$eventId" params={{ eventId: event.event_id }}>
-            <Notebook className="mr-2 h-4 w-4" />
+            <Notebook className="h-4 w-4" />
             Details
           </Link>
         </Button>
         <Button
-          className="w-full text-center"
+          className="flex-1 text-center"
           asChild
         >
           <Link to="/dashboard/events/edit" search={{ id: event.event_id }}>
-            <Edit3 className="mr-2 h-4 w-4" />
+            <Edit3 className="h-4 w-4" />
             Edit
           </Link>
         </Button>

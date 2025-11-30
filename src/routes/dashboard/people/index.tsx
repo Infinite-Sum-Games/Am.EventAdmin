@@ -69,7 +69,7 @@ function PeoplePage() {
                     />
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto"><PlusCircle className="mr-2 h-4 w-4" /> Add New Person</Button>
+                            <Button className="w-full sm:w-auto"><PlusCircle className="h-4 w-4" /> Add New Person</Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -113,11 +113,11 @@ function PeoplePage() {
                                 </div>
                             </CardContent>
                             <CardFooter className="flex gap-2 p-4 border-t">
-                                <Button variant="outline" className="w-full" disabled>
-                                    <Edit3 className="mr-2 h-4 w-4" /> Edit
+                                <Button variant="outline" className="flex-1" disabled>
+                                    <Edit3 className="h-4 w-4" /> Edit
                                 </Button>
-                                <Button variant="outline" className="w-full group hover:border-destructive hover:text-destructive" onClick={() => deletePerson(person.id)}>
-                                    <Trash2 className="mr-2 h-4 w-4 text-muted-foreground group-hover:text-destructive" /> Delete
+                                <Button variant="outline" className="flex-1 group hover:border-destructive hover:text-destructive" onClick={() => deletePerson(person.id)}>
+                                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-destructive" /> Delete
                                 </Button>
                             </CardFooter>
                         </Card>

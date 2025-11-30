@@ -66,7 +66,7 @@ function ViewEventsPage() {
         <h1 className="text-2xl font-semibold">View Events</h1>
         <Button asChild>
             <Link to="/dashboard/events/new">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create New Event
+                <PlusCircle className="h-4 w-4" /> Create New Event
             </Link>
         </Button>
       </div>

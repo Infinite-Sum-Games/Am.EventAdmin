@@ -11,10 +11,11 @@ This project is currently in the **frontend development phase**. The core applic
 - **Framework:** React 19
 - **Build Tool:** Vite
 - **Language:** TypeScript
-- **Routing:** TanStack Router (File-based)
-- **Data Fetching:** TanStack Query
+- **Package Manager:** Bun
+- **Routing:** TanStack Router v1 (File-based)
+- **Data Fetching:** TanStack Query v5
 - **UI Components:** `shadcn/ui`
-- **Styling:** Tailwind CSS with a custom theme
+- **Styling:** Tailwind CSS v4
 
 ## Getting Started
 
@@ -22,11 +23,11 @@ To get the development server running:
 
 1.  **Install Dependencies:**
     ```bash
-    npm install
+    bun install
     ```
 2.  **Run the Development Server:**
     ```bash
-    npm run dev
+    bun dev
     ```
 The application will be available at `http://localhost:5173` (or the next available port).
 
