@@ -1,64 +1,131 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { EventCard } from "@/components/events/event-card";
 import type { GetAllEventsResponse } from "@/types/events";
 import { PlusCircle, Search } from "lucide-react";
 import { api } from "@/lib/api";
+import secureLocalStorage from "react-secure-storage";
 
-// --- Dummy Data ---
-const dummyTagsForFilter = ["Technology", "Coding", "Competition", "Robotics", "Workshop", "STEM", "Arts", "Exhibition"];
-const dummyOrganizersForFilter = ["Tech Club", "CSE Department", "Mechanical Department"];
-const dummyEvents: (GetAllEventsResponse & { organizer_name: string })[] = [
-    { "event_id": "event-1", "event_name": "Hackathon", "event_status": "ACTIVE", "is_group": true, "tags": ["Technology", "Coding", "Competition"], "event_price": 500, "max_seats": 200, "seats_filled": 120, "event_image_url": "https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=2231&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", "event_description": "A 24-hour coding marathon where innovators and developers come together to solve real-world problems.", "event_date": "2025-02-10", "is_registered": false, "is_starred": false, "organizer_name": "Tech Club" },
-    { "event_id": "event-2", "event_name": "Robotics Workshop", "event_status": "ACTIVE", "is_group": false, "tags": ["Robotics", "Workshop", "STEM"], "event_price": 300, "max_seats": 100, "seats_filled": 80, "event_image_url": "https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2370&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", "event_description": "An immersive, hands-on workshop covering the fundamentals of robotics, from building to programming.", "event_date": "2025-02-12", "is_registered": false, "is_starred": false, "organizer_name": "CSE Department" },
-    { "event_id": "event-3", "event_name": "Art Exhibition", "event_status": "CLOSED", "is_group": false, "tags": ["Arts", "Exhibition"], "event_price": 0, "max_seats": 500, "seats_filled": 450, "event_image_url": "https://images.unsplash.com/photo-1547891654-e66ed711b931?q=80&w=2370&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", "event_description": "A curated exhibition showcasing diverse talents in painting, sculpture, and digital art.", "event_date": "2025-02-08", "is_registered": true, "is_starred": true, "organizer_name": "Arts Club" }
+// --- Dummy Data for Filters (To be replaced by API calls if available) ---
+const dummyTagsForFilter = [
+  "Technology",
+  "Coding",
+  "Competition",
+  "Robotics",
+  "Workshop",
+  "STEM",
+  "Arts",
+  "Exhibition",
+  "Art",
+  "Tech",
 ];
-const uniqueEventDates = [...new Set(dummyEvents.map(event => event.event_date))];
+const dummyOrganizersForFilter = [
+  "Tech Club",
+  "CSE Department",
+  "Mechanical Department",
+  "Arts Club",
+];
 
 // --- Data Fetching ---
-const eventsQueryOptions = queryOptions({ queryKey: ['events'], queryFn: () => dummyEvents });
-const tagsQueryOptions = queryOptions({ queryKey: ['tagsForFilter'], queryFn: () => dummyTagsForFilter.map(t => ({ value: t, label: t })) });
-const orgsQueryOptions = queryOptions({ queryKey: ['orgsForFilter'], queryFn: () => dummyOrganizersForFilter.map(o => ({ value: o, label: o })) });
+const eventsQueryOptions = queryOptions({
+  queryKey: ["events"],
+  queryFn: async () => {
+    const token = secureLocalStorage.getItem("t");
+    const res = await fetch(api.FETCH_ALL_EVENTS, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error("Failed to fetch events");
+    }
+    const data = await res.json();
+    // Assuming the API response structure is { events: [...], message: "..." }
+    // And that event_image_url can be null, we'll provide a fallback.
+    console.log("Data fetched: ", data.events);
+    return data.events.map((event: GetAllEventsResponse) => ({
+      ...event,
+      event_image_url:
+        event.event_image_url ||
+        "https://images.unsplash.com/photo-1501281668745-f7f5792d7cdd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Fallback image
+    })) as GetAllEventsResponse[];
+  },
+});
+
+const tagsForFilterQueryOptions = queryOptions({
+  queryKey: ["tagsForFilter"],
+  queryFn: () => dummyTagsForFilter.map((t) => ({ value: t, label: t })),
+});
+
+const orgsForFilterQueryOptions = queryOptions({
+  queryKey: ["orgsForFilter"],
+  queryFn: () => dummyOrganizersForFilter.map((o) => ({ value: o, label: o })),
+});
 
 export const Route = createFileRoute("/dashboard/events/")({
   loader: ({ context: { queryClient } }) => {
     queryClient.ensureQueryData(eventsQueryOptions);
-    queryClient.ensureQueryData(tagsQueryOptions);
-    queryClient.ensureQueryData(orgsQueryOptions);
+    queryClient.ensureQueryData(tagsForFilterQueryOptions);
+    queryClient.ensureQueryData(orgsForFilterQueryOptions);
   },
   component: ViewEventsPage,
 });
 
 function ViewEventsPage() {
   const { data: events } = useSuspenseQuery(eventsQueryOptions);
-  const { data: tagsForFilter } = useSuspenseQuery(tagsQueryOptions);
-  const { data: orgsForFilter } = useSuspenseQuery(orgsQueryOptions);
+  const { data: tagsForFilter } = useSuspenseQuery(tagsForFilterQueryOptions);
+  const { data: orgsForFilter } = useSuspenseQuery(orgsForFilterQueryOptions);
+
+  // Derive unique event dates from fetched events
+  const uniqueEventDates = useMemo(() => {
+    const dates = new Set(events.map(event => event.event_date.split('T')[0])); // Extract YYYY-MM-DD
+    return [...dates].sort();
+  }, [events]);
+
+  const maxPrice = useMemo(() => {
+    if (!events || events.length === 0) return 10000;
+    return Math.max(...events.map((e) => e.event_price));
+  }, [events]);
 
   // --- Filter States ---
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [dateFilter, setDateFilter] = useState("ALL");
-  const [priceRange, setPriceRange] = useState([1000]);
+  const [priceRange, setPriceRange] = useState([maxPrice]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]);
+  const [selectedOrgs, setSelectedOrgs] = useState<string[]>([]); // This filter is currently inactive without organizer_name in event object
+
+  // Reset price range when the max price from data changes
+  useEffect(() => {
+    setPriceRange([maxPrice]);
+  }, [maxPrice]);
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
+        const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
         if (searchTerm && !event.event_name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (statusFilter !== 'ALL' && event.event_status !== statusFilter) return false;
-        if (dateFilter !== 'ALL' && event.event_date !== dateFilter) return false;
+        if (dateFilter !== 'ALL' && eventDate !== dateFilter) return false;
         if (event.event_price > priceRange[0]) return false;
         if (selectedTags.length > 0 && !selectedTags.every(tag => event.tags.includes(tag))) return false;
-        if (selectedOrgs.length > 0 && !selectedOrgs.includes(event.organizer_name)) return false;
+        // Organizer filter is disabled as organizer_name is not in the API response
+        // if (selectedOrgs.length > 0 && !selectedOrgs.includes(event.organizer_name)) return false;
         return true;
     });
-  }, [events, searchTerm, statusFilter, dateFilter, priceRange, selectedTags, selectedOrgs]);
+  }, [events, searchTerm, statusFilter, dateFilter, priceRange, selectedTags, selectedOrgs]); // Removed selectedOrgs from dependencies as filter is commented
 
   return (
     <div className="flex flex-col gap-6">
@@ -82,6 +149,7 @@ function ViewEventsPage() {
                 <SelectItem value="ALL">All Statuses</SelectItem>
                 <SelectItem value="ACTIVE">Active</SelectItem>
                 <SelectItem value="CLOSED">Closed</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
             </SelectContent>
         </Select>
         <Select value={dateFilter} onValueChange={(value) => setDateFilter(value)}>
@@ -95,7 +163,7 @@ function ViewEventsPage() {
         <MultiSelect data={orgsForFilter} name="Organizers" selected={selectedOrgs} setSelected={setSelectedOrgs} />
         <div className="flex flex-col gap-2">
             <label className="text-sm text-muted-foreground">Max Price: ₹{priceRange[0]}</label>
-            <Slider value={priceRange} max={1000} step={50} onValueChange={setPriceRange} />
+            <Slider value={priceRange} max={maxPrice} step={1000} onValueChange={setPriceRange} />
         </div>
       </div>
 

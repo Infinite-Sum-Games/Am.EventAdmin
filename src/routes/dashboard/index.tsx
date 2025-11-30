@@ -5,21 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { IndianRupee, Users, Activity } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 import type { GetAllEventsResponse } from "@/types/events";
-
-// --- Dummy Data ---
-// This data is fetched to calculate the stats on the dashboard.
-const dummyEvents: GetAllEventsResponse[] = [
-  { "event_id": "event-1", "event_name": "Hackathon", "event_status": "ACTIVE", "is_group": true, "tags": ["Technology", "Coding", "Competition"], "event_price": 500, "max_seats": 200, "seats_filled": 120, "event_image_url": "", "event_description": "", "event_date": "", "is_registered": false, "is_starred": false },
-  { "event_id": "event-2", "event_name": "Robotics Workshop", "event_status": "ACTIVE", "is_group": false, "tags": ["Robotics", "Workshop", "STEM"], "event_price": 300, "max_seats": 100, "seats_filled": 80, "event_image_url": "", "event_description": "", "event_date": "", "is_registered": false, "is_starred": false },
-  { "event_id": "event-3", "event_name": "Art Exhibition", "event_status": "CLOSED", "is_group": false, "tags": ["Arts", "Exhibition"], "event_price": 0, "max_seats": 500, "seats_filled": 450, "event_image_url": "", "event_description": "", "event_date": "", "is_registered": true, "is_starred": true }
-];
+import secureLocalStorage from "react-secure-storage";
+import { api } from "@/lib/api";
 
 // --- Data Fetching ---
 const eventsQueryOptions = queryOptions({
-  queryKey: ["events"], // Re-uses the same query key as the events list
+  queryKey: ['events'],
   queryFn: async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    return dummyEvents;
+    const token = secureLocalStorage.getItem("t");
+    const res = await fetch(api.FETCH_ALL_EVENTS, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!res.ok) {
+      throw new Error('Failed to fetch events');
+    }
+    const data = await res.json();
+    return data.events as GetAllEventsResponse[];
   },
 });
 
