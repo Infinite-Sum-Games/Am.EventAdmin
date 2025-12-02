@@ -13,6 +13,7 @@ export default defineConfig({
 		react(),
 		tailwindcss(),
 	],
+	base: "/admin/",
 	resolve: {
 		alias: {
 			"@": fileURLToPath(new URL("./src", import.meta.url)),
@@ -27,4 +28,3 @@ export default defineConfig({
 		},
 	},
 });
-
