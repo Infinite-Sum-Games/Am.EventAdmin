@@ -38,6 +38,7 @@ import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
 import { EditOrgForm } from "@/components/orgs/edit-event-form";
+import { axiosClient } from "@/lib/axios";
 // --- Dummy Data ---
 // const dummyOrgs: Organizer[] = [
 //     { id: "uuid-org-1", name: "Computer Science and Engineering", email: "cse@univ.edu", organizer_type: "DEPARTMENT", student_head: "John Doe", faculty_head: "Dr. Smith", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
@@ -49,24 +50,14 @@ import { EditOrgForm } from "@/components/orgs/edit-event-form";
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
   queryFn: async () => {
-    const token = secureLocalStorage.getItem("t");
-    if (!token) {
-      throw new Error("No auth token found");
-    }
-    const res = await fetch(api.FETCH_ALL_ORGANIZERS, {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (!res.ok) {
-      throw new Error("Failed to fetch organizers");
-    }
-    const data: GetAllOrganizersResponse = await res.json();
-    // console.log("Fetched organizers:", data.organizers);
-    return data.organizers;
+    const res = await axiosClient.get<GetAllOrganizersResponse>(
+      api.FETCH_ALL_ORGANIZERS
+    );
+
+    return res.data.organizers;
   },
 });
+
 
 export const Route = createFileRoute("/dashboard/orgs/")({
   loader: ({ context: { queryClient } }) =>
@@ -100,9 +91,11 @@ function OrgsPage() {
 
   const deletorg = async (orgId: string) => {
     const token = secureLocalStorage.getItem("t");
+
     if (!token) {
       throw new Error("No auth token Found");
     }
+
     if (
       !confirm(
         "Are you sure you want to delete this organizer? This action cannot be undone."
@@ -110,20 +103,10 @@ function OrgsPage() {
     ) {
       return;
     }
+
     try {
-      const res = await fetch(api.DELETE_ORGANIZER(orgId), {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      //   if (!res.ok) {
-      //     throw new Error("Failed to delete organizer");
-      //   }
-      console.log(res);
+      await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
       alert("Organizer deleted successfully");
-      // Instead of clearing the cache we fetch the data again and update the cache {orgs}
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
     } catch (err) {
       console.error(err);
