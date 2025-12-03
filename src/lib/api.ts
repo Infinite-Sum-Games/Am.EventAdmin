@@ -12,4 +12,9 @@ export const api = {
   UPDATE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
   DELETE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
   UPDATE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
+
+  CREATE_PEOPLE: `${CURRENT_BASE_URL}/people`,
+  GET_ALL_PEOPLE: `${CURRENT_BASE_URL}/people`,
+  UPDATE_PEOPLE: (id: string) => `${CURRENT_BASE_URL}/people/${id}`,
+  DELETE_PEOPLE: (id: string) => `${CURRENT_BASE_URL}/people/${id}`,
 };

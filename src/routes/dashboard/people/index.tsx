@@ -1,28 +1,36 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Binoculars, PlusCircle, Trash2, Edit3, Mail, Phone } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input"; // Import Input for search bar
-import type { Person } from "@/types/db";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input"; 
 import { NewPersonForm } from "@/components/people/new-person-form";
-
-// --- Dummy Data ---
-const dummyPeople: Person[] = [
-    { id: "uuid-person-1", name: "Dr. Arjun Rao", email: "arjun.rao@univ.edu", profession: "Professor, CSE", phone_number: "9876543210" },
-    { id: "uuid-person-2", name: "Meera Krishnan", email: "meera.k@techcorp.com", profession: "Software Engineer, TechCorp", phone_number: "9876543211" },
-    { id: "uuid-person-3", name: "Sunil Verma", email: "sunil.v@startup.io", profession: "Product Manager, Startup.io", phone_number: "9876543212" },
-    { id: "uuid-person-4", name: "Priya Sharma", email: "priya.s@design.co", profession: "UI/UX Designer", phone_number: "9876543213" },
-    { id: "uuid-person-5", name: "Rahul Gupta", email: "rahul.g@consult.com", profession: "Consultant", phone_number: "9876543214" },
-];
+import { EditPersonForm } from "@/components/people/edit-person-form"; 
+import { axiosClient } from '@/lib/axios';
+import { api } from '@/lib/api';
+import type { PeopleData } from '@/types/people';
 
 // --- Data Fetching ---
 const peopleQueryOptions = queryOptions({
     queryKey: ['people'],
-    queryFn: () => dummyPeople,
+    queryFn: async () => {
+        const response = axiosClient.get(api.GET_ALL_PEOPLE);
+        const res = await response;
+        return res.data.people ?? [];
+    }
 });
 
 export const Route = createFileRoute('/dashboard/people/')({
@@ -36,7 +44,12 @@ const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').su
 function PeoplePage() {
     const queryClient = useQueryClient();
     const { data: people } = useSuspenseQuery(peopleQueryOptions);
+    
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [editingPerson, setEditingPerson] = useState<PeopleData | null>(null);
+    
+    const [personToDelete, setPersonToDelete] = useState<string | null>(null);
+    
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredPeople = useMemo(() => {
@@ -44,16 +57,26 @@ function PeoplePage() {
             return people;
         }
         const lowerCaseSearchTerm = searchTerm.toLowerCase();
-        return people.filter(person =>
+        return people.filter((person: any) =>
             person.name.toLowerCase().includes(lowerCaseSearchTerm) ||
             (person.email && person.email.toLowerCase().includes(lowerCaseSearchTerm)) ||
             (person.profession && person.profession.toLowerCase().includes(lowerCaseSearchTerm))
         );
     }, [people, searchTerm]);
 
-    const deletePerson = (personId: string) => {
-        alert(`(Simulated) Deleting person with ID: ${personId}`);
-    };
+    const { mutate: deletePerson, isPending: isDeleting } = useMutation({
+        mutationFn: async (id: string) => {
+            await axiosClient.delete(`${api.DELETE_PEOPLE(id)}`);
+        },
+        onSuccess: () => {
+            setPersonToDelete(null);
+            queryClient.invalidateQueries({ queryKey: ['people'] });
+        },
+        onError: () => {
+            alert("Failed to delete person. Please try again.");
+            setPersonToDelete(null);
+        }
+    });
 
     return (
         <div className="flex flex-col gap-4">
@@ -67,6 +90,7 @@ function PeoplePage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full md:max-w-xs"
                     />
+                
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="w-full sm:w-auto"><PlusCircle className="h-4 w-4" /> Add New Person</Button>
@@ -84,6 +108,50 @@ function PeoplePage() {
                 </div>
             </div>
 
+            {/* Edit Dialog */}
+            <Dialog open={!!editingPerson} onOpenChange={(open) => !open && setEditingPerson(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Edit Person</DialogTitle>
+                    </DialogHeader>
+                    {editingPerson && (
+                        <EditPersonForm 
+                            personId={editingPerson.id}
+                            initialData={editingPerson}
+                            onSuccess={() => {
+                                setEditingPerson(null);
+                                queryClient.invalidateQueries({ queryKey: ['people'] });
+                            }} 
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Alert Dialog */}
+            <AlertDialog open={!!personToDelete} onOpenChange={(open) => !open && setPersonToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the person from the database.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (personToDelete) deletePerson(personToDelete);
+                            }}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? "Deleting..." : "Delete"}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             {(!filteredPeople || filteredPeople.length === 0) ? (
                 <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
                     <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
@@ -91,7 +159,7 @@ function PeoplePage() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPeople.map((person) => (
+                    {filteredPeople.map((person: any) => (
                         <Card key={person.id} className="flex flex-col text-center">
                             <CardHeader className="flex flex-col items-center">
                                 <Avatar className="h-20 w-20 mb-2 text-xl">
@@ -113,10 +181,18 @@ function PeoplePage() {
                                 </div>
                             </CardContent>
                             <CardFooter className="flex gap-2 p-4 border-t">
-                                <Button variant="outline" className="flex-1" disabled>
+                                <Button 
+                                    variant="outline" 
+                                    className="flex-1" 
+                                    onClick={() => setEditingPerson(person)}
+                                >
                                     <Edit3 className="h-4 w-4" /> Edit
                                 </Button>
-                                <Button variant="outline" className="flex-1 group hover:border-destructive hover:text-destructive" onClick={() => deletePerson(person.id)}>
+                                <Button 
+                                    variant="outline" 
+                                    className="flex-1 group hover:border-destructive hover:text-destructive" 
+                                    onClick={() => setPersonToDelete(person.id)}
+                                >
                                     <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-destructive" /> Delete
                                 </Button>
                             </CardFooter>
