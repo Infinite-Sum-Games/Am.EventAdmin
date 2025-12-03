@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +15,21 @@ import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+const editOrgSchema = z.object({
+  name: z.string().min(3, "Organizer name must be at least 3 characters"),
+  email: z.string().email("Invalid email"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  orgType: z.enum(["DEPARTMENT", "CLUB"]),
+  studentHead: z.string().min(3, "Student head is required"),
+  studentCoHead: z.string().optional(),
+  facultyHead: z.string().min(3, "Faculty head is required"),
+});
+
+type EditOrgFormValues = z.infer<typeof editOrgSchema>;
 
 interface EditOrgFormProps {
   id: string;
@@ -40,36 +54,38 @@ export function EditOrgForm({
 }: EditOrgFormProps) {
   const queryClient = useQueryClient();
 
-  const [name, setName] = useState(organizer_name);
-  const [email, setEmail] = useState(organizer_email);
-  const [password, setPassword] = useState("");
-  const [orgType, setOrgType] = useState<OrganizerType | "">(organizer_type);
-  const [studentHead, setStudentHead] = useState(student_head);
-  const [studentCoHead, setstudentCoHead] = useState(student_co_head ?? "");
-  const [facultyHead, setFacultyHead] = useState(faculty_head);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<EditOrgFormValues>({
+    resolver: zodResolver(editOrgSchema),
+    defaultValues: {
+      name: organizer_name,
+      email: organizer_email,
+      orgType: organizer_type,
+      studentHead: student_head,
+      studentCoHead: student_co_head ?? "",
+      facultyHead: faculty_head,
+      password: "",
+    },
+  });
 
-  const handleEditOrg = async () => {
-    // ✅ RESET LOADING STATE IF VALIDATION FAILS
-    if (!name || !email || !orgType || !studentHead || !facultyHead) {
-      alert("Please fill out all required fields.");
-      setIsSubmitting(false); // ✅ FIX
-      return;
-    }
-
+  const onSubmit = async (data: EditOrgFormValues) => {
     try {
-      setIsSubmitting(true);
-
-      const hashedPassword = password ? SHA256(password).toString() : undefined;
+      const hashedPassword = data.password
+        ? SHA256(data.password).toString()
+        : undefined;
 
       const payload = {
-        name,
-        email,
+        name: data.name,
+        email: data.email,
         password: hashedPassword,
-        org_type: orgType,
-        student_head: studentHead,
-        student_co_head: studentCoHead || null,
-        faculty_head: facultyHead,
+        org_type: data.orgType,
+        student_head: data.studentHead,
+        student_co_head: data.studentCoHead || null,
+        faculty_head: data.facultyHead,
       };
 
       await axiosClient.put(api.UPDATE_ORGANIZER(id), payload);
@@ -93,54 +109,41 @@ export function EditOrgForm({
       } else {
         alert("Unexpected error occurred");
       }
-    } finally {
-      // ✅ ALWAYS RESET BUTTON STATE
-      setIsSubmitting(false);
     }
   };
 
   return (
-    <form
-      className="grid gap-4 pt-4"
-      onSubmit={(e) => {
-        e.preventDefault();
-        handleEditOrg();
-      }}
-    >
+    <form className="grid gap-4 pt-4" onSubmit={handleSubmit(onSubmit)}>
       <div className="grid gap-2">
         <Label>Organizer Name</Label>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
+        <Input {...register("name")} />
+        {errors.name && (
+          <p className="text-sm text-red-500">{errors.name.message}</p>
+        )}
       </div>
-
       <div className="grid gap-2">
         <Label>Email</Label>
-        <Input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <Input type="email" {...register("email")} />
+        {errors.email && (
+          <p className="text-sm text-red-500">{errors.email.message}</p>
+        )}
       </div>
-
       <div className="grid gap-2">
         <Label>New Password</Label>
         <Input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Leave blank to keep same"
+          {...register("password")}
+          placeholder="Please dont leave this blank"
         />
+        {errors.password && (
+          <p className="text-sm text-red-500">{errors.password.message}</p>
+        )}
       </div>
-
       <div className="grid gap-2">
         <Label>Organizer Type</Label>
         <Select
-          value={orgType}
-          onValueChange={(value) => setOrgType(value as OrganizerType)}
+          defaultValue={organizer_type}
+          onValueChange={(val) => setValue("orgType", val as OrganizerType)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select type" />
@@ -150,32 +153,27 @@ export function EditOrgForm({
             <SelectItem value="CLUB">Club</SelectItem>
           </SelectContent>
         </Select>
+        {errors.orgType && (
+          <p className="text-sm text-red-500">{errors.orgType.message}</p>
+        )}
       </div>
-
       <div className="grid gap-2">
         <Label>Student Head</Label>
-        <Input
-          value={studentHead}
-          onChange={(e) => setStudentHead(e.target.value)}
-          required
-        />
+        <Input {...register("studentHead")} />
+        {errors.studentHead && (
+          <p className="text-sm text-red-500">{errors.studentHead.message}</p>
+        )}
       </div>
-
       <div className="grid gap-2">
         <Label>Student Co-Head</Label>
-        <Input
-          value={studentCoHead}
-          onChange={(e) => setstudentCoHead(e.target.value)}
-        />
+        <Input {...register("studentCoHead")} />
       </div>
-
       <div className="grid gap-2">
         <Label>Faculty Head</Label>
-        <Input
-          value={facultyHead}
-          onChange={(e) => setFacultyHead(e.target.value)}
-          required
-        />
+        <Input {...register("facultyHead")} />
+        {errors.facultyHead && (
+          <p className="text-sm text-red-500">{errors.facultyHead.message}</p>
+        )}
       </div>
 
       <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
