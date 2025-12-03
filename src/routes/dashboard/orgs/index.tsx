@@ -34,30 +34,20 @@ import {
 } from "@/components/ui/select";
 import type { OrganizerType } from "@/types/db";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
-import { api } from "@/lib/api";
-import secureLocalStorage from "react-secure-storage";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
 import { EditOrgForm } from "@/components/orgs/edit-event-form";
 import { axiosClient } from "@/lib/axios";
-// --- Dummy Data ---
-// const dummyOrgs: Organizer[] = [
-//     { id: "uuid-org-1", name: "Computer Science and Engineering", email: "cse@univ.edu", organizer_type: "DEPARTMENT", student_head: "John Doe", faculty_head: "Dr. Smith", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-//     { id: "uuid-org-2", name: "Tech Club", email: "tech@univ.edu", organizer_type: "CLUB", student_head: "Jane Smith", faculty_head: "Dr. Jones", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-//     { id: "uuid-org-3", name: "Mechanical Engineering", email: "mech@univ.edu", organizer_type: "DEPARTMENT", student_head: "Peter Pan", faculty_head: "Dr. Hook", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
-// ];
+import { api } from "@/lib/api";
 
-// --- Data Fetching ---
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
   queryFn: async () => {
     const res = await axiosClient.get<GetAllOrganizersResponse>(
       api.FETCH_ALL_ORGANIZERS
     );
-
     return res.data.organizers;
   },
 });
-
 
 export const Route = createFileRoute("/dashboard/orgs/")({
   loader: ({ context: { queryClient } }) =>
@@ -76,40 +66,33 @@ const getInitials = (name: string) =>
 function OrgsPage() {
   const queryClient = useQueryClient();
   const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [iseditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // ✅ FIXED
+  const [editOrg, setEditOrg] = useState<(typeof orgs)[number] | null>(null);
+
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
   const filteredOrgs = useMemo(() => {
-    if (typeFilter === "ALL") {
-      return orgs;
-    }
+    if (typeFilter === "ALL") return orgs;
     return orgs.filter((org) => org.organizer_type === typeFilter);
   }, [orgs, typeFilter]);
 
-  // -- DELETING END POINT ---
+  const deleteOrg = async (orgId: string) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this organizer? This action cannot be undone."
+    );
 
-  const deletorg = async (orgId: string) => {
-    const token = secureLocalStorage.getItem("t");
-
-    if (!token) {
-      throw new Error("No auth token Found");
-    }
-
-    if (
-      !confirm(
-        "Are you sure you want to delete this organizer? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
+    if (!confirmDelete) return;
 
     try {
       await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
+
       alert("Organizer deleted successfully");
+
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
     } catch (err) {
-      console.error(err);
+      console.error("Delete failed:", err);
       alert("Error deleting organizer");
     }
   };
@@ -118,6 +101,7 @@ function OrgsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <h1 className="text-2xl font-semibold">Organizers</h1>
+
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <Select
             value={typeFilter}
@@ -140,10 +124,12 @@ function OrgsPage() {
                 <PlusCircle className="mr-2 h-4 w-4" /> Create
               </Button>
             </DialogTrigger>
+
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create a New Organizer</DialogTitle>
               </DialogHeader>
+
               <NewOrgForm
                 onSuccess={() => {
                   setIsDialogOpen(false);
@@ -154,7 +140,6 @@ function OrgsPage() {
           </Dialog>
         </div>
       </div>
-
       {!filteredOrgs || filteredOrgs.length === 0 ? (
         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
           <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
@@ -173,9 +158,11 @@ function OrgsPage() {
                       {getInitials(org.organizer_name)}
                     </AvatarFallback>
                   </Avatar>
+
                   <div className="grid gap-1 flex-1">
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">{org.organizer_name}</p>
+
                       <Badge
                         variant={
                           org.organizer_type === "DEPARTMENT"
@@ -191,51 +178,58 @@ function OrgsPage() {
                         {org.organizer_type}
                       </Badge>
                     </div>
+
                     <p className="text-sm text-muted-foreground">
                       Student Head: {org.student_head}
                     </p>
                   </div>
+
                   <div className="flex gap-2">
                     <Dialog
-                      open={iseditDialogOpen}
+                      open={isEditDialogOpen}
                       onOpenChange={setIsEditDialogOpen}
                     >
                       <DialogTrigger asChild>
-                        <Button className="w-full sm:w-auto">
+                        <Button type="button" onClick={() => setEditOrg(org)}>
                           <Edit3 className="mr-2 h-4 w-4" /> Edit
                         </Button>
                       </DialogTrigger>
+
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Edit Organizer</DialogTitle>
                         </DialogHeader>
-                        <EditOrgForm
-                          id={org.id}
-                          organizer_name={org.organizer_name}
-                          organizer_email={org.organizer_email}
-                          organizer_type={org.organizer_type}
-                          student_head={org.student_head}
-                          student_co_head={org.student_co_head}
-                          faculty_head={org.faculty_head}
-                          onSuccess={() => {
-                            setIsEditDialogOpen(false);
-                            queryClient.invalidateQueries({
-                              queryKey: ["orgs"],
-                            });
-                          }}
-                        />
+
+                        {editOrg && (
+                          <EditOrgForm
+                            id={editOrg.id}
+                            organizer_name={editOrg.organizer_name}
+                            organizer_email={editOrg.organizer_email}
+                            organizer_type={editOrg.organizer_type}
+                            student_head={editOrg.student_head}
+                            student_co_head={editOrg.student_co_head}
+                            faculty_head={editOrg.faculty_head}
+                            onSuccess={() => {
+                              setIsEditDialogOpen(false);
+                              queryClient.invalidateQueries({
+                                queryKey: ["orgs"],
+                              });
+                            }}
+                          />
+                        )}
                       </DialogContent>
                     </Dialog>
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => deletorg(org.id)}
+                      onClick={() => deleteOrg(org.id)}
                     >
                       <Trash2 className="w-5 h-5 text-red-500" />
                     </Button>
                   </div>
                 </div>
+
                 {index < filteredOrgs.length - 1 && <Separator />}
               </div>
             ))}

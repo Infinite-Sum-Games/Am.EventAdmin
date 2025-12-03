@@ -45,7 +45,6 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
     setIsSubmitting(true);
 
     try {
-      // Hash the password using SHA256
       const hashedPassword = sha256(password).toString();
 
       await axiosClient.post(api.CREATE_ORGANIZER, {
@@ -59,7 +58,7 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
       });
 
       alert(`Successfully created organizer: ${name}`);
-      onSuccess(); // refetch organizers or update cache
+      onSuccess();
     } catch (err) {
       console.error(err);
       alert("Error creating organizer");

@@ -42,7 +42,7 @@ export function EditOrgForm({
 
   const [name, setName] = useState(organizer_name);
   const [email, setEmail] = useState(organizer_email);
-  const [password, setPassword] = useState(""); 
+  const [password, setPassword] = useState("");
   const [orgType, setOrgType] = useState<OrganizerType | "">(organizer_type);
   const [studentHead, setStudentHead] = useState(student_head);
   const [studentCoHead, setstudentCoHead] = useState(student_co_head ?? "");
@@ -50,20 +50,22 @@ export function EditOrgForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleEditOrg = async () => {
+    // ✅ RESET LOADING STATE IF VALIDATION FAILS
     if (!name || !email || !orgType || !studentHead || !facultyHead) {
       alert("Please fill out all required fields.");
+      setIsSubmitting(false); // ✅ FIX
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
+      setIsSubmitting(true);
+
       const hashedPassword = password ? SHA256(password).toString() : undefined;
 
       const payload = {
         name,
         email,
-        password: hashedPassword, 
+        password: hashedPassword,
         org_type: orgType,
         student_head: studentHead,
         student_co_head: studentCoHead || null,
@@ -74,7 +76,6 @@ export function EditOrgForm({
 
       alert("Organizer updated successfully");
 
-    
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
 
       onSuccess();
@@ -92,6 +93,9 @@ export function EditOrgForm({
       } else {
         alert("Unexpected error occurred");
       }
+    } finally {
+      // ✅ ALWAYS RESET BUTTON STATE
+      setIsSubmitting(false);
     }
   };
 
@@ -121,6 +125,7 @@ export function EditOrgForm({
           required
         />
       </div>
+
       <div className="grid gap-2">
         <Label>New Password</Label>
         <Input
