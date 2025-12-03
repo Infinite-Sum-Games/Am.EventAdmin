@@ -6,4 +6,5 @@ export const api = {
   FETCH_ALL_ORGANIZERS: `${CURRENT_BASE_URL}/organizers`,
   CREATE_ORGANIZER: `${CURRENT_BASE_URL}/organizers`,
   DELETE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
+  UPDATE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
 };
