@@ -11,4 +11,5 @@ export const api = {
   CREATE_TAG: `${CURRENT_BASE_URL}/tags`,
   UPDATE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
   DELETE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
+  UPDATE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
 };
