@@ -227,6 +227,13 @@ function OrgsPage() {
                           <DialogTitle>Edit Organizer</DialogTitle>
                         </DialogHeader>
                         <EditOrgForm
+                          id={org.id}
+                          organizer_name={org.organizer_name}
+                          organizer_email={org.organizer_email}
+                          organizer_type={org.organizer_type}
+                          student_head={org.student_head}
+                          student_co_head={org.student_co_head}
+                          faculty_head={org.faculty_head}
                           onSuccess={() => {
                             setIsEditDialogOpen(false);
                             queryClient.invalidateQueries({
