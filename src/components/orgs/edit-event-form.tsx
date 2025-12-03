@@ -8,21 +8,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle } from "lucide-react";
+import { Edit3 } from "lucide-react";
 import type { OrganizerType } from "@/types/db";
+import SHA256 from "crypto-js/sha256";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
-import sha256 from "crypto-js/sha256";
+import { useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import axios from "axios";
-
-// ✅ Zod Schema
-const newOrgSchema = z.object({
+const editOrgSchema = z.object({
   name: z.string().min(3, "Organizer name must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   orgType: z.enum(["DEPARTMENT", "CLUB"]),
   studentHead: z.string().min(3, "Student head is required"),
@@ -30,37 +29,56 @@ const newOrgSchema = z.object({
   facultyHead: z.string().min(3, "Faculty head is required"),
 });
 
-type NewOrgFormValues = z.infer<typeof newOrgSchema>;
+type EditOrgFormValues = z.infer<typeof editOrgSchema>;
 
-interface NewOrgFormProps {
+interface EditOrgFormProps {
+  id: string;
+  organizer_name: string;
+  organizer_email: string;
+  organizer_type: OrganizerType;
+  student_head: string;
+  student_co_head: string | null;
+  faculty_head: string;
   onSuccess: () => void;
 }
 
-export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
+export function EditOrgForm({
+  id,
+  organizer_name,
+  organizer_email,
+  organizer_type,
+  student_head,
+  student_co_head,
+  faculty_head,
+  onSuccess,
+}: EditOrgFormProps) {
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
     setValue,
-    reset,
     formState: { errors, isSubmitting },
-  } = useForm<NewOrgFormValues>({
-    resolver: zodResolver(newOrgSchema),
+  } = useForm<EditOrgFormValues>({
+    resolver: zodResolver(editOrgSchema),
     defaultValues: {
-      name: "",
-      email: "",
+      name: organizer_name,
+      email: organizer_email,
+      orgType: organizer_type,
+      studentHead: student_head,
+      studentCoHead: student_co_head ?? "",
+      facultyHead: faculty_head,
       password: "",
-      orgType: undefined,
-      studentHead: "",
-      studentCoHead: "",
-      facultyHead: "",
     },
   });
 
-  const onSubmit = async (data: NewOrgFormValues) => {
+  const onSubmit = async (data: EditOrgFormValues) => {
     try {
-      const hashedPassword = sha256(data.password).toString();
+      const hashedPassword = data.password
+        ? SHA256(data.password).toString()
+        : undefined;
 
-      await axiosClient.post(api.CREATE_ORGANIZER, {
+      const payload = {
         name: data.name,
         email: data.email,
         password: hashedPassword,
@@ -68,10 +86,14 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
         student_head: data.studentHead,
         student_co_head: data.studentCoHead || null,
         faculty_head: data.facultyHead,
-      });
+      };
 
-      alert(`Successfully created organizer: ${data.name}`);
-      reset();
+      await axiosClient.put(api.UPDATE_ORGANIZER(id), payload);
+
+      alert("Organizer updated successfully");
+
+      queryClient.invalidateQueries({ queryKey: ["orgs"] });
+
       onSuccess();
     } catch (err) {
       console.error(err);
@@ -80,9 +102,9 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
         const message = err.response?.data?.error;
 
         if (message?.includes("organizer_email_key")) {
-          alert("Email already exists. Please use a different email.");
+          alert("Email already exists. Use a different one.");
         } else {
-          alert(message || "Failed to create organizer");
+          alert(message || "Failed to update organizer");
         }
       } else {
         alert("Unexpected error occurred");
@@ -92,7 +114,6 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
   return (
     <form className="grid gap-4 pt-4" onSubmit={handleSubmit(onSubmit)}>
-      {/* Organizer Name */}
       <div className="grid gap-2">
         <Label>Organizer Name</Label>
         <Input {...register("name")} />
@@ -100,29 +121,28 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.name.message}</p>
         )}
       </div>
-
-      {/* Email */}
       <div className="grid gap-2">
-        <Label>Official Email</Label>
+        <Label>Email</Label>
         <Input type="email" {...register("email")} />
         {errors.email && (
           <p className="text-sm text-red-500">{errors.email.message}</p>
         )}
       </div>
-
-      {/* Password */}
       <div className="grid gap-2">
-        <Label>Password</Label>
-        <Input type="password" {...register("password")} />
+        <Label>New Password</Label>
+        <Input
+          type="password"
+          {...register("password")}
+          placeholder="Please dont leave this blank"
+        />
         {errors.password && (
           <p className="text-sm text-red-500">{errors.password.message}</p>
         )}
       </div>
-
-      {/* Organizer Type */}
       <div className="grid gap-2">
         <Label>Organizer Type</Label>
         <Select
+          defaultValue={organizer_type}
           onValueChange={(val) => setValue("orgType", val as OrganizerType)}
         >
           <SelectTrigger>
@@ -137,8 +157,6 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.orgType.message}</p>
         )}
       </div>
-
-      {/* Student Head */}
       <div className="grid gap-2">
         <Label>Student Head</Label>
         <Input {...register("studentHead")} />
@@ -146,14 +164,10 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.studentHead.message}</p>
         )}
       </div>
-
-      {/* Student Co-Head */}
       <div className="grid gap-2">
         <Label>Student Co-Head</Label>
         <Input {...register("studentCoHead")} />
       </div>
-
-      {/* Faculty Head */}
       <div className="grid gap-2">
         <Label>Faculty Head</Label>
         <Input {...register("facultyHead")} />
@@ -162,10 +176,9 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
         )}
       </div>
 
-      {/* Submit Button */}
       <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
-        {isSubmitting ? "Creating..." : "Create Organizer"}
-        {!isSubmitting && <PlusCircle className="ml-2 h-4 w-4" />}
+        {isSubmitting ? "Editing..." : "Edit Organizer"}
+        {!isSubmitting && <Edit3 className="ml-2 h-4 w-4" />}
       </Button>
     </form>
   );
