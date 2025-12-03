@@ -37,6 +37,7 @@ import { NewOrgForm } from "@/components/orgs/new-org-form";
 import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
+import { EditOrgForm } from "@/components/orgs/edit-event-form";
 // --- Dummy Data ---
 // const dummyOrgs: Organizer[] = [
 //     { id: "uuid-org-1", name: "Computer Science and Engineering", email: "cse@univ.edu", organizer_type: "DEPARTMENT", student_head: "John Doe", faculty_head: "Dr. Smith", created_at: new Date().toISOString(), updated_at: new Date().toISOString() },
@@ -62,7 +63,7 @@ const orgsQueryOptions = queryOptions({
       throw new Error("Failed to fetch organizers");
     }
     const data: GetAllOrganizersResponse = await res.json();
-    console.log("Fetched organizers:", data.organizers);
+    // console.log("Fetched organizers:", data.organizers);
     return data.organizers;
   },
 });
@@ -85,6 +86,7 @@ function OrgsPage() {
   const queryClient = useQueryClient();
   const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [iseditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
   const filteredOrgs = useMemo(() => {
@@ -94,8 +96,39 @@ function OrgsPage() {
     return orgs.filter((org) => org.organizer_type === typeFilter);
   }, [orgs, typeFilter]);
 
-  const deleteOrg = (orgId: string) => {
-    alert(`(Simulated) Deleting organizer with ID: ${orgId}`);
+  // -- DELETING END POINT ---
+
+  const deletorg = async (orgId: string) => {
+    const token = secureLocalStorage.getItem("t");
+    if (!token) {
+      throw new Error("No auth token Found");
+    }
+    if (
+      !confirm(
+        "Are you sure you want to delete this organizer? This action cannot be undone."
+      )
+    ) {
+      return;
+    }
+    try {
+      const res = await fetch(api.DELETE_ORGANIZER(orgId), {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      //   if (!res.ok) {
+      //     throw new Error("Failed to delete organizer");
+      //   }
+      console.log(res);
+      alert("Organizer deleted successfully");
+      // Instead of clearing the cache we fetch the data again and update the cache {orgs}
+      queryClient.invalidateQueries({ queryKey: ["orgs"] });
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting organizer");
+    }
   };
 
   return (
@@ -180,13 +213,34 @@ function OrgsPage() {
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button variant="ghost" size="icon" disabled>
-                      <Edit3 className="w-5 h-5" />
-                    </Button>
+                    <Dialog
+                      open={iseditDialogOpen}
+                      onOpenChange={setIsEditDialogOpen}
+                    >
+                      <DialogTrigger asChild>
+                        <Button className="w-full sm:w-auto">
+                          <Edit3 className="mr-2 h-4 w-4" /> Edit
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit Organizer</DialogTitle>
+                        </DialogHeader>
+                        <EditOrgForm
+                          onSuccess={() => {
+                            setIsEditDialogOpen(false);
+                            queryClient.invalidateQueries({
+                              queryKey: ["orgs"],
+                            });
+                          }}
+                        />
+                      </DialogContent>
+                    </Dialog>
                     <Button
+                      type="button"
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteOrg(org.id)}
+                      onClick={() => deletorg(org.id)}
                     >
                       <Trash2 className="w-5 h-5 text-red-500" />
                     </Button>
