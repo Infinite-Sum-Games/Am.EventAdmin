@@ -6,4 +6,9 @@ export const api = {
   FETCH_ALL_ORGANIZERS: `${CURRENT_BASE_URL}/organizers`,
   CREATE_ORGANIZER: `${CURRENT_BASE_URL}/organizers`,
   DELETE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
+
+  FETCH_ALL_TAGS: `${CURRENT_BASE_URL}/tags`,
+  CREATE_TAG: `${CURRENT_BASE_URL}/tags`,
+  UPDATE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
+  DELETE_TAG: (id: string) => `${CURRENT_BASE_URL}/tags/${id}`,
 };

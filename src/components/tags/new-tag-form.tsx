@@ -2,30 +2,49 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PlusCircle } from 'lucide-react';
+import { AlertCircle, PlusCircle } from 'lucide-react';
+import { axiosClient } from '@/lib/axios';
+import { useMutation } from '@tanstack/react-query';
+import { api } from '@/lib/api';
+import { TagSchema } from "@/schemas/tag";
 
 interface NewTagFormProps {
-  onSuccess: () => void; // Callback to be called on successful submission
+  onSuccess: () => void;
 }
 
 export function NewTagForm({ onSuccess }: NewTagFormProps) {
     const [tagName, setTagName] = useState("");
     const [tagAbbrevation, setTagAbbrevation] = useState("");
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: async (newTag: { name: string; abbreviation: string }) => {
+            const validatedTag = TagSchema.parse(newTag);
+            const response = await axiosClient.post(api.CREATE_TAG, validatedTag);
+            return response.data;
+        },
+        onSuccess: () => {
+            onSuccess();
+        },
+        onError: (err: any) => {
+            if (err.response?.status === 400) {
+                setError("Invalid input. Please check your fields.");
+            } else {
+                setError("Failed to create tag. Please try again.");
+            }
+        }
+    });
 
     const handleAddNewTag = () => {
+        setError(null);
         if (!tagName || !tagAbbrevation) {
-            alert("Please fill out both fields.");
+            setError("Please fill out both fields.");
             return;
         }
-        setIsSubmitting(true);
-        console.log("Simulating new tag creation:", { tagName, tagAbbrevation });
-        // Simulate API call
-        setTimeout(() => {
-            setIsSubmitting(false);
-            alert(`(Simulated) Successfully created tag: ${tagName}`);
-            onSuccess(); // Call the parent's success callback
-        }, 1000);
+        mutate({
+            name: tagName,
+            abbreviation: tagAbbrevation
+        });
     };
 
     return (
@@ -58,9 +77,16 @@ export function NewTagForm({ onSuccess }: NewTagFormProps) {
                     required
                 />
             </div>
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Tag"}
-                {!isSubmitting && <PlusCircle className="ml-2 h-4 w-4" />}
+
+            {error && (
+                <div className="text-red-500 text-sm flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4" /> {error}
+                </div>
+            )}
+            
+           <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Creating..." : "Create Tag"}
+                {!isPending && <PlusCircle className="ml-2 h-4 w-4" />}
             </Button>
         </form>
     );
