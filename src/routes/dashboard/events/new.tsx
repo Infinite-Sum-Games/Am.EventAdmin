@@ -22,6 +22,10 @@ import { MultiSelectBlock } from "@/components/events/multiselect";
 type Organizer = { id: string; organizer_name: string };
 type Tag = { id: string; name: string };
 type Person = { id: string; name: string };
+const formatTimeToHHMMSS = (time: string) => {
+  if (!time) return "";
+  return time.length === 5 ? `${time}:00` : time;
+};
 
 const EMPTY_CREATE_FORM: CreateEventFormState = {
   name: "",
@@ -46,12 +50,7 @@ const EMPTY_CREATE_FORM: CreateEventFormState = {
   tag_ids: [],
   people_ids: [],
 
-  schedule: {
-    event_date: "",
-    start_time: "",
-    end_time: "",
-    venue: "",
-  },
+  schedules: [],
 };
 export const Route = createFileRoute("/dashboard/events/new")({
   loader: ({ context: { queryClient } }) => {
@@ -87,18 +86,33 @@ function NewEventPage() {
     queryFn: async () => (await axios.get(api.FETCH_ALL_PEOPLE)).data.people,
   });
   const createMutation = useMutation({
-    mutationFn: async () =>
-      axios.post(api.FETCH_ALL_EVENTS, form, {
+    mutationFn: async () => {
+      const payload = {
+        ...form,
+        attendance_mode: form.attendance_mode, 
+        event_status: form.event_status, 
+        schedules: form.schedules.map((s) => ({
+          ...s,
+          start_time: formatTimeToHHMMSS(s.start_time),
+          end_time: formatTimeToHHMMSS(s.end_time),
+        })),
+      };
+
+      console.log("🚀 Posting Event Data:", payload);
+
+      return axios.post(api.FETCH_ALL_EVENTS, payload, {
         headers: {
           Authorization: `Bearer ${secureLocalStorage.getItem("t")}`,
         },
-      }),
+      });
+    },
     onSuccess: () => {
       alert("✅ Event Created Successfully!");
       qc.invalidateQueries({ queryKey: ["events"] });
       router.navigate({ to: "/dashboard/events" });
     },
   });
+
   return (
     <div className="min-h-screen bg-background py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -213,7 +227,6 @@ function NewEventPage() {
                   <SelectContent>
                     <SelectItem value="EVENT">Event</SelectItem>
                     <SelectItem value="WORKSHOP">Workshop</SelectItem>
-                    <SelectItem value="SEMINAR">Seminar</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -253,7 +266,8 @@ function NewEventPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ACTIVE">Active</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive</SelectItem>
+                    <SelectItem value="COMPLETED">Completed</SelectItem>
+                    <SelectItem value="CLOSED">Closed</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -273,7 +287,7 @@ function NewEventPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="SOLO">Solo</SelectItem>
-                    <SelectItem value="TEAM">Team</SelectItem>
+                    <SelectItem value="DUO">Team</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -365,7 +379,7 @@ function NewEventPage() {
                   setForm({
                     ...form,
                     is_group: e.target.checked,
-                    attendance_mode: e.target.checked ? "TEAM" : "SOLO",
+                    attendance_mode: e.target.checked ? "DUO" : "SOLO",
                   })
                 }
                 className="w-4 h-4 rounded border-border cursor-pointer"
@@ -448,92 +462,120 @@ function NewEventPage() {
           </div>
 
           {/* SCHEDULE SECTION */}
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-foreground border-b border-border pb-3">
-              Schedule & Venue
-            </h2>
+          <div className="space-y-4 border rounded-xl p-4">
+            <div className="flex justify-between items-center">
+              <Label className="text-lg font-semibold">Schedules</Label>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="grid gap-2">
-                <Label htmlFor="event-date" className="font-medium">
-                  Event Date *
-                </Label>
-                <Input
-                  id="event-date"
-                  type="date"
-                  value={form.schedule.event_date}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      schedule: {
-                        ...form.schedule,
-                        event_date: e.target.value,
+              <Button
+                type="button"
+                onClick={() =>
+                  setForm({
+                    ...form,
+                    schedules: [
+                      ...form.schedules,
+                      {
+                        event_date: "",
+                        start_time: "",
+                        end_time: "",
+                        venue: "",
                       },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="start-time" className="font-medium">
-                  Start Time *
-                </Label>
-                <Input
-                  id="start-time"
-                  type="time"
-                  value={form.schedule.start_time}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      schedule: {
-                        ...form.schedule,
-                        start_time: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="end-time" className="font-medium">
-                  End Time *
-                </Label>
-                <Input
-                  id="end-time"
-                  type="time"
-                  value={form.schedule.end_time}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      schedule: {
-                        ...form.schedule,
-                        end_time: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
-
-              <div className="grid gap-2">
-                <Label htmlFor="venue" className="font-medium">
-                  Venue
-                </Label>
-                <Input
-                  id="venue"
-                  placeholder="Main Auditorium"
-                  value={form.schedule.venue}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      schedule: {
-                        ...form.schedule,
-                        venue: e.target.value,
-                      },
-                    })
-                  }
-                />
-              </div>
+                    ],
+                  })
+                }
+              >
+                + Add Schedule
+              </Button>
             </div>
+
+            {form.schedules.length === 0 && (
+              <p className="text-sm text-muted-foreground">
+                No schedules added yet.
+              </p>
+            )}
+
+            {form.schedules.map((s, i) => (
+              <div
+                key={i}
+                className="space-y-3 border p-4 rounded-xl bg-muted/40"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                  <p className="font-medium">Schedule {i + 1}</p>
+
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                      const copy = [...form.schedules];
+                      copy.splice(i, 1);
+                      setForm({ ...form, schedules: copy });
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+
+                {/* Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {/* Date */}
+                  <div className="space-y-1">
+                    <Label>Event Date</Label>
+                    <Input
+                      type="date"
+                      value={s.event_date}
+                      onChange={(e) => {
+                        const copy = [...form.schedules];
+                        copy[i].event_date = e.target.value;
+                        setForm({ ...form, schedules: copy });
+                      }}
+                    />
+                  </div>
+
+                  {/* Start Time */}
+                  <div className="space-y-1">
+                    <Label>Start Time</Label>
+                    <Input
+                      type="time"
+                      value={s.start_time}
+                      onChange={(e) => {
+                        const copy = [...form.schedules];
+                        copy[i].start_time = e.target.value;
+                        setForm({ ...form, schedules: copy });
+                      }}
+                    />
+                  </div>
+
+                  {/* End Time */}
+                  <div className="space-y-1">
+                    <Label>End Time</Label>
+                    <Input
+                      type="time"
+                      value={s.end_time}
+                      onChange={(e) => {
+                        const copy = [...form.schedules];
+                        copy[i].end_time = e.target.value;
+                        setForm({ ...form, schedules: copy });
+                      }}
+                    />
+                  </div>
+
+                  {/* Venue */}
+                  <div className="space-y-1">
+                    <Label>Venue</Label>
+                    <Input
+                      placeholder="Main Auditorium"
+                      value={s.venue}
+                      onChange={(e) => {
+                        const copy = [...form.schedules];
+                        copy[i].venue = e.target.value;
+                        setForm({ ...form, schedules: copy });
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="flex gap-3 pt-6 border-t border-border">

@@ -60,7 +60,7 @@ export type CreateEventFormState = {
 
   rules: string;
 
-  event_type: "EVENT" | "WORKSHOP" | "SEMINAR";
+  event_type: "EVENT" | "WORKSHOP";
 
   is_group: boolean;
   min_teamsize: number | null;
@@ -69,13 +69,13 @@ export type CreateEventFormState = {
   total_seats: number;
   seats_filled: number;
 
-  event_status: "ACTIVE" | "INACTIVE";
+  event_status: "ACTIVE" | "CLOSED" | "COMPLETED";
   event_mode: "ONLINE" | "OFFLINE";
-  attendance_mode: "SOLO" | "TEAM";
+  attendance_mode: "SOLO" | "DUO";
 
   organizer_ids: string[];
   tag_ids: string[];
   people_ids: string[];
 
-  schedule: Schedule;
+  schedules: Schedule[];
 };
