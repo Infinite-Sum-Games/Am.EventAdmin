@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 import secureLocalStorage from "react-secure-storage";
 import { useRouter } from "@tanstack/react-router";
+import { axiosClient } from "@/lib/axios";
+import { api } from "@/lib/api";
 
 export function NavUser({
     user = {
@@ -94,7 +96,9 @@ export function NavUser({
                             onClick={(e) => {
                                 e.preventDefault();
                                 secureLocalStorage.clear();
-                                router.navigate({ to: "/", replace: true });
+                                axiosClient.get(api.LOGOUT).then(() => {
+                                    router.navigate({ to: "/", replace: true });
+                                })
                             }}
                         >
                             <LogOut />
