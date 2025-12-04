@@ -2,6 +2,10 @@
 const CURRENT_BASE_URL: string = "/api/v1";
 
 export const api = {
+  LOGIN: `${CURRENT_BASE_URL}/auth/admin/login`,
+  LOGOUT: `${CURRENT_BASE_URL}/auth/admin/logout`,
+  SESSION: `${CURRENT_BASE_URL}/auth/admin/session`,
+  
   FETCH_ALL_EVENTS: `${CURRENT_BASE_URL}/events`,
   FETCH_ALL_ORGANIZERS: `${CURRENT_BASE_URL}/organizers`,
   CREATE_ORGANIZER: `${CURRENT_BASE_URL}/organizers`,
