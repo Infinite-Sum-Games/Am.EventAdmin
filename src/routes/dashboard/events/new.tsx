@@ -1,207 +1,354 @@
-import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
-import { queryOptions, useSuspenseQuery } from '@tanstack/react-query'
-import { api } from '@/lib/api'
-import React, { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { MultiSelect } from '@/components/ui/multi-select'
-import { Separator } from '@/components/ui/separator'
-import { Textarea } from '@/components/ui/textarea'
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { PlusCircle } from 'lucide-react'
-import secureLocalStorage from 'react-secure-storage'
+"use client";
 
-// --- Data Fetching ---
-const orgsQueryOptions = queryOptions({
-    queryKey: ['orgs'],
-    queryFn: async () => {
-        const res = await fetch(api.ORGS_URL);
-        if (!res.ok) throw new Error('Failed to fetch orgs');
-        const data = await res.json();
-        return data.DATA.map((item: { organizerID: string; organizerName: string }) => ({
-            value: item.organizerID,
-            label: item.organizerName,
-        }));
-    }
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import axios from "axios";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { api } from "@/lib/api";
+import { ChevronsUpDown } from "lucide-react";
+import secureLocalStorage from "react-secure-storage";
+
+/* ---------------- TYPES ---------------- */
+
+type Organizer = { id: string; organizer_name: string };
+type Tag = { id: string; name: string };
+type Person = { id: string; name: string };
+
+type CreateEventFormState = {
+  name: string;
+  blurb: string;
+  description: string;
+  cover_image_url: string;
+  rules: string;
+  price: number;
+  is_per_head: boolean;
+  is_group: boolean;
+  min_teamsize: number | null;
+  max_teamsize: number | null;
+  total_seats: number;
+  event_status: "ACTIVE" | "INACTIVE";
+  event_mode: "ONLINE" | "OFFLINE";
+  attendance_mode: "SOLO" | "TEAM";
+  organizer_ids: string[];
+  tag_ids: string[];
+  people_ids: string[];
+};
+
+/* ---------------- DEFAULT FORM ---------------- */
+
+const EMPTY_CREATE_FORM: CreateEventFormState = {
+  name: "",
+  blurb: "",
+  description: "",
+  cover_image_url: "",
+  rules: "",
+  price: 0,
+  is_per_head: false,
+  is_group: false,
+  min_teamsize: null,
+  max_teamsize: null,
+  total_seats: 0,
+  event_status: "ACTIVE",
+  event_mode: "OFFLINE",
+  attendance_mode: "SOLO",
+  organizer_ids: [],
+  tag_ids: [],
+  people_ids: [],
+};
+
+/* ---------------- ROUTE ---------------- */
+
+export const Route = createFileRoute("/dashboard/events/new")({
+  component: NewEventPage,
 });
 
-const tagsQueryOptions = queryOptions({
-    queryKey: ['tags'],
-    queryFn: async () => {
-        const res = await fetch(api.TAGS_URL);
-        if (!res.ok) throw new Error('Failed to fetch tags');
-        const data = await res.json();
-        return data.DATA.map((item: { tagID: string; tagName: string }) => ({
-            value: item.tagID,
-            label: item.tagName,
-        }));
-    }
-});
-
-export const Route = createFileRoute('/dashboard/events/new')({
-    loader: ({ context: { queryClient } }) => {
-        queryClient.ensureQueryData(orgsQueryOptions);
-        queryClient.ensureQueryData(tagsQueryOptions);
-    },
-    component: NewEventPage,
-})
+/* ---------------- COMPONENT ---------------- */
 
 function NewEventPage() {
-    const router = useRouter();
-    const { data: orgData } = useSuspenseQuery(orgsQueryOptions);
-    const { data: tagData } = useSuspenseQuery(tagsQueryOptions);
+  const router = useRouter();
+  const qc = useQueryClient();
+  const [form, setForm] = useState<CreateEventFormState>(EMPTY_CREATE_FORM);
 
-    // --- Component State ---
-    const [eventName, setEventName] = useState("");
-    const [imageUrl, setImageUrl] = useState("");
-    const [eventFee, setEventFee] = useState("");
-    const [eventDescription, setEventDescription] = useState("");
-    const [venue, setVenue] = useState("");
-    const [time, setTime] = useState("");
-    const [isGroup, setIsGroup] = useState(false);
-    const [maxTeamSize, setMaxTeamSize] = useState("1");
-    const [minTeamSize, setMinTeamSize] = useState("1");
-    const [eventDate, setEventDate] = useState("");
-    const [maxRegistrationsPerDept, setMaxRegistrationsPerDept] = useState("50");
-    const [isPerHeadFee, setIsPerHeadFee] = useState(false);
-    const [firstPrizeMoney, setFirstPrizeMoney] = useState("");
-    const [secondPrizeMoney, setSecondPrizeMoney] = useState("");
-    const [thirdPrizeMoney, setThirdPrizeMoney] = useState("");
-    const [fourthPrizeMoney, setFourthPrizeMoney] = useState("");
-    const [fifthPrizeMoney, setFifthPrizeMoney] = useState("");
-    const [rules, setRules] = useState("");
-    const [organizerIDs, setOrganizerIDs] = useState<string[]>([]);
-    const [tagIDs, setTagIDs] = useState<string[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+  /* ---------------- FETCH DROPDOWNS ---------------- */
 
-    const addNewEvent = async () => {
-        setIsSubmitting(true);
-        try {
-            const response = await fetch(api.EVENTS_URL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${secureLocalStorage.getItem("t")}`,
-                },
-                body: JSON.stringify({
-                    eventName, imageUrl, videoUrl: null,
-                    eventFee: parseInt(eventFee), eventDescription, venue, time, isGroup,
-                    maxTeamSize: parseInt(maxTeamSize), minTeamSize: parseInt(minTeamSize),
-                    eventDate, maxRegistrationsPerDept: parseInt(maxRegistrationsPerDept),
-                    isPerHeadFee, organizerIDs: organizerIDs.map(id => parseInt(id)),
-                    tagIDs: tagIDs.map(id => parseInt(id)),
-                    firstPrice: firstPrizeMoney || null, secondPrice: secondPrizeMoney || null,
-                    thirdPrice: thirdPrizeMoney || null, fourthPrice: fourthPrizeMoney || null,
-                    fifthPrice: fifthPrizeMoney || null, rules,
-                }),
-            });
+  const { data: organizers = [] } = useQuery<Organizer[]>({
+    queryKey: ["organizers"],
+    queryFn: async () =>
+      (await axios.get(api.FETCH_ALL_ORGANIZERS)).data.organizers,
+  });
 
-            if (response.ok) {
-                router.navigate({ to: '/dashboard', replace: true });
-            } else {
-                const errorData = await response.json();
-                alert(`Error: ${errorData.MESSAGE || 'Something went wrong.'}`);
+  const { data: tags = [] } = useQuery<Tag[]>({
+    queryKey: ["tags"],
+    queryFn: async () => (await axios.get(api.FETCH_ALL_TAGS)).data.tags,
+  });
+
+  const { data: people = [] } = useQuery<Person[]>({
+    queryKey: ["people"],
+    queryFn: async () => (await axios.get(api.FETCH_ALL_PEOPLE)).data.people,
+  });
+
+  /* ---------------- CREATE MUTATION ---------------- */
+
+  const createMutation = useMutation({
+    mutationFn: async () =>
+      axios.post(api.FETCH_ALL_EVENTS, form, {
+        headers: {
+          Authorization: `Bearer ${secureLocalStorage.getItem("t")}`,
+        },
+      }),
+    onSuccess: () => {
+      alert("✅ Event Created Successfully!");
+      qc.invalidateQueries({ queryKey: ["events"] });
+      router.navigate({ to: "/dashboard/events" });
+    },
+  });
+
+  /* ---------------- UI ---------------- */
+
+  return (
+    <div className="space-y-6 bg-background p-4 md:p-6 rounded-xl border mx-auto w-full">
+      <div className="grid gap-2">
+        <Label>Event Name</Label>
+        <Input
+          value={form.name}
+          onChange={(e) => setForm({ ...form, name: e.target.value })}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Blurb</Label>
+        <Textarea
+          value={form.blurb}
+          onChange={(e) => setForm({ ...form, blurb: e.target.value })}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Description</Label>
+        <Textarea
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Cover Image URL</Label>
+        <Input
+          value={form.cover_image_url}
+          onChange={(e) =>
+            setForm({ ...form, cover_image_url: e.target.value })
+          }
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Rules</Label>
+        <Textarea
+          value={form.rules}
+          onChange={(e) => setForm({ ...form, rules: e.target.value })}
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label>Price</Label>
+        <Input
+          type="number"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
+        />
+      </div>
+
+      {/* TEAM SIZE */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label>Min Team Size</Label>
+          <Input
+            type="number"
+            value={form.min_teamsize ?? ""}
+            onChange={(e) =>
+              setForm({ ...form, min_teamsize: Number(e.target.value) })
             }
-        } catch (error) {
-            console.error(error);
-            alert("An unexpected error occurred.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+          />
+        </div>
+        <div>
+          <Label>Max Team Size</Label>
+          <Input
+            type="number"
+            value={form.max_teamsize ?? ""}
+            onChange={(e) =>
+              setForm({ ...form, max_teamsize: Number(e.target.value) })
+            }
+          />
+        </div>
+      </div>
 
-    return (
-        <>
-            <h1 className="text-2xl font-semibold">Create New Event</h1>
-            <div className="bg-muted/50 p-4 rounded-xl flex flex-col gap-4">
-                <form className="grid gap-6" onSubmit={e => { e.preventDefault(); addNewEvent(); }}>
-                    {/* Event Name */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="eventName" className="text-lg font-semibold">Event Name</Label>
-                        <Input id="eventName" value={eventName} onChange={e => setEventName(e.target.value)} placeholder="Solo Singing" required />
-                    </div>
+      {/* EVENT MODE */}
+      <Select
+        value={form.event_mode}
+        onValueChange={(v) => setForm({ ...form, event_mode: v as any })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Event Mode" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ONLINE">Online</SelectItem>
+          <SelectItem value="OFFLINE">Offline</SelectItem>
+        </SelectContent>
+      </Select>
 
-                    {/* isGroup Checkbox */}
-                    <div className="flex flex-row items-center gap-2 border rounded-md p-4">
-                        <Checkbox id="isGroup" checked={isGroup} onCheckedChange={checked => setIsGroup(!!checked)} />
-                        <div className="grid gap-1.5 leading-none">
-                            <label htmlFor="isGroup" className="text-lg font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Is this a group event?
-                                <p className="text-sm text-muted-foreground font-light">Check this box if this event is a group (team) event.</p>
-                            </label>
-                        </div>
-                    </div>
+      {/* EVENT STATUS */}
+      <Select
+        value={form.event_status}
+        onValueChange={(v) => setForm({ ...form, event_status: v as any })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Event Status" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="ACTIVE">Active</SelectItem>
+          <SelectItem value="INACTIVE">Inactive</SelectItem>
+        </SelectContent>
+      </Select>
 
-                    {/* Team Size Inputs (Conditional) */}
-                    {isGroup && (
-                        <div className="flex flex-row gap-4">
-                            <div className="grid gap-2 w-full">
-                                <Label htmlFor="minTeamSize" className="text-lg font-semibold">Min Team Size</Label>
-                                <Input id="minTeamSize" type="number" value={minTeamSize} onChange={e => setMinTeamSize(e.target.value)} required />
-                            </div>
-                            <div className="grid gap-2 w-full">
-                                <Label htmlFor="maxTeamSize" className="text-lg font-semibold">Max Team Size</Label>
-                                <Input id="maxTeamSize" type="number" value={maxTeamSize} onChange={e => setMaxTeamSize(e.target.value)} required />
-                            </div>
-                        </div>
+      {/* ATTENDANCE MODE */}
+      <Select
+        value={form.attendance_mode}
+        onValueChange={(v) => setForm({ ...form, attendance_mode: v as any })}
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Attendance Mode" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="SOLO">Solo</SelectItem>
+          <SelectItem value="TEAM">Team</SelectItem>
+        </SelectContent>
+      </Select>
+
+      {/* ---------------- ORGANIZERS ---------------- */}
+      <MultiSelectBlock
+        label="Organizers"
+        items={organizers}
+        selected={form.organizer_ids}
+        onChange={(ids) => setForm({ ...form, organizer_ids: ids })}
+        getLabel={(o) => o.organizer_name}
+      />
+
+      {/* ---------------- TAGS ---------------- */}
+      <MultiSelectBlock
+        label="Tags"
+        items={tags}
+        selected={form.tag_ids}
+        onChange={(ids) => setForm({ ...form, tag_ids: ids })}
+        getLabel={(t) => t.name}
+      />
+
+      {/* ---------------- PEOPLE ---------------- */}
+      <MultiSelectBlock
+        label="People"
+        items={people}
+        selected={form.people_ids}
+        onChange={(ids) => setForm({ ...form, people_ids: ids })}
+        getLabel={(p) => p.name}
+      />
+
+      <Button onClick={() => createMutation.mutate()} className="w-fit text-lg">
+        Create Event
+      </Button>
+    </div>
+  );
+}
+
+/* ---------------- REUSABLE MULTISELECT ---------------- */
+
+function MultiSelectBlock<T extends { id: string }>({
+  label,
+  items,
+  selected,
+  onChange,
+  getLabel,
+}: {
+  label: string;
+  items: T[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+  getLabel: (item: T) => string;
+}) {
+  return (
+    <div className="grid gap-2">
+      <Label>{label}</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            className="w-full justify-between bg-transparent"
+          >
+            <span className="truncate">
+              {selected.length
+                ? items
+                    .filter((i) => selected.includes(i.id))
+                    .map(getLabel)
+                    .join(", ")
+                : `Select ${label.toLowerCase()}...`}
+            </span>
+            <ChevronsUpDown className="ml-2 opacity-50 shrink-0" />
+          </Button>
+        </PopoverTrigger>
+
+        <PopoverContent className="w-full p-0">
+          <Command>
+            <CommandInput placeholder={`Search ${label.toLowerCase()}...`} />
+            <CommandList>
+              <CommandEmpty>No item found.</CommandEmpty>
+              <CommandGroup>
+                {items.map((item) => (
+                  <CommandItem
+                    key={item.id}
+                    onSelect={() =>
+                      onChange(
+                        selected.includes(item.id)
+                          ? selected.filter((id) => id !== item.id)
+                          : [...selected, item.id]
+                      )
+                    }
+                  >
+                    <span>{getLabel(item)}</span>
+                    {selected.includes(item.id) && (
+                      <span className="ml-auto">✔️</span>
                     )}
-
-                    {/* Event Date */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="eventDate" className="text-lg font-semibold">Event Date</Label>
-                        <Input id="eventDate" type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} required />
-                    </div>
-
-                    {/* Other fields... */}
-                    <div className="grid gap-2">
-                        <Label htmlFor="time" className="text-lg font-semibold">Timings</Label>
-                        <Textarea id="time" value={time} onChange={e => setTime(e.target.value)} placeholder={"Round 1: 10.30 AM - 3.30 PM\nRound 2: 4.30 PM - 8.30 PM"} required />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="eventDescription" className="text-lg font-semibold">About the event</Label>
-                        <Textarea id="eventDescription" value={eventDescription} onChange={e => setEventDescription(e.target.value)} placeholder="Enter about the event" required className="min-h-[120px]" />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="rules" className="text-lg font-semibold">Event Rules</Label>
-                        <Textarea id="rules" value={rules} onChange={e => setRules(e.target.value)} placeholder="Enter the rules of the event, one per line." className="min-h-[120px]" />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="venue" className="text-lg font-semibold">Venue</Label>
-                        <Input id="venue" value={venue} onChange={e => setVenue(e.target.value)} placeholder="ASB C101" required />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="eventFee" className="text-lg font-semibold">Event Fee</Label>
-                        <Input id="eventFee" type="number" value={eventFee} onChange={e => setEventFee(e.target.value)} placeholder="100" required />
-                    </div>
-                    <div className="flex flex-row items-center gap-2 border rounded-md p-4">
-                        <Checkbox id="isPerHeadFee" checked={isPerHeadFee} onCheckedChange={checked => setIsPerHeadFee(!!checked)} />
-                        <div className="grid gap-1.5 leading-none">
-                            <label htmlFor="isPerHeadFee" className="text-lg font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Is the fee per head?
-                                <p className="text-sm text-muted-foreground font-light">If not checked, the fee will be charged per team.</p>
-                            </label>
-                        </div>
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="imageUrl" className="text-lg font-semibold">Event Poster URL</Label>
-                        <Input id="imageUrl" type="url" value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://example.com/image.jpg" required />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label className="text-lg font-semibold">Event Organizers</Label>
-                        <MultiSelect data={orgData} name="organizers" selected={organizerIDs} setSelected={setOrganizerIDs} />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label className="text-lg font-semibold">Tags for events</Label>
-                        <MultiSelect data={tagData} name="tags" selected={tagIDs} setSelected={setTagIDs} />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isSubmitting}>
-                        {isSubmitting ? "Creating..." : "Create Event"}
-                        {!isSubmitting && <PlusCircle className="ml-2 w-6 h-6" />}
-                    </Button>
-                </form>
-            </div>
-        </>
-    )
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
 }

@@ -68,7 +68,7 @@ function OrgsPage() {
   const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // ✅ FIXED
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editOrg, setEditOrg] = useState<(typeof orgs)[number] | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
