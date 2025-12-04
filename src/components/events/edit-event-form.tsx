@@ -31,6 +31,7 @@ import { api } from "@/lib/api";
 import type { EventFormState } from "@/types/events";
 import { ChevronsUpDown } from "lucide-react";
 import { EMPTY_FORM } from "@/types/constants";
+import { createEventSchema } from "@/schemas/event";
 
 type Organizer = { id: string; organizer_name: string };
 type Tag = { id: string; name: string };
@@ -40,6 +41,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
   const qc = useQueryClient();
   const [form, setForm] = useState<EventFormState>(EMPTY_FORM);
   const [loading, setLoading] = useState(true);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function loadEvent() {
@@ -92,7 +94,24 @@ export function EditEventForm({ eventId }: { eventId: string }) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async () => axios.put(api.UPDATE_EVENT(eventId), form),
+    mutationFn: async () => {
+      const result = createEventSchema.safeParse(form);
+
+      if (!result.success) {
+        const fieldErrors: Record<string, string> = {};
+
+        result.error.issues.forEach((err) => {
+          const key = err.path[0] as string;
+          fieldErrors[key] = err.message;
+        });
+
+        setErrors(fieldErrors);
+        throw new Error("Validation failed");
+      }
+
+      setErrors({});
+      return axios.put(api.UPDATE_EVENT(eventId), form);
+    },
     onSuccess: () => {
       alert("✅ Event Updated Successfully!");
       qc.invalidateQueries({ queryKey: ["events"] });
@@ -108,6 +127,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
+        {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
       </div>
       <div className="grid gap-2">
         <Label>Blurb</Label>
@@ -115,6 +135,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           value={form.blurb}
           onChange={(e) => setForm({ ...form, blurb: e.target.value })}
         />
+        {errors.blurb && <p className="text-sm text-red-500">{errors.blurb}</p>}
       </div>
       <div className="grid gap-2">
         <Label>Description</Label>
@@ -122,6 +143,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
+        {errors.description && (
+          <p className="text-sm text-red-500">{errors.description}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <Label>Cover Image URL</Label>
@@ -131,6 +155,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
             setForm({ ...form, cover_image_url: e.target.value })
           }
         />
+        {errors.cover_image_url && (
+          <p className="text-sm text-red-500">{errors.cover_image_url}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <Label>Rules</Label>
@@ -138,6 +165,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           value={form.rules}
           onChange={(e) => setForm({ ...form, rules: e.target.value })}
         />
+        {errors.rules && <p className="text-sm text-red-500">{errors.rules}</p>}
       </div>
       <div className="grid gap-2">
         <Label>Price</Label>
@@ -146,6 +174,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           value={form.price}
           onChange={(e) => setForm({ ...form, price: Number(e.target.value) })}
         />
+        {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -157,6 +186,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
               setForm({ ...form, min_teamsize: Number(e.target.value) })
             }
           />
+          {errors.min_teamsize && (
+            <p className="text-sm text-red-500">{errors.min_teamsize}</p>
+          )}
         </div>
         <div>
           <Label>Max Team Size</Label>
@@ -167,6 +199,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
               setForm({ ...form, max_teamsize: Number(e.target.value) })
             }
           />
+          {errors.max_teamsize && (
+            <p className="text-sm text-red-500">{errors.max_teamsize}</p>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -179,6 +214,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
               setForm({ ...form, total_seats: Number(e.target.value) })
             }
           />
+          {errors.total_seats && (
+            <p className="text-sm text-red-500">{errors.total_seats}</p>
+          )}
         </div>
         <div>
           <Label>Seats Filled</Label>
@@ -189,6 +227,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
               setForm({ ...form, seats_filled: Number(e.target.value) })
             }
           />
+          {errors.seats_filled && (
+            <p className="text-sm text-red-500">{errors.seats_filled}</p>
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -204,6 +245,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
             <SelectItem value="OFFLINE">Offline</SelectItem>
           </SelectContent>
         </Select>
+        {errors.event_mode && (
+          <p className="text-sm text-red-500">{errors.event_mode}</p>
+        )}
 
         <Select
           value={form.event_status}
@@ -214,9 +258,13 @@ export function EditEventForm({ eventId }: { eventId: string }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="ACTIVE">Active</SelectItem>
-            <SelectItem value="INACTIVE">Inactive</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+            <SelectItem value="CLOSED">Closed</SelectItem>
           </SelectContent>
         </Select>
+        {errors.event_status && (
+          <p className="text-sm text-red-500">{errors.event_status}</p>
+        )}
       </div>
       <Select
         value={form.attendance_mode}
@@ -227,9 +275,12 @@ export function EditEventForm({ eventId }: { eventId: string }) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="SOLO">Solo</SelectItem>
-          <SelectItem value="TEAM">Team</SelectItem>
+          <SelectItem value="DUO">Team</SelectItem>
         </SelectContent>
       </Select>
+      {errors.attendance_mode && (
+        <p className="text-sm text-red-500">{errors.attendance_mode}</p>
+      )}
       <div className="grid gap-2">
         <Label>Organizers</Label>
         <Popover>
@@ -279,6 +330,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
             </Command>
           </PopoverContent>
         </Popover>
+        {errors.organizer_ids && (
+          <p className="text-sm text-red-500">{errors.organizer_ids}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <Label>Tags</Label>
@@ -329,6 +383,9 @@ export function EditEventForm({ eventId }: { eventId: string }) {
             </Command>
           </PopoverContent>
         </Popover>
+        {errors.tag_ids && (
+          <p className="text-sm text-red-500">{errors.tag_ids}</p>
+        )}
       </div>
       <div className="grid gap-2">
         <Label>People</Label>
@@ -379,12 +436,16 @@ export function EditEventForm({ eventId }: { eventId: string }) {
             </Command>
           </PopoverContent>
         </Popover>
+        {errors.people_ids && (
+          <p className="text-sm text-red-500">{errors.people_ids}</p>
+        )}
       </div>
       <Button
         onClick={() => updateMutation.mutate()}
+        disabled={updateMutation.isPending}
         className="w-fit text-lg"
       >
-        Update Event
+        {updateMutation.isPending ? "Updating..." : "Update Event"}
       </Button>
     </div>
   );

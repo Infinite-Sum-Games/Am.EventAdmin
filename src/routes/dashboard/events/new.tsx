@@ -18,7 +18,7 @@ import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
 import type { CreateEventFormState } from "@/types/events";
 import { MultiSelectBlock } from "@/components/events/multiselect";
-
+import { createEventSchema } from "@/schemas/event";
 type Organizer = { id: string; organizer_name: string };
 type Tag = { id: string; name: string };
 type Person = { id: string; name: string };
@@ -85,19 +85,36 @@ function NewEventPage() {
     queryKey: ["people"],
     queryFn: async () => (await axios.get(api.FETCH_ALL_PEOPLE)).data.people,
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const createMutation = useMutation({
     mutationFn: async () => {
       const payload = {
         ...form,
-        attendance_mode: form.attendance_mode, 
-        event_status: form.event_status, 
+        attendance_mode: form.attendance_mode,
+        event_status: form.event_status,
         schedules: form.schedules.map((s) => ({
           ...s,
           start_time: formatTimeToHHMMSS(s.start_time),
           end_time: formatTimeToHHMMSS(s.end_time),
         })),
       };
+      console.log(payload);
+      // ✅ ZOD VALIDATION
+      const result = createEventSchema.safeParse(payload);
 
+      if (!result.success) {
+        const fieldErrors: Record<string, string> = {};
+
+        result.error.issues.forEach((err) => {
+          const key = err.path[0] as string;
+          fieldErrors[key] = err.message;
+        });
+
+        setErrors(fieldErrors);
+        throw new Error("Validation failed");
+      }
+
+      setErrors({});
       console.log("🚀 Posting Event Data:", payload);
 
       return axios.post(api.FETCH_ALL_EVENTS, payload, {
@@ -106,6 +123,7 @@ function NewEventPage() {
         },
       });
     },
+
     onSuccess: () => {
       alert("✅ Event Created Successfully!");
       qc.invalidateQueries({ queryKey: ["events"] });
@@ -142,6 +160,9 @@ function NewEventPage() {
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
+              {errors.name && (
+                <p className="text-sm text-red-500">{errors.name}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -156,6 +177,9 @@ function NewEventPage() {
                 className="resize-none"
                 rows={3}
               />
+              {errors.blurb && (
+                <p className="text-sm text-red-500">{errors.blurb}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -172,6 +196,9 @@ function NewEventPage() {
                 className="resize-none"
                 rows={4}
               />
+              {errors.description && (
+                <p className="text-sm text-red-500">{errors.description}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -187,6 +214,9 @@ function NewEventPage() {
                   setForm({ ...form, cover_image_url: e.target.value })
                 }
               />
+              {errors.cover_image_url && (
+                <p className="text-sm text-red-500">{errors.cover_image_url}</p>
+              )}
             </div>
 
             <div className="grid gap-2">
@@ -201,6 +231,9 @@ function NewEventPage() {
                 className="resize-none"
                 rows={3}
               />
+              {errors.rules && (
+                <p className="text-sm text-red-500">{errors.rules}</p>
+              )}
             </div>
           </div>
 
@@ -229,6 +262,9 @@ function NewEventPage() {
                     <SelectItem value="WORKSHOP">Workshop</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.event_type && (
+                  <p className="text-sm text-red-500">{errors.event_type}</p>
+                )}
               </div>
 
               <div className="grid gap-2">
@@ -290,6 +326,11 @@ function NewEventPage() {
                     <SelectItem value="DUO">Team</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.attendance_mode && (
+                  <p className="text-sm text-red-500">
+                    {errors.attendance_mode}
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -308,7 +349,7 @@ function NewEventPage() {
                   type="number"
                   placeholder="0"
                   min="0"
-                  step="0.01"
+                  step="1"
                   value={form.price}
                   onChange={(e) =>
                     setForm({ ...form, price: Number(e.target.value) })
@@ -442,6 +483,9 @@ function NewEventPage() {
                 onChange={(ids) => setForm({ ...form, organizer_ids: ids })}
                 getLabel={(o) => o.organizer_name}
               />
+              {errors.organizer_ids && (
+                <p className="text-sm text-red-500">{errors.organizer_ids}</p>
+              )}
 
               <MultiSelectBlock
                 label="Tags"
@@ -450,15 +494,23 @@ function NewEventPage() {
                 onChange={(ids) => setForm({ ...form, tag_ids: ids })}
                 getLabel={(t) => t.name}
               />
+              {errors.tag_ids && (
+                <p className="text-sm text-red-500">{errors.tag_ids}</p>
+              )}
             </div>
 
-            <MultiSelectBlock
-              label="People"
-              items={people}
-              selected={form.people_ids}
-              onChange={(ids) => setForm({ ...form, people_ids: ids })}
-              getLabel={(p) => p.name}
-            />
+            <div>
+              <MultiSelectBlock
+                label="People"
+                items={people}
+                selected={form.people_ids}
+                onChange={(ids) => setForm({ ...form, people_ids: ids })}
+                getLabel={(p) => p.name}
+              />
+              {errors.people_ids && (
+                <p className="text-sm text-red-500">{errors.people_ids}</p>
+              )}
+            </div>
           </div>
 
           {/* SCHEDULE SECTION */}
@@ -572,6 +624,9 @@ function NewEventPage() {
                         setForm({ ...form, schedules: copy });
                       }}
                     />
+                    {errors.schedules && (
+                      <p className="text-sm text-red-500">{errors.schedules}</p>
+                    )}
                   </div>
                 </div>
               </div>
