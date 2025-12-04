@@ -468,8 +468,6 @@ function NewEventPage() {
               </div>
             )}
           </div>
-
-          {/* SELECTIONS SECTION */}
           <div className="space-y-6">
             <h2 className="text-lg font-semibold text-foreground border-b border-border pb-3">
               Organizers & Tags
@@ -513,7 +511,7 @@ function NewEventPage() {
             </div>
           </div>
 
-          {/* SCHEDULE SECTION */}
+     
           <div className="space-y-4 border rounded-xl p-4">
             <div className="flex justify-between items-center">
               <Label className="text-lg font-semibold">Schedules</Label>
@@ -550,7 +548,7 @@ function NewEventPage() {
                 key={i}
                 className="space-y-3 border p-4 rounded-xl bg-muted/40"
               >
-                {/* Header */}
+
                 <div className="flex justify-between items-center">
                   <p className="font-medium">Schedule {i + 1}</p>
 
@@ -568,9 +566,9 @@ function NewEventPage() {
                   </Button>
                 </div>
 
-                {/* Fields */}
+    
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  {/* Date */}
+          
                   <div className="space-y-1">
                     <Label>Event Date</Label>
                     <Input
@@ -584,7 +582,7 @@ function NewEventPage() {
                     />
                   </div>
 
-                  {/* Start Time */}
+        
                   <div className="space-y-1">
                     <Label>Start Time</Label>
                     <Input
@@ -598,7 +596,7 @@ function NewEventPage() {
                     />
                   </div>
 
-                  {/* End Time */}
+             
                   <div className="space-y-1">
                     <Label>End Time</Label>
                     <Input
@@ -612,7 +610,7 @@ function NewEventPage() {
                     />
                   </div>
 
-                  {/* Venue */}
+           
                   <div className="space-y-1">
                     <Label>Venue</Label>
                     <Input
