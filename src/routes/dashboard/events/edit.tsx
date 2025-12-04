@@ -15,7 +15,7 @@ function EditEvent() {
   const { id } = Route.useSearch();
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-[80%] mx-auto space-y-6">
       <h1 className="text-2xl font-bold">Edit Event</h1>
       <p className="text-sm text-muted-foreground">
         Editing event with ID: {id}

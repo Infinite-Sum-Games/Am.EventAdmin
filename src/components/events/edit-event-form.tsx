@@ -101,7 +101,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
 
   if (loading) return <p className="text-center py-8">Loading event...</p>;
   return (
-    <div className="space-y-6 bg-background p-4 md:p-6 rounded-xl border max-w-3xl mx-auto w-full">
+    <div className="space-y-6 bg-background p-4 md:p-6 rounded-xl border  mx-auto w-full">
       <div className="grid gap-2">
         <Label>Event Name</Label>
         <Input
@@ -382,7 +382,7 @@ export function EditEventForm({ eventId }: { eventId: string }) {
       </div>
       <Button
         onClick={() => updateMutation.mutate()}
-        className="w-full text-lg"
+        className="w-fit text-lg"
       >
         Update Event
       </Button>
