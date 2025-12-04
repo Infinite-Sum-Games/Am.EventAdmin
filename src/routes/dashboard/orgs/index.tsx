@@ -35,7 +35,7 @@ import {
 import type { OrganizerType } from "@/types/db";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
-import { EditOrgForm } from "@/components/orgs/edit-event-form";
+import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 
