@@ -45,3 +45,37 @@ export type EventFormState = {
   people_ids: string[];
   schedules: Schedule[];
 };
+
+
+
+
+export type CreateEventFormState = {
+  name: string;
+  blurb: string;
+  description: string;
+  cover_image_url: string;
+
+  price: number;
+  is_per_head: boolean;
+
+  rules: string;
+
+  event_type: "EVENT" | "WORKSHOP" | "SEMINAR";
+
+  is_group: boolean;
+  min_teamsize: number | null;
+  max_teamsize: number | null;
+
+  total_seats: number;
+  seats_filled: number;
+
+  event_status: "ACTIVE" | "INACTIVE";
+  event_mode: "ONLINE" | "OFFLINE";
+  attendance_mode: "SOLO" | "TEAM";
+
+  organizer_ids: string[];
+  tag_ids: string[];
+  people_ids: string[];
+
+  schedule: Schedule;
+};
