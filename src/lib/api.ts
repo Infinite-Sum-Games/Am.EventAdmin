@@ -18,7 +18,6 @@ export const api = {
   UPDATE_ORGANIZER: (id: string) => `${CURRENT_BASE_URL}/organizers/${id}`,
   UPDATE_EVENT:  (eventId: string) => `${CURRENT_BASE_URL}/events/${eventId}`,
   FETCH_EVENT_BY_ID: (eventId: string) => `${CURRENT_BASE_URL}/events/${eventId}`,
-  FETCH_ALL_TAGS: `${CURRENT_BASE_URL}/tags`,
   FETCH_ALL_PEOPLE: `${CURRENT_BASE_URL}/people/`,
 
   CREATE_PEOPLE: `${CURRENT_BASE_URL}/people`,
