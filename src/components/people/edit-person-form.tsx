@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Check, ChevronsUpDown, PlusCircle, AlertCircle } from 'lucide-react';
+import { Check, ChevronsUpDown, Save, AlertCircle } from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -23,6 +23,8 @@ import { axiosClient } from '@/lib/axios';
 import { Checkbox } from '../ui/checkbox';
 import { z } from 'zod'; 
 import { PeopleSchema } from '@/schemas/people';
+import type { PeopleData } from '@/types/people';
+
 
 const eventQueryOptions = queryOptions({
     queryKey: ['events'],
@@ -35,18 +37,20 @@ const eventQueryOptions = queryOptions({
     }
 })
 
-interface NewPersonFormProps {
+interface EditPersonFormProps {
+    personId: string;
+    initialData: PeopleData;
     onSuccess: () => void;
 }
 
-export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
+export function EditPersonForm({ personId, initialData, onSuccess }: EditPersonFormProps) {
     const [formData, setFormData] = useState({
-        name: "",
-        email: "",
-        phoneNumber: "",
-        profession: "",
-        eventId: "",
-        eventDay: [] as number[]
+        name: initialData.name || "",
+        email: initialData.email || "",
+        phoneNumber: initialData.phone_number || "",
+        profession: initialData.profession || "",
+        eventId: initialData.event_id || "",
+        eventDay: initialData.event_day || []
     });
     
     const [open, setOpen] = useState(false);
@@ -67,10 +71,11 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 event_day: data.eventDay,
             };
 
-            // Validate before sending
+
             const validated = PeopleSchema.parse(payload);
             
-            const response = await axiosClient.post(api.CREATE_PEOPLE, validated);
+            
+            const response = await axiosClient.put(api.UPDATE_PEOPLE(personId), validated);
             return response.data;
         },
         onSuccess: () => {
@@ -81,8 +86,10 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 setFormError(error.issues[0].message);
             } else if (error.response?.status === 400) {
                 setFormError("Invalid input data.");
+            } else if (error.response?.status === 404) {
+                setFormError("Person not found.");
             } else {
-                setFormError("Failed to create person. Please try again.");
+                setFormError("Failed to update person. Please try again.");
             }
         }
     });
@@ -132,7 +139,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 />
             </div>
             
-            {/* ... Profession Input (similar to above) ... */}
             <div className="grid gap-2">
                 <Label htmlFor="profession">Profession / Title</Label>
                 <Input 
@@ -143,7 +149,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 />
             </div>
 
-            {/* Event Selection */}
             <div className="grid gap-2">
                 <Label>Associated Event</Label>
                 <Popover open={open} onOpenChange={setOpen}>
@@ -164,7 +169,7 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                                     {events.map((event) => (
                                         <CommandItem
                                             key={event.value}
-                                            value={event.label} // Command usually filters by label
+                                            value={event.label}
                                             onSelect={() => {
                                                 updateField('eventId', event.value === formData.eventId ? "" : event.value);
                                                 setOpen(false);
@@ -181,7 +186,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 </Popover>
             </div>
 
-            {/* Event Day Checkboxes */}
             <div className="grid gap-2">
                 <Label>Event Day</Label>
                 <div className="flex flex-row gap-4">
@@ -203,7 +207,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 </div>
             </div>
 
-            {/* Error Message UI */}
             {formError && (
                 <div className="text-red-500 text-sm flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" /> {formError}
@@ -211,8 +214,8 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
             )}
 
             <Button type="submit" className="w-full mt-2" disabled={isPending}>
-                {isPending ? "Creating..." : "Create Person"}
-                {!isPending && <PlusCircle className="ml-2 h-4 w-4" />}
+                {isPending ? "Updating..." : "Update Person"}
+                {!isPending && <Save className="ml-2 h-4 w-4" />}
             </Button>
         </form>
     );

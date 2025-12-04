@@ -1,31 +1,40 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
-import secureLocalStorage from "react-secure-storage";
 import { AppSidebar } from "@/components/app-sidebar";
 import { generateNavItems } from "@/lib/nav-manager";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { useState } from "react";
-import { ModeToggle } from "@/components/ui/theme-toggle"; // Import the ModeToggle
+import { ModeToggle } from "@/components/ui/theme-toggle"; 
+import { axiosClient } from "@/lib/axios";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/dashboard")({
-    beforeLoad: () => {
-        // Auth check is temporarily disabled
-    },
+    // THIS WONT WORK UNLESS THE BACKEND ENDPOINT ADDS THE SESSION ENDPOINT
+    // beforeLoad: async () => {
+    //     try {
+    //         const response = await axiosClient.get(api.SESSION);
+    //         return {
+    //             user: response.data
+    //         };
+    //     } catch (error) {
+    //         throw redirect({
+    //             to: "/",
+    //         });
+    //     }
+    // },
     component: DashboardLayout,
 });
 
 function DashboardLayout() {
-    const storedUser = secureLocalStorage.getItem("u");
-    const parsedUser = storedUser ? JSON.parse(storedUser as string) : null;
-
-    const [user] = useState({
-        name: parsedUser?.userName || "Admin",
-        email: parsedUser?.userEmail || "admin@example.com",
-        avatar: parsedUser?.avatar || "https://gravatar.com/avatar/dd55aeae8806246ac1d0ab0c6baa34f5?&d=robohash&r=x",
-    });
-
+    const { user: sessionUser } = Route.useRouteContext();
     const routerState = useRouterState();
+
+    const user = {
+        name: sessionUser?.name || "Admin",
+        email: sessionUser?.email || "admin@example.com",
+        avatar: "https://gravatar.com/avatar/dd55aeae8806246ac1d0ab0c6baa34f5?&d=robohash&r=x",
+    };
+
     const navItems = generateNavItems(routerState.location.pathname);
 
     return (
