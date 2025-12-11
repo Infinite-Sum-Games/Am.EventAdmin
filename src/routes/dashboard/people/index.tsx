@@ -22,6 +22,7 @@ import { EditPersonForm } from "@/components/people/edit-person-form";
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import type { PeopleData } from '@/types/people';
+import { toast } from 'sonner';
 
 // --- Data Fetching ---
 const peopleQueryOptions = queryOptions({
@@ -69,11 +70,12 @@ function PeoplePage() {
             await axiosClient.delete(`${api.DELETE_PEOPLE(id)}`);
         },
         onSuccess: () => {
+            toast.success("Person deleted successfully.");
             setPersonToDelete(null);
             queryClient.invalidateQueries({ queryKey: ['people'] });
         },
         onError: () => {
-            alert("Failed to delete person. Please try again.");
+            toast.error("Failed to delete person. Please try again.");
             setPersonToDelete(null);
         }
     });
@@ -90,7 +92,8 @@ function PeoplePage() {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full md:max-w-xs"
                     />
-                
+
+                    {/* Create Person Button */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="w-full sm:w-auto"><PlusCircle className="h-4 w-4" /> Add New Person</Button>
@@ -100,6 +103,7 @@ function PeoplePage() {
                                 <DialogTitle>Add a New Person</DialogTitle>
                             </DialogHeader>
                             <NewPersonForm onSuccess={() => {
+                                toast.success("Person created successfully.");
                                 setIsDialogOpen(false);
                                 queryClient.invalidateQueries({ queryKey: ['people'] });
                             }} />
@@ -119,6 +123,7 @@ function PeoplePage() {
                             personId={editingPerson.id}
                             initialData={editingPerson}
                             onSuccess={() => {
+                                toast.success("Person updated successfully.");
                                 setEditingPerson(null);
                                 queryClient.invalidateQueries({ queryKey: ['people'] });
                             }} 
@@ -189,11 +194,11 @@ function PeoplePage() {
                                     <Edit3 className="h-4 w-4" /> Edit
                                 </Button>
                                 <Button 
-                                    variant="outline" 
-                                    className="flex-1 group hover:border-destructive hover:text-destructive" 
+                                    variant="destructive" 
+                                    className="flex-1 group" 
                                     onClick={() => setPersonToDelete(person.id)}
                                 >
-                                    <Trash2 className="h-4 w-4 text-muted-foreground group-hover:text-destructive" /> Delete
+                                    <Trash2 className="h-4 w-4" /> Delete
                                 </Button>
                             </CardFooter>
                         </Card>
