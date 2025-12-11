@@ -9,3 +9,10 @@ export const OrgSchema = z.object({
     student_co_head: z.string().optional().refine(val => !val || /^[a-zA-Z\s]+$/.test(val), "Student co-head must contain only letters"),
     faculty_head: z.string().min(3, "Faculty head is required").regex(/^[a-zA-Z\s]+$/, "Faculty head must contain only letters"),
 });
+
+export const EditOrgSchema = OrgSchema.extend({
+    id: z.uuid("Invalid organization ID"),
+    password: z.string().optional().or(z.literal('')).refine(
+            (val) => !val || val.length >= 6,
+            "Password must be at least 6 characters if changed."
+        ).transform(val => val === '' ? undefined : val), }).partial({ password: true });
