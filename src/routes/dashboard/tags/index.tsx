@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { EditTagForm } from "@/components/tags/edit-tag-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";  
+import { toast } from "sonner";
 
 // --- Data Fetching ---
 const tagsQueryOptions = queryOptions({
@@ -37,10 +38,11 @@ function TagsPage() {
       await axiosClient.delete(api.DELETE_TAG(tagId));
     },
     onSuccess: () => {
+      toast.success("Tag deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["tags"] });
     },
     onError: () => {
-      alert("Failed to delete tag. Please try again.");
+      toast.error("Failed to delete tag. Please try again.");
     }
   });
 
