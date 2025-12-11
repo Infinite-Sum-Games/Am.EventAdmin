@@ -32,6 +32,7 @@ function TagsPage() {
   const { data: tags } = useSuspenseQuery(tagsQueryOptions);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [tagToEdit, setTagToEdit] = useState<Tag | null>(null);
+  const [tagToDeleteId, setTagToDeleteId] = useState<string | null>(null);
 
   const { mutate: deleteTagMutation } = useMutation({
     mutationFn: async (tagId: string) => {
@@ -46,11 +47,6 @@ function TagsPage() {
     }
   });
 
-  const deleteTag = (tagId: string) => {
-  if (confirm("Are you sure you want to delete this tag?")) {
-    deleteTagMutation(tagId);
-  }
-};
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
@@ -87,7 +83,7 @@ function TagsPage() {
               <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setTagToEdit(tag)}>
             <Edit3 className="w-4 h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteTag(tag.id)}>
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => {setTagToDeleteId(tag.id)}}>
             <Trash2 className="w-4 h-4 text-red-500" />
               </Button>
           </div>
@@ -102,6 +98,8 @@ function TagsPage() {
           ))}
         </div>
       )}
+
+    {/* Edit Tag Dialog */}
       <Dialog open={!!tagToEdit} onOpenChange={(open) => !open && setTagToEdit(null)}>
       <DialogContent>
         <DialogHeader>
@@ -116,6 +114,34 @@ function TagsPage() {
             }} 
           />
         )}
+      </DialogContent>
+    </Dialog>
+
+    {/* Delete Confirmation Dialog */}
+    <Dialog open={!!tagToDeleteId} onOpenChange={(open) => !open && setTagToDeleteId(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Tag</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Are you sure you want to delete this tag? This action cannot be undone.
+        </p>
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setTagToDeleteId(null)}>
+            Cancel
+          </Button>
+          <Button 
+            variant="destructive" 
+            onClick={() => {
+              if (tagToDeleteId) {
+                deleteTagMutation(tagToDeleteId);
+                setTagToDeleteId(null);
+              }
+            }}
+          >
+            Delete
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
     </div>
