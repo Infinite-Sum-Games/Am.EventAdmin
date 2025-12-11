@@ -13,89 +13,73 @@ import type { OrganizerType } from "@/types/db";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import sha256 from "crypto-js/sha256";
-
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import axios from "axios";
+import { OrgSchema } from "@/schemas/orgs";
+import type z from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useForm } from "react-hook-form";
 
-// ✅ Zod Schema
-const newOrgSchema = z.object({
-  name: z.string().min(3, "Organizer name must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  orgType: z.enum(["DEPARTMENT", "CLUB"]),
-  studentHead: z.string().min(3, "Student head is required"),
-  studentCoHead: z.string().optional(),
-  facultyHead: z.string().min(3, "Faculty head is required"),
-});
-
-type NewOrgFormValues = z.infer<typeof newOrgSchema>;
+type OrgData = z.infer<typeof OrgSchema>;
 
 interface NewOrgFormProps {
   onSuccess: () => void;
 }
+
+const createOrganizer = async (data: OrgData) => {
+  const hashedPassword = sha256(data.password).toString();
+
+  const dataToSend = { ...data, password: hashedPassword }; 
+  console.log("Data to send:", dataToSend);
+
+  const response = await axiosClient.post(api.CREATE_ORGANIZER, dataToSend);
+  return response.data;
+};
 
 export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
   const {
     register,
     handleSubmit,
     setValue,
+    getValues,
     reset,
-    formState: { errors, isSubmitting },
-  } = useForm<NewOrgFormValues>({
-    resolver: zodResolver(newOrgSchema),
+    formState: { errors },
+  } = useForm<OrgData>({
+    resolver: zodResolver(OrgSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
-      orgType: undefined,
-      studentHead: "",
-      studentCoHead: "",
-      facultyHead: "",
+      org_type: undefined,
+      student_head: "",
+      student_co_head: "",
+      faculty_head: "",
     },
   });
 
-  const onSubmit = async (data: NewOrgFormValues) => {
-    try {
-      const hashedPassword = sha256(data.password).toString();
-
-      await axiosClient.post(api.CREATE_ORGANIZER, {
-        name: data.name,
-        email: data.email,
-        password: hashedPassword,
-        org_type: data.orgType,
-        student_head: data.studentHead,
-        student_co_head: data.studentCoHead || null,
-        faculty_head: data.facultyHead,
-      });
-
-      alert(`Successfully created organizer: ${data.name}`);
-      reset();
+  const mutation = useMutation({
+    mutationFn: createOrganizer,
+    onSuccess: (variables) => {
+      toast.success(`Organizer "${variables.name}" created successfully!`);
+      reset(); 
       onSuccess();
-    } catch (err) {
-      console.error(err);
-
-      if (axios.isAxiosError(err)) {
-        const message = err.response?.data?.error;
-
-        if (message?.includes("organizer_email_key")) {
-          alert("Email already exists. Please use a different email.");
-        } else {
-          alert(message || "Failed to create organizer");
-        }
-      } else {
-        alert("Unexpected error occurred");
-      }
-    }
+    },
+    onError: () => {
+      toast.error("Failed to create organizer. Please try again.");
+    },
+  });
+  
+  const onSubmit = (data: OrgData) => {
+    mutation.mutate(data);
   };
 
   return (
     <form className="grid gap-4 pt-4" onSubmit={handleSubmit(onSubmit)}>
+      
       {/* Organizer Name */}
       <div className="grid gap-2">
-        <Label>Organizer Name</Label>
-        <Input {...register("name")} />
+        <Label htmlFor="name">Organizer Name</Label>
+        <Input id="name" {...register("name")} />
         {errors.name && (
           <p className="text-sm text-red-500">{errors.name.message}</p>
         )}
@@ -103,8 +87,8 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Email */}
       <div className="grid gap-2">
-        <Label>Official Email</Label>
-        <Input type="email" {...register("email")} />
+        <Label htmlFor="email">Official Email</Label>
+        <Input id="email" type="email" {...register("email")} />
         {errors.email && (
           <p className="text-sm text-red-500">{errors.email.message}</p>
         )}
@@ -112,8 +96,8 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Password */}
       <div className="grid gap-2">
-        <Label>Password</Label>
-        <Input type="password" {...register("password")} />
+        <Label htmlFor="password">Password</Label>
+        <Input id="password" type="password" {...register("password")} />
         {errors.password && (
           <p className="text-sm text-red-500">{errors.password.message}</p>
         )}
@@ -121,11 +105,12 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Organizer Type */}
       <div className="grid gap-2">
-        <Label>Organizer Type</Label>
+        <Label htmlFor="org_type">Organizer Type</Label>
         <Select
-          onValueChange={(val) => setValue("orgType", val as OrganizerType)}
+          onValueChange={(val) => setValue("org_type", val as OrganizerType)}
+          value={getValues("org_type") as OrganizerType}
         >
-          <SelectTrigger>
+          <SelectTrigger id="org_type" className={errors.org_type ? "border-red-500" : ""}>
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -133,39 +118,46 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
             <SelectItem value="CLUB">Club</SelectItem>
           </SelectContent>
         </Select>
-        {errors.orgType && (
-          <p className="text-sm text-red-500">{errors.orgType.message}</p>
+        {errors.org_type && (
+          <p className="text-sm text-red-500">{errors.org_type.message}</p>
         )}
       </div>
 
       {/* Student Head */}
       <div className="grid gap-2">
-        <Label>Student Head</Label>
-        <Input {...register("studentHead")} />
-        {errors.studentHead && (
-          <p className="text-sm text-red-500">{errors.studentHead.message}</p>
+        <Label htmlFor="studentHead">Student Head</Label>
+        <Input id="studentHead" {...register("student_head")} />
+        {errors.student_head && (
+          <p className="text-sm text-red-500">{errors.student_head.message}</p>
         )}
       </div>
 
       {/* Student Co-Head */}
       <div className="grid gap-2">
-        <Label>Student Co-Head</Label>
-        <Input {...register("studentCoHead")} />
+        <Label htmlFor="studentCoHead">Student Co-Head</Label>
+        <Input id="studentCoHead" {...register("student_co_head")} />
+        {errors.student_co_head && (
+          <p className="text-sm text-red-500">{errors.student_co_head.message}</p>
+        )}
       </div>
 
       {/* Faculty Head */}
       <div className="grid gap-2">
-        <Label>Faculty Head</Label>
-        <Input {...register("facultyHead")} />
-        {errors.facultyHead && (
-          <p className="text-sm text-red-500">{errors.facultyHead.message}</p>
+        <Label htmlFor="facultyHead">Faculty Head</Label>
+        <Input id="facultyHead" {...register("faculty_head")} />
+        {errors.faculty_head && (
+          <p className="text-sm text-red-500">{errors.faculty_head.message}</p>
         )}
       </div>
 
       {/* Submit Button */}
-      <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
-        {isSubmitting ? "Creating..." : "Create Organizer"}
-        {!isSubmitting && <PlusCircle className="ml-2 h-4 w-4" />}
+      <Button 
+        type="submit" 
+        className="w-full mt-2" 
+        disabled={mutation.isPending}
+      >
+        {mutation.isPending ? "Creating..." : "Create Organizer"}
+        {!mutation.isPending && <PlusCircle className="ml-2 h-4 w-4" />}
       </Button>
     </form>
   );
