@@ -110,6 +110,7 @@ function TagsPage() {
             tag={tagToEdit} 
             onSuccess={() => {
               setTagToEdit(null);
+              toast.success("Tag updated successfully");
               queryClient.invalidateQueries({ queryKey: ['tags'] });
             }} 
           />
