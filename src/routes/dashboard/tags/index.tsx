@@ -51,10 +51,12 @@ function TagsPage() {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Tags</h1>
+
+        {/* Create Tag Button */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <PlusCircle className="mr-2 h-4 w-4" /> Create New Tag
+              <PlusCircle className="h-4 w-4" /> Create New Tag
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -62,6 +64,7 @@ function TagsPage() {
               <DialogTitle>Create a New Tag</DialogTitle>
             </DialogHeader>
             <NewTagForm onSuccess={() => {
+              toast.success("Tag created successfully");
               setIsCreateDialogOpen(false);
               queryClient.invalidateQueries({ queryKey: ['tags'] });
             }} />
