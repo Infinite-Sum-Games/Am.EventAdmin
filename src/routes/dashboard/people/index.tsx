@@ -185,7 +185,7 @@ function PeoplePage() {
                                     </a>
                                 </div>
                             </CardContent>
-                            <CardFooter className="flex gap-2 p-4 border-t">
+                            <CardFooter className="flex gap-2 border-t">
                                 <Button 
                                     variant="outline" 
                                     className="flex-1" 
