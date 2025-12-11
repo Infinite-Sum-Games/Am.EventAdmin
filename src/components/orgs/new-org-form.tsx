@@ -60,7 +60,6 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
   const mutation = useMutation({
     mutationFn: createOrganizer,
     onSuccess: (variables) => {
-      toast.success(`Organizer "${variables.name}" created successfully!`);
       reset(); 
       onSuccess();
     },

@@ -38,6 +38,7 @@ import type { GetAllOrganizersResponse } from "@/types/organizers";
 import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -87,13 +88,10 @@ function OrgsPage() {
 
     try {
       await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
-
-      alert("Organizer deleted successfully");
-
+      toast.success("Organizer deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Error deleting organizer");
+      toast.error("Error deleting organizer");
     }
   };
 
@@ -118,6 +116,8 @@ function OrgsPage() {
               <SelectItem value="CLUB">Club</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Create Organizer Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto">
@@ -132,14 +132,18 @@ function OrgsPage() {
 
               <NewOrgForm
                 onSuccess={() => {
+                  toast.success("Organizer created successfully");
                   setIsDialogOpen(false);
                   queryClient.invalidateQueries({ queryKey: ["orgs"] });
                 }}
               />
             </DialogContent>
           </Dialog>
+
         </div>
       </div>
+
+      {/* Organizers */}
       {!filteredOrgs || filteredOrgs.length === 0 ? (
         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
           <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
@@ -185,6 +189,8 @@ function OrgsPage() {
                   </div>
 
                   <div className="flex gap-2">
+
+                    {/* Edit Organizer Dialog */}
                     <Dialog
                       open={isEditDialogOpen}
                       onOpenChange={setIsEditDialogOpen}
@@ -203,13 +209,14 @@ function OrgsPage() {
                         {editOrg && (
                           <EditOrgForm
                             id={editOrg.id}
-                            organizer_name={editOrg.organizer_name}
-                            organizer_email={editOrg.organizer_email}
-                            organizer_type={editOrg.organizer_type}
+                            name={editOrg.organizer_name}
+                            email={editOrg.organizer_email}
+                            org_type={editOrg.organizer_type}
                             student_head={editOrg.student_head}
-                            student_co_head={editOrg.student_co_head}
+                            student_co_head={editOrg.student_co_head || ""}
                             faculty_head={editOrg.faculty_head}
                             onSuccess={() => {
+                              toast.success("Organizer edited successfully");
                               setIsEditDialogOpen(false);
                               queryClient.invalidateQueries({
                                 queryKey: ["orgs"],
@@ -219,6 +226,7 @@ function OrgsPage() {
                         )}
                       </DialogContent>
                     </Dialog>
+
                     <Button
                       type="button"
                       variant="ghost"
