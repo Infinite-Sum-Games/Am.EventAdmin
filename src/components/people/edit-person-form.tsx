@@ -72,25 +72,23 @@ export function EditPersonForm({ personId, initialData, onSuccess }: EditPersonF
             };
 
 
-            const validated = PeopleSchema.parse(payload);
-            
-            
-            const response = await axiosClient.put(api.UPDATE_PEOPLE(personId), validated);
+            // Validate before sending
+            const validated = PeopleSchema.safeParse(payload);
+            if (!validated.success) {
+                const messages = validated.error.issues
+                    .map(issue => issue.message)
+                    .join("; ");
+                console.log("Validation failed:", messages);
+                throw new Error(messages);
+            }
+            const response = await axiosClient.put(api.UPDATE_PEOPLE(personId), validated.data);
             return response.data;
         },
         onSuccess: () => {
             onSuccess();
         },
         onError: (error: any) => {
-            if (error instanceof z.ZodError) {
-                setFormError(error.issues[0].message);
-            } else if (error.response?.status === 400) {
-                setFormError("Invalid input data.");
-            } else if (error.response?.status === 404) {
-                setFormError("Person not found.");
-            } else {
-                setFormError("Failed to update person. Please try again.");
-            }
+            setFormError(error.message || "Failed to update person. Please try again.");
         }
     });
 
