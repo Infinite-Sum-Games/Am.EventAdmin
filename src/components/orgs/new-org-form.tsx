@@ -125,8 +125,8 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Student Head */}
       <div className="grid gap-2">
-        <Label htmlFor="studentHead">Student Head</Label>
-        <Input id="studentHead" {...register("student_head")} />
+        <Label htmlFor="student_head">Student Head</Label>
+        <Input id="student_head" {...register("student_head")} />
         {errors.student_head && (
           <p className="text-sm text-red-500">{errors.student_head.message}</p>
         )}
@@ -134,8 +134,8 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Student Co-Head */}
       <div className="grid gap-2">
-        <Label htmlFor="studentCoHead">Student Co-Head</Label>
-        <Input id="studentCoHead" {...register("student_co_head")} />
+        <Label htmlFor="student_co_head">Student Co-Head</Label>
+        <Input id="student_co_head" {...register("student_co_head")} />
         {errors.student_co_head && (
           <p className="text-sm text-red-500">{errors.student_co_head.message}</p>
         )}
@@ -143,8 +143,8 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
       {/* Faculty Head */}
       <div className="grid gap-2">
-        <Label htmlFor="facultyHead">Faculty Head</Label>
-        <Input id="facultyHead" {...register("faculty_head")} />
+        <Label htmlFor="faculty_head">Faculty Head</Label>
+        <Input id="faculty_head" {...register("faculty_head")} />
         {errors.faculty_head && (
           <p className="text-sm text-red-500">{errors.faculty_head.message}</p>
         )}
