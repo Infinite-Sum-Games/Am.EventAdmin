@@ -59,7 +59,7 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
 
   const mutation = useMutation({
     mutationFn: createOrganizer,
-    onSuccess: (variables) => {
+    onSuccess: () => {
       reset(); 
       onSuccess();
     },

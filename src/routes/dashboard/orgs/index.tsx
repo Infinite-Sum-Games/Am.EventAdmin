@@ -152,7 +152,7 @@ function OrgsPage() {
           </p>
         </div>
       ) : (
-        <Card>
+        <Card className="py-1">
           <div className="flex flex-col">
             {filteredOrgs.map((org, index) => (
               <div key={org.id}>
