@@ -7,7 +7,7 @@ export const OrgSchema = z.object({
     org_type: z.enum(["DEPARTMENT", "CLUB"], "Organizer type is either Department or Club"),
     student_head: z.string().min(3, "Student head is required").regex(/^[a-zA-Z\s]+$/, "Student head must contain only letters"),
     student_co_head: z.string().optional().refine(val => !val || /^[a-zA-Z\s]+$/.test(val), "Student co-head must contain only letters"),
-    faculty_head: z.string().min(3, "Faculty head is required").regex(/^[a-zA-Z\s]+$/, "Faculty head must contain only letters"),
+    faculty_head: z.string().min(3, "Faculty head is required").regex(/^[a-zA-Z\s.]+$/, "Faculty head must contain only letters or symbols like ."),
 });
 
 export const EditOrgSchema = OrgSchema.extend({
