@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Tags, Users, Wifi, XCircle } from 'lucide-react';
+import { ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -21,6 +21,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
+import { SchedulingTab } from '@/components/events/scheduling-tab';
 
 export function EventEditorPage() {
 
@@ -102,16 +103,14 @@ export function EventEditorPage() {
       <Separator className='my-4'/>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="w-full mb-4 grid grid-cols-9 rounded-sm bg-popover h-10">
+        <TabsList className="w-full mb-4 grid grid-cols-7 rounded-sm bg-popover h-10">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="rules">Rules</TabsTrigger>
           <TabsTrigger value="seats">Seats</TabsTrigger>
           <TabsTrigger value="modes">Modes/Orgs/Tags</TabsTrigger>
-          <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="dependencies">Dependencies</TabsTrigger>
-          <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
           <TabsTrigger value="people">People</TabsTrigger>
+          <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general">
@@ -134,16 +133,8 @@ export function EventEditorPage() {
           <ModesTagsOrgsTab data={eventData} />
         </TabsContent>
 
-        <TabsContent value="pricing">
-          <div>Pricing Content</div>
-        </TabsContent>
-
-        <TabsContent value="dependencies">
-          <div>Dependencies Content</div>
-        </TabsContent>
-
         <TabsContent value="scheduling">
-          <div>Scheduling Content</div>
+          <SchedulingTab data={eventData} />
         </TabsContent>
 
         <TabsContent value="people">
@@ -583,20 +574,20 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   const [inputEventType, setInputEventType] = useState(data.event_type || "EVENT");
   const [inputIsOffline, setInputIsOffline] = useState(data.is_offline ? "OFFLINE" : "ONLINE");
   const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
-  const [inputEventStatus, setInputEventStatus] = useState(data.event_status || "ACTIVE");
+  const [inputIsTechnical, setInputIsTechnical] = useState(data.is_technical ? "YES" : "NO");
   
   useEffect(() => {
     setInputEventType(data.event_type);
     setInputIsOffline(data.is_offline ? "OFFLINE" : "ONLINE");
     setInputAttendanceMode(data.attendance_mode);
-    setInputEventStatus(data.event_status);
-  }, [data.event_type, data.is_offline, data.attendance_mode, data.event_status]);
+    setInputIsTechnical(data.is_technical ? "YES" : "NO");
+  }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical]);
 
 
   const hasModesChanged =  inputEventType !== data.event_type ||
     inputIsOffline !== (data.is_offline ? "OFFLINE" : "ONLINE") ||
     inputAttendanceMode !== data.attendance_mode ||
-    inputEventStatus !== data.event_status;
+    (inputIsTechnical === "YES") !== data.is_technical;
 
 
   // Update Event Modes
@@ -605,7 +596,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
       event_type: inputEventType,
       is_offline: inputIsOffline === "OFFLINE",
       attendance_mode: inputAttendanceMode,
-      event_status: inputEventStatus,
+      is_technical: inputIsTechnical === "YES",
     });
     console.log("API CALL:", "Updating Modes");
     toast.success("Updated modes successfully!");
@@ -706,26 +697,25 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
 
           <Separator />
 
-          {/* Completion Status */}
+          {/* IsTechnical */}
           <SettingRow 
-            label="Mark as Completed" 
-            description="Has this event finished?"
+            label="Technical Event"
+            description="Is this event technical in nature?"
           >
-            <ToggleGroup 
-              type="single" 
+            <ToggleGroup
+              type="single"
               variant="outline"
-              value={inputEventStatus === "COMPLETED" ? "YES" : "NO"}
+              value={inputIsTechnical}
               onValueChange={(value) => {
                 if (!value) return;
-                setInputEventStatus(value === "YES" ? "COMPLETED" : "ACTIVE");
+                setInputIsTechnical(value);
               }}
-              disabled={data.event_status === "CLOSED"}
             >
               <ToggleGroupItem value="NO">
                 <XCircle className="mr-2 h-4 w-4" /> No
               </ToggleGroupItem>
-              <ToggleGroupItem value="YES" className="data-[state=on]:bg-green-100 data-[state=on]:text-green-900 dark:data-[state=on]:bg-green-900/30 dark:data-[state=on]:text-green-300">
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Completed
+              <ToggleGroupItem value="YES" className="">
+                <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
               </ToggleGroupItem>
             </ToggleGroup>
           </SettingRow>

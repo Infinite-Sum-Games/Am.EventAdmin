@@ -44,7 +44,7 @@ export interface tags {
   name: string;
 }
 
-interface schedules {
+export interface schedules {
   id?: string;
   event_date: string;
   start_time: string;
