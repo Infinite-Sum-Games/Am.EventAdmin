@@ -29,7 +29,7 @@ export interface EventData {
   tags: tags[]
 }
 
-interface organizers {
+export interface organizers {
   id?: string;
   name: string;
 }
@@ -39,7 +39,7 @@ interface people {
   name: string;
 }
 
-interface tags {
+export interface tags {
   id?: string;
   name: string;
 }
