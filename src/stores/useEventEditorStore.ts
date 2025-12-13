@@ -7,6 +7,7 @@ export interface EventData {
   event_id: string,
   event_name: string,
   event_type: "EVENT" | "WORKSHOP",
+  event_status: "ACTIVE" | "CLOSED" | "COMPLETED",
   is_group: boolean,
   is_offline: boolean,
   is_published: boolean,
