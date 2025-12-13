@@ -21,6 +21,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useEventEditorStore, type EventData, type schedules } from "@/stores/useEventEditorStore"; 
 import { toast } from "sonner";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+
+// Map specific dates to Day Labels for easy lookup
+const EVENT_DAYS: Record<string, { label: string; shortDate: string }> = {
+  "2026-01-07": { label: "1", shortDate: "Jan 7" },
+  "2026-01-08": { label: "2", shortDate: "Jan 8" },
+  "2026-01-09": { label: "3", shortDate: "Jan 9" },
+};
 
 function SchedulingTab({ data }: { data: EventData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -77,7 +86,7 @@ function SchedulingTab({ data }: { data: EventData }) {
       toast.success("Schedule added");
     }
 
-    // Sort chronologically (Optional quality of life improvement)
+    // Sort chronologically
     updatedSchedules.sort((a, b) => {
       const dateA = new Date(`${a.event_date}T${a.start_time}`);
       const dateB = new Date(`${b.event_date}T${b.start_time}`);
@@ -131,7 +140,7 @@ function SchedulingTab({ data }: { data: EventData }) {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-106.25">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit Schedule" : "Add Schedule"}</DialogTitle>
             <DialogDescription>
@@ -141,15 +150,29 @@ function SchedulingTab({ data }: { data: EventData }) {
           
           <div className="grid gap-4 py-4">
             
-            {/* Date */}
-            <div className="grid gap-2">
-              <Label htmlFor="date">Event Date</Label>
-              <Input 
-                id="date" 
-                type="date" 
+            {/* Custom Day Selector */}
+            <div className="space-y-2">
+              <Label>Event Day</Label>
+              <ToggleGroup 
+                type="single" 
+                variant="outline"
+                className="w-full"
                 value={formData.event_date}
-                onChange={(e) => setFormData({...formData, event_date: e.target.value})}
-              />
+                onValueChange={(value) => {
+                  if(value) setFormData({...formData, event_date: value})
+                }}
+              >
+                {Object.entries(EVENT_DAYS).map(([dateValue, info]) => (
+                  <ToggleGroupItem 
+                    key={dateValue} 
+                    value={dateValue} 
+                    className="flex-1 flex-col h-fit py-2 "
+                  >
+                    <span className="font-semibold">Day {info.label}</span>
+                    <span className="text-[10px] text-muted-foreground">{info.shortDate}</span>
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
             {/* Time Row */}
@@ -181,7 +204,7 @@ function SchedulingTab({ data }: { data: EventData }) {
                 <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input 
                     id="venue" 
-                    placeholder="e.g. Main Auditorium, Room 304" 
+                    placeholder="e.g. Main Auditorium" 
                     className="pl-8"
                     value={formData.venue}
                     onChange={(e) => setFormData({...formData, venue: e.target.value})}
@@ -212,23 +235,20 @@ function ScheduleCard({
     onEdit: () => void; 
     onDelete: () => void; 
 }) {
-    // Format date for better readability (e.g., "Mon, Oct 15 2024")
-    const dateObj = new Date(schedule.event_date);
-    // const dateStr = isNaN(dateObj.getTime()) 
-    //     ? schedule.event_date 
-    //     : dateObj.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+    // Lookup the "Day X" label based on the date string
+    const dayInfo = EVENT_DAYS[schedule.event_date] || { label: "Day ?", shortDate: schedule.event_date };
 
     return (
         <Card className="hover:bg-muted/30 transition-colors">
             <CardContent className="flex items-center ">
                 
-                {/* Date Block */}
-                <div className="flex flex-col items-center justify-center border rounded-md p-2 w-16 h-16 bg-background mr-4 shrink-0">
-                    <span className="text-xs font-medium text-muted-foreground uppercase">
-                        {isNaN(dateObj.getTime()) ? 'DATE' : dateObj.toLocaleDateString(undefined, { month: 'short' })}
+                {/* Day Block */}
+                <div className="flex flex-col items-center justify-center border rounded-lg w-16 h-16 bg-muted/30 mr-4 shrink-0 shadow-sm">
+                    <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                        Day
                     </span>
-                    <span className="text-xl font-bold">
-                        {isNaN(dateObj.getTime()) ? '--' : dateObj.getDate()}
+                    <span className="text-2xl font-bold text-primary">
+                      {dayInfo.label}
                     </span>
                 </div>
 
