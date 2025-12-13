@@ -1,0 +1,67 @@
+import { create } from 'zustand';
+
+export interface EventData {
+  attendance_mode: "SOLO" | "DUO",
+  blurb: string,
+  description: string,
+  event_id: string,
+  event_name: string,
+  event_type: "EVENT" | "WORKSHOP",
+  is_group: boolean,
+  is_offline: boolean,
+  is_published: boolean,
+  is_technical: boolean,
+  max_teamsize: number,
+
+  // message from response
+  message: string,
+
+  min_teamsize: number,
+  organizers: organizers[],
+  people: people[],
+  poster_url: string,
+  price: number,
+  pricing_per_head: boolean,
+  rules: string,
+  schedules: schedules[],
+  seat_count: number,
+  tags: tags[]
+}
+
+interface organizers {
+  id?: string;
+  name: string;
+}
+
+interface people {
+  id?: string;
+  name: string;
+}
+
+interface tags {
+  id?: string;
+  name: string;
+}
+
+interface schedules {
+  id?: string;
+  event_date: string;
+  start_time: string;
+  end_time: string;
+  venue: string;
+}
+
+interface EventEditorState {
+  eventData: EventData | null;
+  setEventData: (data: Partial<EventData>) => void;
+  initializeEvent: (data: EventData) => void;
+}
+
+export const useEventEditorStore = create<EventEditorState>((set) => ({
+  eventData: null,
+  initializeEvent: (data) => set({ eventData: data }),
+  setEventData: (updates) =>
+    set((state) => ({
+      eventData: state.eventData ? { ...state.eventData, ...updates } : null,
+    })),
+}));
