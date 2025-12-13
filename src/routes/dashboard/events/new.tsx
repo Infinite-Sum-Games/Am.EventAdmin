@@ -114,7 +114,7 @@ export function EventEditorPage() {
         </TabsContent>
 
         <TabsContent value="description">
-          <div>Description Content</div>
+          <DescriptionTab data={eventData} />
         </TabsContent>
 
         <TabsContent value="rules">
@@ -285,3 +285,61 @@ function GeneralTab({ data }: { data: EventData }) {
   );
 }
 
+const MDXEditorLazy = lazy(() => import("@/components/events/mdx-editor"));
+
+function EditorSkeleton() {
+  return (
+    <div className="w-full h-100 border rounded-md bg-muted/20 flex items-center justify-center text-muted-foreground">
+      <Loader2 className="h-6 w-6 animate-spin mr-2" />
+      Loading Editor...
+    </div>
+  )
+}
+
+// description
+function DescriptionTab({ data }: { data: EventData }) {
+  const [inputDescription, setInputDescription] = useState(data.description || "");
+
+  useEffect(() => {
+    if (!inputDescription && data.description) {
+      setInputDescription(data.description);
+    }
+  }, [data.description]);
+
+  const hasDescriptionChanged = inputDescription !== (data.description || "");
+
+  const handleUpdateDescription = () => {
+    useEventEditorStore.getState().setEventData({ description: inputDescription });
+    
+    console.log("API CALL:", "Updating Description:", inputDescription);
+
+    toast.success("Updated description successfully!");
+  }
+
+  return (
+    <div className="flex flex-col flex-1 border rounded-md p-6 h-full">
+      <Label className="block text-sm font-medium mb-2" htmlFor="event-description">
+        Event Description
+      </Label>
+      
+      <div className="flex flex-col flex-1 min-h-100 border rounded-md overflow-hidden">
+        <Suspense fallback={<EditorSkeleton />}>
+           <MDXEditorLazy 
+             markdown={inputDescription} 
+             onChange={(newMarkdown) => setInputDescription(newMarkdown)}
+             className="h-full bg-background"
+           />
+        </Suspense>
+      </div>
+
+
+        <Button 
+          className="mt-4"
+          onClick={handleUpdateDescription}
+          disabled={!hasDescriptionChanged}
+        >
+          Update Description
+        </Button>
+      </div>
+  );
+}
