@@ -19,6 +19,8 @@ import { toast } from 'sonner';
 import '@mdxeditor/editor/style.css'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { OrganizersCard } from '@/components/events/organiser-card';
+import { TagsCard } from '@/components/events/tag-card';
 
 export function EventEditorPage() {
 
@@ -624,7 +626,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 disabled={!hasModesChanged}
                 className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> Save Rules
+              <Save className="mr-2 h-4 w-4" /> Save Modes
             </Button>
         </CardHeader>
         <CardContent className="grid gap-2">
@@ -734,32 +736,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
       {/* 2. Organizers & Tags */}
       <div className="grid grid-cols-2 gap-6">
         {/* Organizers Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" /> Organizers
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-muted-foreground border-2 border-dashed rounded-lg p-8 flex items-center justify-center">
-                Add Organizer Content
-            </div>
-          </CardContent>
-        </Card>
+        <OrganizersCard data={data} />
 
         {/* Tags Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-                <Tags className="h-5 w-5" /> Tags
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-muted-foreground border-2 border-dashed rounded-lg p-8 flex items-center justify-center">
-                Add Tags Content
-            </div>
-          </CardContent>
-        </Card>
+        <TagsCard data={data} />
       </div>
 
     </div>
