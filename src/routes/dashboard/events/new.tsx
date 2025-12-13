@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Wifi, XCircle } from 'lucide-react';
+import { Armchair, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -27,8 +27,8 @@ export function EventEditorPage() {
 
   const mockData: EventData = {
     attendance_mode: "SOLO",
-    event_id: "fd0c3fd9-464b-4187-b6cc-5633968d51e7",
-    event_name: "Sample Event",
+    id: "fd0c3fd9-464b-4187-b6cc-5633968d51e7",
+    name: "Sample Event",
     blurb: "This is a sample event for demonstration purposes.",
     description: "#Event Description\n\nThis event is designed to showcase the event editor functionality.",
     rules: "1. Be respectful.\n2. Follow the guidelines.",
@@ -36,14 +36,14 @@ export function EventEditorPage() {
     is_published: true,
     event_type: "EVENT",
     event_status: "ACTIVE",
-    is_group: false,
+    is_group: true,
     is_offline: true,
     is_technical: false,
     price: 0,
     pricing_per_head: false,
-    seat_count: 100,
-    min_teamsize: 1,
-    max_teamsize: 1,
+    seat_count: 40,
+    min_teamsize: 2,
+    max_teamsize: 4,
     organizers: [
       { id: "org1", name: "Organizer One" },
       { id: "org2", name: "Organizer Two" },
@@ -88,8 +88,8 @@ export function EventEditorPage() {
     <div className="container mx-auto py-10">
       <div className='flex flex-row justify-between'>
         <div className="flex flex-col justify-between">
-          <h1 className="text-3xl font-bold">{eventData.event_name}</h1>
-          <span className="text-sm text-muted-foreground">ID: {eventData.event_id}</span>
+          <h1 className="text-3xl font-bold">{eventData.name}</h1>
+          <span className="text-sm text-muted-foreground">ID: {eventData.id}</span>
         </div>
         <div>
           <Button variant="outline" className="mr-4">Preview</Button>
@@ -147,7 +147,7 @@ export function EventEditorPage() {
 
 // name, blurb, poster
 function GeneralTab({ data }: { data: EventData }) {
-  const [inputName, setInputName] = useState(data.event_name);
+  const [inputName, setInputName] = useState(data.name);
   const [inputBlurb, setInputBlurb] = useState(data.blurb || "");
   const [inputUrl, setInputUrl] = useState(data.poster_url || "");
 
@@ -159,11 +159,11 @@ function GeneralTab({ data }: { data: EventData }) {
 
   // initialize name and blurb on load
   useEffect(() => {
-    setInputName(data.event_name);
+    setInputName(data.name);
     setInputBlurb(data.blurb || "");
-  }, [data.event_name, data.blurb]);
+  }, [data.name, data.blurb]);
 
-  const hasNameAndBlurbChanged = inputName !== data.event_name || inputBlurb !== (data.blurb || "");
+  const hasNameAndBlurbChanged = inputName !== data.name || inputBlurb !== (data.blurb || "");
   const hasImageURLChanged = inputUrl !== (data.poster_url || "");
 
   const handleApplyUrl = async () => {
@@ -177,12 +177,12 @@ function GeneralTab({ data }: { data: EventData }) {
 
   const handleUpdateNameandBlurb = () => {
     useEventEditorStore.getState().setEventData({ 
-      event_name: inputName,
+      name: inputName,
       blurb: inputBlurb,
     });
 
     // TODO: Call API to update name and blurb
-    console.log("API CALL: Updating Name and Blurb:", { event_name: inputName, blurb: inputBlurb });
+    console.log("API CALL: Updating Name and Blurb:", { name: inputName, blurb: inputBlurb });
 
     toast.success("Updated details successfully!");
   }
@@ -453,98 +453,211 @@ function RulesTab({ data }: { data: EventData }) {
   )
 }
 
-
-function SeatsTab({ data }: { data: EventData }) {
+// is group, team sizes, seats
+function SeatsTab({ data }: { data: EventData }) { 
+  const [inputIsGroup, setInputIsGroup] = useState(data.is_group);
+  const [inputMinTeamSize, setInputMinTeamSize] = useState(data.min_teamsize);
+  const [inputMaxTeamSize, setInputMaxTeamSize] = useState(data.max_teamsize);
+  const [inputMaxNoOfTeams, setInputMaxNoOfTeams] = useState(0);
+  const [inputTotalSeats, setInputTotalSeats] = useState(data.seat_count);
   
-  // 1. Handle Toggle Change
-  const handleGroupToggle = (value: string) => {
-    if (!value) return; 
-    
-    const isGroup = value === "YES";
-    
-    useEventEditorStore.getState().setEventData({
-      is_group: isGroup,
-      // Reset defaults when switching modes
-      min_teamsize: isGroup ? 2 : 1,
-      max_teamsize: isGroup ? 4 : 1,
-    });
-  };
-
-  // 2. Auto-Calculate Total Seats for Group Events
   useEffect(() => {
-    if (data.is_group) {
-      const calculatedSeats = (data.seat_count || 0) * (data.max_teamsize || 1);
-      // Only update if different to avoid infinite loops
-      if (calculatedSeats !== data.seat_count) {
-        useEventEditorStore.getState().setEventData({ seat_count: calculatedSeats });
-      }
+    setInputIsGroup(data.is_group);
+    setInputMinTeamSize(data.min_teamsize);
+    setInputMaxTeamSize(data.max_teamsize);
+    setInputMaxNoOfTeams(data.is_group ? data.seat_count : 0);
+    setInputTotalSeats(data.seat_count);
+  }, [data.is_group, data.min_teamsize, data.max_teamsize, data.seat_count]);
+
+  const hadSeatsChanged = inputIsGroup !== data.is_group || 
+    (inputIsGroup && (inputMinTeamSize !== data.min_teamsize || inputMaxTeamSize !== data.max_teamsize || inputMaxNoOfTeams !== data.seat_count)) ||
+    (!inputIsGroup && inputTotalSeats !== data.seat_count);
+
+  const handleUpdateSeats = () => {
+    if (inputIsGroup) {
+      useEventEditorStore.getState().setEventData({
+        is_group: true,
+        min_teamsize: inputMinTeamSize,
+        max_teamsize: inputMaxTeamSize,
+        seat_count: inputMaxNoOfTeams,
+      });
+    } else {
+      useEventEditorStore.getState().setEventData({
+        is_group: false,
+        seat_count: inputTotalSeats,
+      });
     }
-  }, [data.is_group, data.seat_count, data.max_teamsize, data.seat_count]);
+
+    console.log("API CALL:", "Updating Seats for", inputIsGroup ? "Group Event" : "Individual Event");
+    toast.success("Updated seating successfully!");
+  }
 
   return (
-    <div className="flex flex-col flex-1 border rounded-md p-6 h-full gap-6">
-      <div>
-        <Label className="block text-sm font-medium mb-2">
-          Is this a group event?
-        </Label>
-        <ToggleGroup 
-          type="single" 
-          value={data.is_group ? "YES" : "NO"} 
-          onValueChange={handleGroupToggle}
-        >
-          <ToggleGroupItem value="YES">Yes</ToggleGroupItem>
-          <ToggleGroupItem value="NO">No</ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+    <div className="h-full mx-auto">
+      <Card className="h-full flex flex-col border-none shadow-none md:border md:shadow-sm">
+        
+        {/* Header */}
+        <CardHeader className="px-0 md:px-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle className="flex items-center gap-2">
+                <Armchair className="h-5 w-5" /> Seat & Participation
+              </CardTitle>
+              <CardDescription>
+                Configure seating and registration options for your event.
+              </CardDescription>
+            </div>
+            {/* Action Button */}
+            <Button 
+                disabled={!hadSeatsChanged} 
+                onClick={handleUpdateSeats}
+                className="flex"
+            >
+              <Save className="mr-2 h-4 w-4" /> Update Seats
+            </Button>
+          </div>
+        </CardHeader>
 
-      {data.is_group && (
-        <div className="flex flex-row gap-6">
-          <div className="flex-1">
-            <Label className="block text-sm font-medium mb-2" htmlFor="min-teamsize">
-              Minimum Team Size
-            </Label>
-            <Input
-              type="number"
-              id="min-teamsize"
-              value={data.min_teamsize || 2}
-              min={2}
-              onChange={(e) => 
-                useEventEditorStore.getState().setEventData({ min_teamsize: parseInt(e.target.value) })
-              }
-            />
+        <CardContent className="flex-1 px-0 md:px-6 pb-6 space-y-6">
+          
+          {/* 1. Participation Mode Toggle */}
+          <div className="bg-muted/30 p-4 rounded-lg border">
+            <SettingRow
+              label="Participation Mode"
+              description="How do users register for this event?"
+            >
+              <ToggleGroup 
+                type="single" 
+                variant="outline"
+                className="justify-start sm:justify-end"
+                value={inputIsGroup ? "YES" : "NO"}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputIsGroup(value === "YES");
+                  if(value === "YES") {
+                      setInputMinTeamSize(1);
+                      setInputMaxTeamSize(1);
+                      setInputMaxNoOfTeams(1);
+                  } else {
+                      setInputTotalSeats(0);
+                  }
+                }}
+              >
+                <ToggleGroupItem value="NO" className="flex-1 sm:flex-none">
+                  <User className="mr-2 h-4 w-4" /> Individual
+                </ToggleGroupItem>
+                <ToggleGroupItem value="YES" className="flex-1 sm:flex-none">
+                  <Users className="mr-2 h-4 w-4" /> Team / Group
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
           </div>
 
-          <div className="flex-1">
-            <Label className="block text-sm font-medium mb-2" htmlFor="max-teamsize">
-              Maximum Team Size
-            </Label>
-            <Input
-              type="number"
-              id="max-teamsize"
-              value={data.max_teamsize || 4}
-              min={2}
-              onChange={(e) => 
-                useEventEditorStore.getState().setEventData({ max_teamsize: parseInt(e.target.value) })
-              }
-            />
-          </div>
-        </div>
-      )}
+          <Separator />
 
-      <div>
-        <Label className="block text-sm font-medium mb-2" htmlFor="seat-count">
-          Total Seats Available
-        </Label>
-        <Input
-          type="number"
-          id="seat-count"
-          value={data.seat_count || 0}
-          min={0}
-          onChange={(e) => 
-            useEventEditorStore.getState().setEventData({ seat_count: parseInt(e.target.value) })
-          }
-        />
-      </div>
+          {/* 2. Logic Section */}
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            {inputIsGroup ? (
+              <div className="space-y-6">
+                
+                {/* Horizontal Row: Team Size + Registration Limit */}
+                <div className="flex flex-col md:flex-row gap-6">
+                    
+                    {/* Left Side: Team Size Logic */}
+                    <div className="flex-1 space-y-2">
+                        <Label className="text-base font-medium">Team Size Constraints</Label>
+                        <div className="flex items-end gap-3">
+                            <div className="space-y-1.5 flex-1">
+                                <Label htmlFor="min-size" className="text-xs text-muted-foreground">Minimum</Label>
+                                <Input
+                                    id="min-size"
+                                    type="number"
+                                    value={inputMinTeamSize}
+                                    max={inputMaxTeamSize}
+                                    min="1"
+                                    className="text-center"
+                                    onChange={(e) => setInputMinTeamSize(parseInt(e.target.value, 10) || 1)}
+                                />
+                            </div>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground mb-3" />
+                            <div className="space-y-1.5 flex-1">
+                                <Label htmlFor="max-size" className="text-xs text-muted-foreground">Maximum</Label>
+                                <Input
+                                    id="max-size"
+                                    type="number"
+                                    value={inputMaxTeamSize}
+                                    max="10"
+                                    min="1"
+                                    className="text-center"
+                                    onChange={(e) => setInputMaxTeamSize(parseInt(e.target.value, 10) || 1)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Vertical Divider (Desktop Only) */}
+                    <div className="hidden md:block w-px bg-border self-stretch mx-2" />
+
+                    {/* Right Side: Registration Limit */}
+                    <div className="flex-1 space-y-2">
+                         <Label className="text-base font-medium">Registration Limit</Label>
+                         <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="max-teams" className="text-xs text-muted-foreground">Max Teams Allowed</Label>
+                            <Input
+                                id="max-teams"
+                                type="number"
+                                value={inputMaxNoOfTeams}
+                                min="1"
+                                onChange={(e) => setInputMaxNoOfTeams(parseInt(e.target.value, 10) || 1)}
+                            />
+                         </div>
+                    </div>
+                </div>
+
+                <Separator className="my-2" />
+
+                {/* Bottom Row: Estimated Capacity */}
+                <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium">
+                                <Info className="h-4 w-4" /> Estimated Total Capacity
+                            </div>
+                            <p className="text-sm text-blue-600/80 dark:text-blue-400/80 max-w-md">
+                                This is the theoretical maximum number of people attending if every team is full.
+                            </p>
+                        </div>
+                        <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
+                             <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
+                             <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                                {inputMaxNoOfTeams * inputMaxTeamSize}
+                             </p>
+                        </div>
+                    </div>
+                </div>
+
+              </div>
+            ) : (
+              // Individual Mode
+              <SettingRow 
+                label="Total Seat Capacity"
+                description="The total number of individual tickets/registrations available."
+              >
+                <div className="relative max-w-[200px]">
+                    <Input
+                        type="number"
+                        value={inputTotalSeats}
+                        className="pl-9"
+                        onChange={(e) => setInputTotalSeats(parseInt(e.target.value, 10))}
+                    />
+                    <Armchair className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                </div>
+              </SettingRow>
+            )}
+          </div>
+
+        </CardContent>
+      </Card>
     </div>
   )
 }
