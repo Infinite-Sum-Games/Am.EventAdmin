@@ -118,7 +118,7 @@ export function EventEditorPage() {
         </TabsContent>
 
         <TabsContent value="rules">
-          <div>Rules Content</div>
+          <RulesTab data={eventData} />
         </TabsContent>
 
         <TabsContent value="seats">
@@ -188,7 +188,7 @@ function GeneralTab({ data }: { data: EventData }) {
   }
 
   return (
-    <div className="flex flex-row h-full">
+    <div className="flex flex-row">
       <div className="flex flex-row flex-1 mr-10 border rounded-md">
         <div className="flex flex-col flex-1 p-6 gap-6">
           
@@ -342,4 +342,51 @@ function DescriptionTab({ data }: { data: EventData }) {
         </Button>
       </div>
   );
+}
+
+// rules
+function RulesTab({data}: { data: EventData }) {
+  const [inputRules, setInputRules] = useState(data.rules || "");
+
+  useEffect(() => {
+    if (!inputRules && data.rules) {
+      setInputRules(data.rules);
+    }
+  }, [data.rules]);
+  
+  const hasRulesChanged = inputRules !== (data.rules || "");
+
+  const handleUpdateRules = () => {
+    useEventEditorStore.getState().setEventData({ rules: inputRules });
+    
+    console.log("API CALL:", "Updating Rules:", inputRules);
+    
+    toast.success("Updated rules successfully!");
+  }
+  return (
+    <div className="flex flex-col flex-1 border rounded-md p-6 h-full">
+      <Label className="block text-sm font-medium mb-2" htmlFor="event-rules">
+        Event Rules
+      </Label>
+      
+      <div className="flex flex-col flex-1 min-h-100 border rounded-md overflow-hidden">
+        <Suspense fallback={<EditorSkeleton />}>
+           <MDXEditorLazy 
+             markdown={inputRules} 
+             onChange={(newMarkdown) => setInputRules(newMarkdown)}
+             className="h-full bg-background"
+           />
+        </Suspense>
+      </div>
+
+
+        <Button 
+          className="mt-4"
+          onClick={handleUpdateRules}
+          disabled={!hasRulesChanged}
+        >
+          Update Rules
+        </Button>
+      </div>
+  )
 }
