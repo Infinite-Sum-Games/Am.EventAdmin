@@ -578,12 +578,54 @@ function SettingRow({
 }
 
 function ModesTagsOrgsTab({ data }: { data: EventData }) { 
+  const [inputEventType, setInputEventType] = useState(data.event_type || "EVENT");
+  const [inputIsOffline, setInputIsOffline] = useState(data.is_offline ? "OFFLINE" : "ONLINE");
+  const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
+  const [inputEventStatus, setInputEventStatus] = useState(data.event_status || "ACTIVE");
+  
+  useEffect(() => {
+    setInputEventType(data.event_type);
+    setInputIsOffline(data.is_offline ? "OFFLINE" : "ONLINE");
+    setInputAttendanceMode(data.attendance_mode);
+    setInputEventStatus(data.event_status);
+  }, [data.event_type, data.is_offline, data.attendance_mode, data.event_status]);
+
+
+  const hasModesChanged =  inputEventType !== data.event_type ||
+    inputIsOffline !== (data.is_offline ? "OFFLINE" : "ONLINE") ||
+    inputAttendanceMode !== data.attendance_mode ||
+    inputEventStatus !== data.event_status;
+
+
+  // Update Event Modes
+  const handleUpdateEventModes = () => {
+    useEventEditorStore.getState().setEventData({
+      event_type: inputEventType,
+      is_offline: inputIsOffline === "OFFLINE",
+      attendance_mode: inputAttendanceMode,
+      event_status: inputEventStatus,
+    });
+    console.log("API CALL:", "Updating Modes");
+    toast.success("Updated modes successfully!");
+  }
   return (
     <div className="flex flex-col gap-6">
       {/* Configuration Card */}
       <Card>
-        <CardHeader>
-          <CardTitle>Event Configuration</CardTitle>
+        <CardHeader className='flex flex-row justify-between'>
+          <div className="space-y-1">
+            <CardTitle className='mb-2'>Event Configuration</CardTitle>
+            <CardDescription>
+              Set the fundamental modes and settings for your event.
+            </CardDescription>
+          </div>
+          <Button 
+                onClick={handleUpdateEventModes}
+                disabled={!hasModesChanged}
+                className="flex"
+            >
+              <Save className="mr-2 h-4 w-4" /> Save Rules
+            </Button>
         </CardHeader>
         <CardContent className="grid gap-2">
           
@@ -595,10 +637,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <ToggleGroup 
               type="single" 
               variant="outline"
-              value={data.event_type} 
+              value={inputEventType} 
               onValueChange={(value) => {
                 if (!value) return;
-                useEventEditorStore.getState().setEventData({ event_type: value as "EVENT" | "WORKSHOP" });
+                setInputEventType(value as "EVENT" | "WORKSHOP");
               }}
             >
               <ToggleGroupItem value="EVENT" aria-label="Event">
@@ -620,10 +662,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <ToggleGroup 
               type="single" 
               variant="outline"
-              value={data.is_offline ? "OFFLINE" : "ONLINE"}
+              value={inputIsOffline}
               onValueChange={(value) => {
                 if (!value) return;
-                useEventEditorStore.getState().setEventData({ is_offline: value === "OFFLINE" });
+                setInputIsOffline(value);
               }}
             >
               <ToggleGroupItem value="OFFLINE">
@@ -645,10 +687,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <ToggleGroup 
               type="single" 
               variant="outline"
-              value={data.attendance_mode}
+              value={inputAttendanceMode}
               onValueChange={(value) => {
                 if (!value) return;
-                useEventEditorStore.getState().setEventData({ attendance_mode: value as "SOLO" | "DUO" });
+                setInputAttendanceMode(value as "SOLO" | "DUO");
               }}
             >
               <ToggleGroupItem value="SOLO" title="Scan once to attend">
@@ -670,11 +712,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <ToggleGroup 
               type="single" 
               variant="outline"
-              value={data.event_status === "COMPLETED" ? "YES" : "NO"}
+              value={inputEventStatus === "COMPLETED" ? "YES" : "NO"}
               onValueChange={(value) => {
-                useEventEditorStore.getState().setEventData({ 
-                    event_status: value === "YES" ? "COMPLETED" : "ACTIVE" 
-                });
+                if (!value) return;
+                setInputEventStatus(value === "YES" ? "COMPLETED" : "ACTIVE");
               }}
               disabled={data.event_status === "CLOSED"}
             >
