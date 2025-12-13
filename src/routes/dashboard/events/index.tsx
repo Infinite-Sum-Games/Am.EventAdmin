@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { queryOptions, useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,9 +14,12 @@ import { Slider } from "@/components/ui/slider";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { EventCard } from "@/components/events/event-card";
 import type { GetAllEventsResponse } from "@/types/events";
-import { PlusCircle, Search } from "lucide-react";
+import { Loader2, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
+import { useEventEditorStore } from "@/stores/useEventEditorStore";
+import { axiosClient } from "@/lib/axios";
+import { toast } from "sonner";
 
 // --- Dummy Data for Filters (To be replaced by API calls if available) ---
 const dummyTagsForFilter = [
@@ -85,13 +88,22 @@ export const Route = createFileRoute("/dashboard/events/")({
 });
 
 function ViewEventsPage() {
+
+  const navigate = useNavigate();
+  const initializeEvent = useEventEditorStore((state) => state.initializeEvent);
+
+
   const { data: events } = useSuspenseQuery(eventsQueryOptions);
   const { data: tagsForFilter } = useSuspenseQuery(tagsForFilterQueryOptions);
   const { data: orgsForFilter } = useSuspenseQuery(orgsForFilterQueryOptions);
 
   // Derive unique event dates from fetched events
   const uniqueEventDates = useMemo(() => {
-    const dates = new Set(events.map(event => event.event_date.split('T')[0])); // Extract YYYY-MM-DD
+    const dates = new Set(
+      events
+        .filter(event => event.event_date)
+        .map(event => event.event_date.split('T')[0])
+    );
     return [...dates].sort();
   }, [events]);
 
@@ -115,7 +127,7 @@ function ViewEventsPage() {
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-        const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
+        // const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
         if (searchTerm && !event.event_name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (statusFilter !== 'ALL' && event.event_status !== statusFilter) return false;
         if (dateFilter !== 'ALL' && eventDate !== dateFilter) return false;
@@ -127,14 +139,38 @@ function ViewEventsPage() {
     });
   }, [events, searchTerm, statusFilter, dateFilter, priceRange, selectedTags, selectedOrgs]); // Removed selectedOrgs from dependencies as filter is commented
 
+  const { mutate: handleCreateEvent, isPending: isCreating } = useMutation({
+    mutationFn: async () => {
+      const response = await axiosClient.get(api.CREATE_EVENT);
+      console.log("Create Event Response:", response.data);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      initializeEvent(data);
+      navigate({ to: "/dashboard/events/new" });
+    },
+    onError: () => {
+      // console.error("Failed to create event draft:", error);
+      toast.error("Failed to initialize event"); 
+    },
+  });
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">View Events</h1>
-        <Button asChild>
-            <Link to="/dashboard/events/new">
-                <PlusCircle className="h-4 w-4" /> Create New Event
-            </Link>
+        <Button onClick={() => handleCreateEvent()} disabled={isCreating}>
+            {isCreating ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                </>
+            ) : (
+                <>
+                    <Plus className="mr-2 h-4 w-4" /> 
+                    Create New Event
+                </>
+            )}
         </Button>
       </div>
 
