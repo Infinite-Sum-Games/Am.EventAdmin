@@ -192,9 +192,7 @@ function GeneralTab({ data }: { data: EventData }) {
 
       {/* General Details */}
       <div className="flex-1 flex flex-col gap-6 w-full">
-        
-        {/* Basic Details */}
-        <Card>
+        <Card className="border-none">
           <CardHeader>
             <CardTitle>Basic Details</CardTitle>
             <CardDescription>The core information shown on the event card.</CardDescription>
@@ -238,7 +236,7 @@ function GeneralTab({ data }: { data: EventData }) {
         </Card>
 
         {/* Poster URL */}
-        <Card>
+        <Card className="border-none">
           <CardHeader>
             <CardTitle>Event Media</CardTitle>
             <CardDescription>Add a poster to make your event stand out.</CardDescription>
@@ -560,7 +558,7 @@ function SeatsTab({ data }: { data: EventData }) {
             {inputIsGroup ? (
               <div className="space-y-6">
                 
-                {/* Horizontal Row: Team Size + Registration Limit */}
+                {/* Team Size + Registration Limit */}
                 <div className="flex flex-col md:flex-row gap-6">
                     
                     {/* Left Side: Team Size Logic */}
@@ -595,10 +593,10 @@ function SeatsTab({ data }: { data: EventData }) {
                         </div>
                     </div>
 
-                    {/* Vertical Divider (Desktop Only) */}
-                    <div className="hidden md:block w-px bg-border self-stretch mx-2" />
+                    {/* Vertical Divider */}
+                    <div className="w-px bg-border self-stretch mx-2" />
 
-                    {/* Right Side: Registration Limit */}
+                    {/* Registration Limit */}
                     <div className="flex-1 space-y-2">
                          <Label className="text-base font-medium">Registration Limit</Label>
                          <div className="flex flex-col space-y-1.5">
@@ -616,7 +614,7 @@ function SeatsTab({ data }: { data: EventData }) {
 
                 <Separator className="my-2" />
 
-                {/* Bottom Row: Estimated Capacity */}
+                {/* Estimated Capacity */}
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="space-y-1">
@@ -717,7 +715,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   return (
     <div className="flex flex-col gap-6">
       {/* Configuration Card */}
-      <Card>
+      <Card className="border-none">
         <CardHeader className='flex flex-row justify-between'>
           <div className="space-y-1">
             <CardTitle className='mb-2'>Event Configuration</CardTitle>

@@ -75,7 +75,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
   };
 
   return (
-    <Card className="h-full flex flex-col">
+    <Card className="h-full flex flex-col border-none">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" /> Organizers
