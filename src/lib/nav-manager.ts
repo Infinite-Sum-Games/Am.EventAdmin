@@ -21,17 +21,11 @@ export const dashboardNavItem: NavItem = {
     icon: LayoutDashboard,
 };
 
-// --- Navigation Structure Definition ---
-
 export const managementNavItems: NavItem[] = [
     {
         title: "Events",
         url: "/dashboard/events",
         icon: CalendarDays,
-        items: [
-            { title: "View All", url: "/dashboard/events" },
-            { title: "New Event", url: "/dashboard/events/new" },
-        ],
     },
     {
         title: "Organizers",
