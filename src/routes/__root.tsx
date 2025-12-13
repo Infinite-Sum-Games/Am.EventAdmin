@@ -13,12 +13,22 @@ function NotFound() {
   )
 }
 
+function ErrorComponent({ error }: { error: Error }) {
+  return (
+    <div className="p-6 text-red-500">
+      <h1 className="text-xl font-bold">Something went wrong</h1>
+      <pre>{error.message}</pre>
+    </div>
+  )
+}
+
 export const Route = createRootRoute({
   component: () => (
-    <ThemeProvider defaultTheme="system" attribute="class" enableSystem disableTransitionOnChange>
+    <ThemeProvider defaultTheme="dark" attribute="class" storageKey="theme">
       <Outlet />
       <Toaster position='top-center'/>
     </ThemeProvider>
   ),
-  notFoundComponent: NotFound, // Reference the NotFound component here
+  notFoundComponent: NotFound,
+  errorComponent: ErrorComponent,
 })
