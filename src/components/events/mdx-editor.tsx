@@ -18,6 +18,7 @@ import { forwardRef } from "react";
 
 const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
   return (
+    <div className="h-100 w-full border rounded-md bg-background overflow-scroll dark-theme">
     <MDXEditor
       ref={ref}
       {...props}
@@ -31,17 +32,17 @@ const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
         markdownShortcutPlugin(),
         toolbarPlugin({
           toolbarContents: () => (
-            <>
-                  <UndoRedo />
-                  <BlockTypeSelect />
-                  <BoldItalicUnderlineToggles />
-                  <ListsToggle />
-            </>
+            <div className="flex items-center gap-2 bg-accent p-1">
+              <UndoRedo />
+              <BlockTypeSelect />
+              <BoldItalicUnderlineToggles />
+              <ListsToggle />
+            </div>
           )
         })
       ]}
-      className="min-h-100 w-full bg-background border rounded-md dark-theme"
     />
+    </div>
   );
 });
 
