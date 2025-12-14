@@ -17,7 +17,7 @@ import type { GetAllEventsResponse } from "@/types/events";
 import { Loader2, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
-import { useEventEditorStore } from "@/stores/useEventEditorStore";
+import { useEventEditorStore, type EventData } from "@/stores/useEventEditorStore";
 import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 
@@ -59,12 +59,12 @@ const eventsQueryOptions = queryOptions({
     // Assuming the API response structure is { events: [...], message: "..." }
     // And that event_image_url can be null, we'll provide a fallback.
     console.log("Data fetched: ", data.events);
-    return data.events.map((event: GetAllEventsResponse) => ({
+    return data.events.map((event: EventData) => ({
       ...event,
-      event_image_url:
-        event.event_image_url ||
+      poster_url:
+        event.poster_url ||
         "https://images.unsplash.com/photo-1501281668745-f7f5792d7cdd?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", // Fallback image
-    })) as GetAllEventsResponse[];
+    })) as EventData[];
   },
 });
 
@@ -98,18 +98,18 @@ function ViewEventsPage() {
   const { data: orgsForFilter } = useSuspenseQuery(orgsForFilterQueryOptions);
 
   // Derive unique event dates from fetched events
-  const uniqueEventDates = useMemo(() => {
-    const dates = new Set(
-      events
-        .filter(event => event.event_date)
-        .map(event => event.event_date.split('T')[0])
-    );
-    return [...dates].sort();
-  }, [events]);
+  // const uniqueEventDates = useMemo(() => {
+  //   const dates = new Set(
+  //     events
+  //       .filter(event => event.)
+  //       .map(event => event.event_date.split('T')[0])
+  //   );
+  //   return [...dates].sort();
+  // }, [events]);
 
   const maxPrice = useMemo(() => {
     if (!events || events.length === 0) return 10000;
-    return Math.max(...events.map((e) => e.event_price));
+    return Math.max(...events.map((e) => e.price));
   }, [events]);
 
   // --- Filter States ---
@@ -128,10 +128,10 @@ function ViewEventsPage() {
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
         // const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
-        if (searchTerm && !event.event_name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+        if (searchTerm && !event.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
         if (statusFilter !== 'ALL' && event.event_status !== statusFilter) return false;
-        if (dateFilter !== 'ALL' && eventDate !== dateFilter) return false;
-        if (event.event_price > priceRange[0]) return false;
+        // if (dateFilter !== 'ALL' && event.date !== dateFilter) return false;
+        if (event.price > priceRange[0]) return false;
         if (selectedTags.length > 0 && !selectedTags.every(tag => event.tags.includes(tag))) return false;
         // Organizer filter is disabled as organizer_name is not in the API response
         // if (selectedOrgs.length > 0 && !selectedOrgs.includes(event.organizer_name)) return false;
@@ -192,7 +192,7 @@ function ViewEventsPage() {
             <SelectTrigger><SelectValue placeholder="Filter by date..." /></SelectTrigger>
             <SelectContent>
                 <SelectItem value="ALL">All Dates</SelectItem>
-                {uniqueEventDates.map(date => <SelectItem key={date} value={date}>{new Date(date).toLocaleDateString()}</SelectItem>)}
+                {/* {uniqueEventDates.map(date => <SelectItem key={date} value={date}>{new Date(date).toLocaleDateString()}</SelectItem>)} */}
             </SelectContent>
         </Select>
         <MultiSelect data={tagsForFilter} name="Tags" selected={selectedTags} setSelected={setSelectedTags} />
