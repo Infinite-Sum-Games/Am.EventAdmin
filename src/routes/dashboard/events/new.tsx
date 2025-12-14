@@ -22,6 +22,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
+import { PeopleCard } from '@/components/events/people-card';
 
 export function EventEditorPage() {
 
@@ -714,125 +715,128 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   }
   return (
     <div className="flex flex-col gap-6">
-      {/* Configuration Card */}
-      <Card className="border-none">
-        <CardHeader className='flex flex-row justify-between'>
-          <div className="space-y-1">
-            <CardTitle className='mb-2'>Event Configuration</CardTitle>
-            <CardDescription>
-              Set the fundamental modes and settings for your event.
-            </CardDescription>
-          </div>
-          <Button 
-                onClick={handleUpdateEventModes}
-                disabled={!hasModesChanged}
-                className="flex"
+      <div className="grid grid-cols-2 gap-6">
+        {/* Configuration Card */}
+        <Card className="border-none">
+          <CardHeader className='flex flex-row justify-between'>
+            <div className="space-y-1">
+              <CardTitle className='mb-2'>Event Configuration</CardTitle>
+              <CardDescription>
+                Set the fundamental modes and settings for your event.
+              </CardDescription>
+            </div>
+            <Button 
+                  onClick={handleUpdateEventModes}
+                  disabled={!hasModesChanged}
+                  className="flex"
+              >
+                <Save className="mr-2 h-4 w-4" /> Save Modes
+              </Button>
+          </CardHeader>
+          <CardContent className="grid gap-2">
+            
+            {/* Event Type */}
+            <SettingRow 
+              label="Event Type" 
+              description="Is this a workshop or a general event?"
             >
-              <Save className="mr-2 h-4 w-4" /> Save Modes
-            </Button>
-        </CardHeader>
-        <CardContent className="grid gap-2">
-          
-          {/* Event Type */}
-          <SettingRow 
-            label="Event Type" 
-            description="Is this a workshop or a general event?"
-          >
-            <ToggleGroup 
-              type="single" 
-              variant="outline"
-              value={inputEventType} 
-              onValueChange={(value) => {
-                if (!value) return;
-                setInputEventType(value as "EVENT" | "WORKSHOP");
-              }}
+              <ToggleGroup 
+                type="single" 
+                variant="outline"
+                value={inputEventType} 
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputEventType(value as "EVENT" | "WORKSHOP");
+                }}
+              >
+                <ToggleGroupItem value="EVENT" aria-label="Event">
+                  <Calendar className="mr-2 h-4 w-4" /> Event
+                </ToggleGroupItem>
+                <ToggleGroupItem value="WORKSHOP" aria-label="Workshop">
+                  <Presentation className="mr-2 h-4 w-4" /> Workshop
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
+
+            <Separator />
+
+            {/* Event Mode */}
+            <SettingRow 
+              label="Location Mode" 
+              description="Is this event held online or offline?"
             >
-              <ToggleGroupItem value="EVENT" aria-label="Event">
-                <Calendar className="mr-2 h-4 w-4" /> Event
-              </ToggleGroupItem>
-              <ToggleGroupItem value="WORKSHOP" aria-label="Workshop">
-                <Presentation className="mr-2 h-4 w-4" /> Workshop
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </SettingRow>
+              <ToggleGroup 
+                type="single" 
+                variant="outline"
+                value={inputIsOffline}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputIsOffline(value);
+                }}
+              >
+                <ToggleGroupItem value="OFFLINE">
+                  <MapPin className="mr-2 h-4 w-4" /> Offline
+                </ToggleGroupItem>
+                <ToggleGroupItem value="ONLINE">
+                  <Wifi className="mr-2 h-4 w-4" /> Online
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
 
-          <Separator />
+            <Separator />
 
-          {/* Event Mode */}
-          <SettingRow 
-            label="Location Mode" 
-            description="Is this event held online or offline?"
-          >
-            <ToggleGroup 
-              type="single" 
-              variant="outline"
-              value={inputIsOffline}
-              onValueChange={(value) => {
-                if (!value) return;
-                setInputIsOffline(value);
-              }}
+            {/* Attendance Mode */}
+            <SettingRow 
+              label="Attendance Tracking" 
+              description="How should participants mark their presence?"
             >
-              <ToggleGroupItem value="OFFLINE">
-                <MapPin className="mr-2 h-4 w-4" /> Offline
-              </ToggleGroupItem>
-              <ToggleGroupItem value="ONLINE">
-                <Wifi className="mr-2 h-4 w-4" /> Online
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </SettingRow>
+              <ToggleGroup 
+                type="single" 
+                variant="outline"
+                value={inputAttendanceMode}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputAttendanceMode(value as "SOLO" | "DUO");
+                }}
+              >
+                <ToggleGroupItem value="SOLO" title="Scan once to attend">
+                  <LogIn className="mr-2 h-4 w-4" /> Check-in Only
+                </ToggleGroupItem>
+                <ToggleGroupItem value="DUO" title="Scan start and end">
+                  <ArrowRightLeft className="mr-2 h-4 w-4" /> In & Out
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
 
-          <Separator />
+            <Separator />
 
-          {/* Attendance Mode */}
-          <SettingRow 
-            label="Attendance Tracking" 
-            description="How should participants mark their presence?"
-          >
-            <ToggleGroup 
-              type="single" 
-              variant="outline"
-              value={inputAttendanceMode}
-              onValueChange={(value) => {
-                if (!value) return;
-                setInputAttendanceMode(value as "SOLO" | "DUO");
-              }}
+            {/* IsTechnical */}
+            <SettingRow 
+              label="Technical Event"
+              description="Is this event technical in nature?"
             >
-              <ToggleGroupItem value="SOLO" title="Scan once to attend">
-                <LogIn className="mr-2 h-4 w-4" /> Check-in Only
-              </ToggleGroupItem>
-              <ToggleGroupItem value="DUO" title="Scan start and end">
-                <ArrowRightLeft className="mr-2 h-4 w-4" /> In & Out
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </SettingRow>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={inputIsTechnical}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputIsTechnical(value);
+                }}
+              >
+                <ToggleGroupItem value="NO">
+                  <XCircle className="mr-2 h-4 w-4" /> No
+                </ToggleGroupItem>
+                <ToggleGroupItem value="YES" className="">
+                  <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
 
-          <Separator />
-
-          {/* IsTechnical */}
-          <SettingRow 
-            label="Technical Event"
-            description="Is this event technical in nature?"
-          >
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={inputIsTechnical}
-              onValueChange={(value) => {
-                if (!value) return;
-                setInputIsTechnical(value);
-              }}
-            >
-              <ToggleGroupItem value="NO">
-                <XCircle className="mr-2 h-4 w-4" /> No
-              </ToggleGroupItem>
-              <ToggleGroupItem value="YES" className="">
-                <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </SettingRow>
-
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+        <PeopleCard data={data} />
+      </div>
 
       {/* 2. Organizers & Tags */}
       <div className="grid grid-cols-2 gap-6">

@@ -34,7 +34,7 @@ export interface organizers {
   name: string;
 }
 
-interface people {
+export interface people {
   id?: string;
   name: string;
 }
