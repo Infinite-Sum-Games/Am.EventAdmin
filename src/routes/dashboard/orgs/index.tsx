@@ -110,7 +110,7 @@ function OrgsPage() {
               setTypeFilter(value as OrganizerType | "ALL")
             }
           >
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-[180px] mr-2">
               <SelectValue placeholder="Filter by type..." />
             </SelectTrigger>
             <SelectContent>
