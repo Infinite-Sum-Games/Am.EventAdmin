@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useMutation, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,7 @@ import { EventCard } from "@/components/events/event-card";
 import { Loader2, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
-import { useEventEditorStore, type EventData } from "@/stores/useEventEditorStore";
+import { type EventData } from "@/stores/useEventEditorStore";
 import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 
@@ -89,8 +89,7 @@ export const Route = createFileRoute("/dashboard/events/")({
 function ViewEventsPage() {
 
   const navigate = useNavigate();
-  const initializeEvent = useEventEditorStore((state) => state.initializeEvent);
-
+  const queryClient = useQueryClient();
 
   const { data: events } = useSuspenseQuery(eventsQueryOptions);
   const { data: tagsForFilter } = useSuspenseQuery(tagsForFilterQueryOptions);
@@ -145,8 +144,8 @@ function ViewEventsPage() {
       return response.data;
     },
     onSuccess: (data) => {
-      initializeEvent(data);
-      navigate({ to: "/dashboard/events/new" });
+      queryClient.setQueryData(['event', data.id], data);
+      navigate({ to: `/dashboard/events/${data.id}` })
     },
     onError: () => {
       // console.error("Failed to create event draft:", error);
