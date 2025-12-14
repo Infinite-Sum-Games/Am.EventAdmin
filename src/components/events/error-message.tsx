@@ -26,10 +26,10 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ title, message }) =>
 
   return (
     <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg p-4 mt-4">
-      <div className="flex items-start gap-3">
-        <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+      <div className="flex items-start">
+        <XCircle className="h-4 w-4  text-red-600 dark:text-red-400 shrink-0 mt-0.5 mr-2" />
         <div>
-          <p className="text-sm font-medium text-red-800 dark:text-red-300">
+          <p className="text-base font-medium text-red-800 dark:text-red-300">
             {title}
           </p>
           <p className="text-sm text-red-700 dark:text-red-400 mt-1 whitespace-pre-wrap">
