@@ -22,7 +22,7 @@ export interface EventData {
   people: people[],
   poster_url: string,
   price: number,
-  pricing_per_head: boolean,
+  is_per_head: boolean,
   rules: string,
   schedules: schedules[],
   seat_count: number,
