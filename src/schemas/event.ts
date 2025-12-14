@@ -56,6 +56,8 @@ export const eventTagsSchema = z.object({
   tag_id: z.uuid("Tag ID must be a valid UUID").optional(),
 });
 
+export type EventTags = z.infer<typeof eventTagsSchema>;
+
 export const eventScheduleSchema = z.object({
   id: z.uuid().optional(),
   event_date: z.string().refine((date) => !isNaN(new Date(date).getTime()), {

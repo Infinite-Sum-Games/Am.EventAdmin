@@ -37,4 +37,10 @@ export const api = {
 
   CONNECT_EVENT_ORGANIZER:`${CURRENT_BASE_URL}/events/admin/organizer/`,
   DISCONNECT_EVENT_ORGANIZER:`${CURRENT_BASE_URL}/events/admin/organizer/`,
+
+  CONNECT_EVENT_TAG:`${CURRENT_BASE_URL}/events/admin/tag/`,
+  DISCONNECT_EVENT_TAG:`${CURRENT_BASE_URL}/events/admin/tag/`,
+
+  CONNECT_EVENT_PEOPLE:`${CURRENT_BASE_URL}/events/admin/people/`,
+  DISCONNECT_EVENT_PEOPLE:`${CURRENT_BASE_URL}/events/admin/people/`,
 };
