@@ -13,7 +13,6 @@ export interface EventData {
   is_published: boolean,
   is_technical: boolean,
   max_teamsize: number,
-
   // message from response
   message: string,
 
@@ -25,7 +24,8 @@ export interface EventData {
   is_per_head: boolean,
   rules: string,
   schedules: schedules[],
-  seat_count: number,
+  total_seats: number,
+  seats_filled?: number,
   tags: tags[]
 }
 

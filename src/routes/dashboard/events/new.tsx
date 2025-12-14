@@ -2,9 +2,11 @@ import { createFileRoute } from '@tanstack/react-router'
 export const Route = createFileRoute('/dashboard/events/new')({
   component: RouteComponent,
 })
+
 function RouteComponent() {
   return EventEditorPage();
 }
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useEventEditorStore, type EventData } from "@/stores/useEventEditorStore";
 import { Button } from '@/components/ui/button';
@@ -12,18 +14,17 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Tag, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, ArrowRight, ArrowRightLeft, BookCheck, Calendar, Check, CheckCircle2, Eye, FileText, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlink, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import '@mdxeditor/editor/style.css'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
-import { Switch } from '@/components/ui/switch';
 
 export function EventEditorPage() {
   const mockData: EventData = {
@@ -42,7 +43,7 @@ export function EventEditorPage() {
     is_technical: false,
     price: 0,
     is_per_head: false,
-    seat_count: 40,
+    total_seats: 40,
     min_teamsize: 2,
     max_teamsize: 4,
     organizers: [
@@ -93,11 +94,14 @@ export function EventEditorPage() {
           <span className="text-sm text-muted-foreground">ID: {eventData.id}</span>
         </div>
         <div>
-          <Button variant="outline" className="mr-4">Preview</Button>
+          <Button variant="outline" className="mr-4">
+            <Eye /> Preview
+          </Button>
           {eventData.is_published ? (
-            <Button variant="destructive">Unpublish</Button>
+            <Button variant="destructive">
+              <Unlink />Unpublish</Button>
           ) : (
-            <Button>Publish</Button>
+            <Button><BookCheck />Publish</Button>
           )}
         </div>
       </div>
@@ -330,10 +334,9 @@ function GeneralTab({ data }: { data: EventData }) {
       </div>
 
       {/* Live Preview */}
-      <div className="w-full lg:w-80 xl:w-96 shrink-0 space-y-2">
-        <Label className="text-muted-foreground pl-1">Live Preview</Label>
+      <div className="w-full lg:w-80 xl:w-96 shrink-0 space-y-2 flex flex-col justify-center">
         
-        <div className="relative aspect-2/3 w-full rounded-lg border-2 border-dashed border-muted bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all hover:border-muted-foreground/50">
+        <div className="relative aspect-2/3 w-full rounded-lg border-2 border-dashed bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all border-muted-foreground/50">
             
             {/* Preview Badge */}
             <div className="absolute top-3 left-3 z-10">
@@ -366,7 +369,9 @@ function GeneralTab({ data }: { data: EventData }) {
                 </p>
               </div>
             )}
+            
         </div>
+        <Label className="text-muted-foreground pl-1 self-center">Live Preview</Label>
       </div>
     </div>
   );
@@ -520,19 +525,19 @@ function SeatsTab({ data }: { data: EventData }) {
   const [inputMinTeamSize, setInputMinTeamSize] = useState(data.min_teamsize);
   const [inputMaxTeamSize, setInputMaxTeamSize] = useState(data.max_teamsize);
   const [inputMaxNoOfTeams, setInputMaxNoOfTeams] = useState(0);
-  const [inputTotalSeats, setInputTotalSeats] = useState(data.seat_count);
+  const [inputTotalSeats, setInputTotalSeats] = useState(data.total_seats);
   
   useEffect(() => {
     setInputIsGroup(data.is_group);
     setInputMinTeamSize(data.min_teamsize);
     setInputMaxTeamSize(data.max_teamsize);
-    setInputMaxNoOfTeams(data.is_group ? data.seat_count : 0);
-    setInputTotalSeats(data.seat_count);
-  }, [data.is_group, data.min_teamsize, data.max_teamsize, data.seat_count]);
+    setInputMaxNoOfTeams(data.is_group ? data.total_seats : 0);
+    setInputTotalSeats(data.total_seats);
+  }, [data.is_group, data.min_teamsize, data.max_teamsize, data.total_seats]);
 
   const hadSeatsChanged = inputIsGroup !== data.is_group || 
-    (inputIsGroup && (inputMinTeamSize !== data.min_teamsize || inputMaxTeamSize !== data.max_teamsize || inputMaxNoOfTeams !== data.seat_count)) ||
-    (!inputIsGroup && inputTotalSeats !== data.seat_count);
+    (inputIsGroup && (inputMinTeamSize !== data.min_teamsize || inputMaxTeamSize !== data.max_teamsize || inputMaxNoOfTeams !== data.total_seats)) ||
+    (!inputIsGroup && inputTotalSeats !== data.total_seats);
 
   const handleUpdateSeats = () => {
     if (inputIsGroup) {
@@ -540,12 +545,12 @@ function SeatsTab({ data }: { data: EventData }) {
         is_group: true,
         min_teamsize: inputMinTeamSize,
         max_teamsize: inputMaxTeamSize,
-        seat_count: inputMaxNoOfTeams,
+        total_seats: inputMaxNoOfTeams,
       });
     } else {
       useEventEditorStore.getState().setEventData({
         is_group: false,
-        seat_count: inputTotalSeats,
+        total_seats: inputTotalSeats,
       });
     }
 
