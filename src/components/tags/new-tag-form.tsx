@@ -6,7 +6,7 @@ import { AlertCircle, PlusCircle } from 'lucide-react';
 import { axiosClient } from '@/lib/axios';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { TagSchema } from "@/schemas/tag";
+import { TagSchema } from "@/schemas/tags";
 import { set } from 'zod';
 
 interface NewTagFormProps {

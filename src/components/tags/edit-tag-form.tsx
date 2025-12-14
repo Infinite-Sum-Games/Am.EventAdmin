@@ -6,7 +6,7 @@ import { Check, AlertCircle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
-import { TagSchema } from '@/schemas/tag';
+import { TagSchema } from '@/schemas/tags';
 
 interface Tag {
     id: string;
