@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, FileText, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Tag, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -23,9 +23,9 @@ import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
+import { Switch } from '@/components/ui/switch';
 
 export function EventEditorPage() {
-
   const mockData: EventData = {
     attendance_mode: "SOLO",
     id: "fd0c3fd9-464b-4187-b6cc-5633968d51e7",
@@ -41,7 +41,7 @@ export function EventEditorPage() {
     is_offline: true,
     is_technical: false,
     price: 0,
-    pricing_per_head: false,
+    is_per_head: false,
     seat_count: 40,
     min_teamsize: 2,
     max_teamsize: 4,
@@ -146,89 +146,156 @@ function GeneralTab({ data }: { data: EventData }) {
   const [inputName, setInputName] = useState(data.name);
   const [inputBlurb, setInputBlurb] = useState(data.blurb || "");
   const [inputUrl, setInputUrl] = useState(data.poster_url || "");
-
+  const [inputPrice, setInputPrice] = useState(data.price || 0);
+  const [inputIsPerHead, setInputIsPerHead] = useState(data.is_per_head || false);
   
-  // initialize inputUrl on load
+  // Sync state on load
   useEffect(() => {
     setInputUrl(data.poster_url || "");
-  }, [data.poster_url]);
-
-  // initialize name and blurb on load
-  useEffect(() => {
     setInputName(data.name);
     setInputBlurb(data.blurb || "");
-  }, [data.name, data.blurb]);
+    setInputPrice(data.price || 0);
+    setInputIsPerHead(data.is_per_head || false);
+  }, [data]);
 
-  const hasNameAndBlurbChanged = inputName !== data.name || inputBlurb !== (data.blurb || "");
+  const hasDetailsChanged = inputName !== data.name || inputBlurb !== (data.blurb || "") || inputPrice !== data.price || inputIsPerHead !== data.is_per_head;
   const hasImageURLChanged = inputUrl !== (data.poster_url || "");
 
   const handleApplyUrl = async () => {
     useEventEditorStore.getState().setEventData({ poster_url: inputUrl });
-    
-    // TODO: Call API to upload/verify URL
     console.log("API CALL: Uploading/Verifying URL:", inputUrl);
-
     toast.success("Poster URL updated successfully!");
   };
 
-  const handleUpdateNameandBlurb = () => {
+  const handleUpdateDetails = () => {
     useEventEditorStore.getState().setEventData({ 
       name: inputName,
       blurb: inputBlurb,
+      price: inputPrice,
+      is_per_head: inputIsPerHead,
     });
-
-    // TODO: Call API to update name and blurb
-    console.log("API CALL: Updating Name and Blurb:", { name: inputName, blurb: inputBlurb });
-
+    console.log("API CALL: Updating Details", { name: inputName, blurb: inputBlurb, price: inputPrice, is_per_head: inputIsPerHead });
     toast.success("Updated details successfully!");
   }
 
   return (
-<div className="flex flex-col lg:flex-row gap-6 h-full items-start">
+    <div className="flex flex-col lg:flex-row gap-6 h-full items-start">
 
       {/* General Details */}
       <div className="flex-1 flex flex-col gap-6 w-full">
-        <Card className="border-none">
-          <CardHeader>
-            <CardTitle>Basic Details</CardTitle>
-            <CardDescription>The core information shown on the event card.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="event-name">Event Name</Label>
-              <Input
-                id="event-name"
-                placeholder="e.g. Annual Tech Symposium 2024"
-                value={inputName}
-                onChange={(e) => setInputName(e.target.value)}
-                className="font-medium"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="event-blurb">Short Blurb (Max 120 chars)</Label>
-              <Textarea
-                id="event-blurb"
-                placeholder="A catchy one-liner describing the event..."
-                rows={3}
-                value={inputBlurb}
-                onChange={(e) => setInputBlurb(e.target.value)}
-                className="resize-none"
-              />
-              <p className="text-[0.8rem] text-muted-foreground text-right">
-                {inputBlurb.length} chars
-              </p>
-            </div>
-          </CardContent>
-          <CardFooter className="border-t flex justify-end">
-            <Button 
-              onClick={handleUpdateNameandBlurb} 
+        <Card className="border-none shadow-sm">
+          <div className="flex flex-row items-center justify-between px-6">
+            <CardHeader className='p-0 m-0 flex-1 flex-col'>
+              <CardTitle className="text-base">Basic Details</CardTitle>
+              <CardDescription>The core information shown on the event card.</CardDescription>
+            </CardHeader>
+          <Button 
+              onClick={handleUpdateDetails} 
               size="sm"
-              disabled={!hasNameAndBlurbChanged}
+              disabled={!hasDetailsChanged}
             >
               <Save className="mr-2 h-4 w-4" /> Save Changes
-            </Button>
-          </CardFooter>
+          </Button>
+          </div>
+          <CardContent className="space-y-4">
+            
+            {/* Name & Blurb Section */}
+            <div className="space-y-4">
+                <div className="space-y-3">
+                <Label htmlFor="event-name">Event Name</Label>
+                <Input
+                    id="event-name"
+                    placeholder="e.g. Annual Tech Symposium 2024"
+                    value={inputName}
+                    onChange={(e) => setInputName(e.target.value)}
+                    className="font-medium"
+                />
+                </div>
+
+                <div className="space-y-3">
+                <Label htmlFor="event-blurb">Short Blurb <span className="text-muted-foreground font-normal">(Max 120 chars)</span></Label>
+                <Textarea
+                    id="event-blurb"
+                    placeholder="A catchy one-liner describing the event..."
+                    rows={3}
+                    maxLength={120}
+                    value={inputBlurb}
+                    onChange={(e) => setInputBlurb(e.target.value)}
+                    className="resize-none"
+                />
+                <p className="text-[0.8rem] text-muted-foreground text-right">
+                    {inputBlurb.length}/120
+                </p>
+                </div>
+            </div>
+
+            <Separator />
+
+            {/* Pricing Section */}
+            <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                    <h3 className="text-base font-semibold">Pricing Configuration</h3>
+                </div>
+                
+                <div className="flex flex-row gap-6">
+                    {/* Price Input */}
+                    <div className="flex-1 space-y-3">
+                        <Label htmlFor="event-price">Ticket Price</Label>
+                        <div className="relative">
+                            <IndianRupee className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                id="event-price"
+                                type="number"
+                                placeholder="0"
+                                min={0}
+                                value={inputPrice}
+                                onChange={(e) => setInputPrice(parseInt(e.target.value, 10))}
+                                className="pl-8 font-mono"
+                            />
+                        </div>
+                        <p className="text-[0.8rem] text-muted-foreground">
+                            Set to 0 for free events.
+                        </p>
+                    </div>
+
+                    {/* Fee Structure Toggle Group */}
+                    <div className="space-y-3">
+                         <Label>Fee Structure</Label>
+                         <ToggleGroup 
+                            type="single" 
+                            variant="outline"
+                            className="justify-start"
+                            value={inputIsPerHead ? "PER_HEAD" : "PER_TEAM"}
+                            onValueChange={(value) => {
+                                if (!value) return; // Prevent unselecting
+                                if (value === "PER_HEAD" && data.is_group){
+                                  toast.error("Per Person pricing is not allowed for Group Events.");
+                                  return;
+                                }
+                                if (value === "FIXED" && !data.is_group) {
+                                    toast.error("Fixed pricing is not allowed for Individual Events.");
+                                    return;
+                                }
+                                setInputIsPerHead(value === "PER_HEAD");
+                            }}
+                         >
+                             <ToggleGroupItem value="PER_HEAD" className="flex-1">
+                                <User className="mr-2 h-4 w-4" /> Per Person
+                             </ToggleGroupItem>
+                              <ToggleGroupItem value="PER_TEAM" className="flex-1">
+                                <Users className="mr-2 h-4 w-4" />Per Team
+                             </ToggleGroupItem>
+                         </ToggleGroup>
+                         <p className="text-[0.8rem] text-muted-foreground">
+                            {inputIsPerHead 
+                                ? "Ticket price is calculated per person." 
+                                : "Ticket price is fixed per team/group."}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+          </CardContent>
         </Card>
 
         {/* Poster URL */}
@@ -251,7 +318,7 @@ function GeneralTab({ data }: { data: EventData }) {
                 />
                 <Button 
                   onClick={handleApplyUrl} 
-                  variant="default"
+                  variant="secondary"
                   disabled={!hasImageURLChanged}
                 >
                   Apply <Check className="ml-2 h-4 w-4" />
@@ -617,7 +684,7 @@ function SeatsTab({ data }: { data: EventData }) {
                             <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium">
                                 <Info className="h-4 w-4" /> Estimated Total Capacity
                             </div>
-                            <p className="text-sm text-blue-600/80 dark:text-blue-400/80 max-w-md">
+                            <p className="text-sm text-blue-600/80 dark:text-blue-400/80">
                                 This is the theoretical maximum number of people attending if every team is full.
                             </p>
                         </div>
