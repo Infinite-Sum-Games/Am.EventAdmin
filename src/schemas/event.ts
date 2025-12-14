@@ -3,7 +3,7 @@ import { z } from "zod";
 export const eventDetailsSchema = z.object({
   name: z.string().min(1, "Name must be at least 1 characters").optional(),
   blurb: z.string().max(120, "Blurb must be short (120 chars max)").optional(),
-  description: z.string().min(10, "Description is required").max(1500, "Description is too long (1500 chars max)").optional(),
+  description: z.string().max(1500, "Description is too long (1500 chars max)").optional(),
   rules: z.string().max(1500, "Rules is too long (1500 chars max)").optional(),
   price: z.number("Price must be a number.").min(0, "Price cannot be negative").optional(),
   is_per_head: z.boolean().optional(),
@@ -11,7 +11,9 @@ export const eventDetailsSchema = z.object({
 
 export type EventDetails = z.infer<typeof eventDetailsSchema>;
 
-export const posterSchema = z.url("Poster image must be a valid URL").optional();
+export const posterSchema = z.object({
+  poster_url: z.url("Poster URL must be a valid URL").optional(),
+});
 
 export const isPublishSchema = z.object({
   is_published: z.boolean().default(false),
