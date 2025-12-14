@@ -25,12 +25,11 @@ import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
-import { eventDetailsSchema, posterSchema, type EventDetails } from '@/schemas/event';
+import { eventDetailsSchema, eventSizeSchema, posterSchema, type EventDetails, type EventSize } from '@/schemas/event';
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
-import { da } from 'date-fns/locale';
 
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
@@ -650,6 +649,7 @@ function SeatsTab({ data }: { data: EventData }) {
   const [inputMaxTeamSize, setInputMaxTeamSize] = useState(data.max_teamsize);
   const [inputMaxNoOfTeams, setInputMaxNoOfTeams] = useState(0);
   const [inputTotalSeats, setInputTotalSeats] = useState(data.total_seats);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setInputIsGroup(data.is_group);
@@ -663,23 +663,42 @@ function SeatsTab({ data }: { data: EventData }) {
     (inputIsGroup && (inputMinTeamSize !== data.min_teamsize || inputMaxTeamSize !== data.max_teamsize || inputMaxNoOfTeams !== data.total_seats)) ||
     (!inputIsGroup && inputTotalSeats !== data.total_seats);
 
-  const handleUpdateSeats = () => {
-    if (inputIsGroup) {
-      useEventEditorStore.getState().setEventData({
-        is_group: true,
-        min_teamsize: inputMinTeamSize,
-        max_teamsize: inputMaxTeamSize,
-        total_seats: inputMaxNoOfTeams,
-      });
-    } else {
-      useEventEditorStore.getState().setEventData({
-        is_group: false,
-        total_seats: inputTotalSeats,
-      });
-    }
+  const { mutate: updateSeats, isPending: isUpdatingSeats, error: updateSeatsError } = useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: EventSize }) => {
+      // zod validation
+      const validatedData = eventSizeSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
 
-    console.log("API CALL:", "Updating Seats for", inputIsGroup ? "Group Event" : "Individual Event");
-    toast.success("Updated seating successfully!");
+      const response = await axiosClient.post(api.UPDATE_EVENT_SIZE(id), validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, { id, payload }) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...payload };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+
+      toast.success("Updated event seating successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to update event seating.");
+    }
+  });
+
+  const handleUpdateSeats = () => {
+    updateSeats({
+      id: data.id,
+      payload: {
+        is_group: inputIsGroup,
+        min_teamsize: inputIsGroup ? inputMinTeamSize : 1,
+        max_teamsize: inputIsGroup ? inputMaxTeamSize : 1,
+        total_seats: inputIsGroup ? inputMaxNoOfTeams : inputTotalSeats,
+      }
+    });
   }
 
   return (
@@ -700,10 +719,11 @@ function SeatsTab({ data }: { data: EventData }) {
             {/* Action Button */}
             <Button
               disabled={!hadSeatsChanged}
-              onClick={handleUpdateSeats}
+              onClick={handleUpdateSeats || isUpdatingSeats}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> Update Seats
+              <Save className="mr-2 h-4 w-4" /> 
+              {isUpdatingSeats ? "Updating Seats..." : "Update Seats"}
             </Button>
           </div>
         </CardHeader>
@@ -766,7 +786,7 @@ function SeatsTab({ data }: { data: EventData }) {
                           max={inputMaxTeamSize}
                           min="1"
                           className="text-center"
-                          onChange={(e) => setInputMinTeamSize(parseInt(e.target.value, 10) || 1)}
+                          onChange={(e) => setInputMinTeamSize(parseInt(e.target.value, 10))}
                         />
                       </div>
                       <ArrowRight className="h-4 w-4 text-muted-foreground mb-3" />
@@ -779,7 +799,7 @@ function SeatsTab({ data }: { data: EventData }) {
                           max="10"
                           min="1"
                           className="text-center"
-                          onChange={(e) => setInputMaxTeamSize(parseInt(e.target.value, 10) || 1)}
+                          onChange={(e) => setInputMaxTeamSize(parseInt(e.target.value, 10))}
                         />
                       </div>
                     </div>
@@ -798,7 +818,7 @@ function SeatsTab({ data }: { data: EventData }) {
                         type="number"
                         value={inputMaxNoOfTeams}
                         min="1"
-                        onChange={(e) => setInputMaxNoOfTeams(parseInt(e.target.value, 10) || 1)}
+                        onChange={(e) => setInputMaxNoOfTeams(parseInt(e.target.value, 10))}
                       />
                     </div>
                   </div>
@@ -845,6 +865,11 @@ function SeatsTab({ data }: { data: EventData }) {
               </SettingRow>)
             )}
           </div>
+
+          <ErrorMessage
+            title="Failed to update seating configuration"
+            message={updateSeatsError?.message}
+          />
 
         </CardContent>
       </Card>

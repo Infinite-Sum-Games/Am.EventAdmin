@@ -29,6 +29,8 @@ export const api = {
   UPDATE_BASIC_EVENT_DETAILS: (id : string) => `${CURRENT_BASE_URL}/events/admin/details/${id}`,
 
   UPDATE_EVENT_POSTER_URL: (id: string) => `${CURRENT_BASE_URL}/events/admin/poster/${id}`,
-  DELETE_EVENT_POSTER_URL: (id: string) => `${CURRENT_BASE_URL}/events/admin/poster/${id}`
+  DELETE_EVENT_POSTER_URL: (id: string) => `${CURRENT_BASE_URL}/events/admin/poster/${id}`,
+
+  UPDATE_EVENT_SIZE: (id: string) => `${CURRENT_BASE_URL}/events/admin/size/${id}`,
 
 };

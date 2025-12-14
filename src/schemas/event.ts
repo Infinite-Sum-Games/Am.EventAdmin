@@ -21,10 +21,12 @@ export const isPublishSchema = z.object({
 
 export const eventSizeSchema = z.object({
   is_group: z.boolean().optional(),
-  min_teamsize: z.number().min(1, "Minimum team size must be at least 1").default(1).optional(),
-  max_teamsize: z.number().min(1, "Maximum team size must be at least 1").default(1).optional(),
-  total_seats: z.number().min(1, "Total seats must be at least 1").optional(),
+  min_teamsize: z.number("Minimum team size must be a number").min(1, "Minimum team size must be at least 1").default(1).optional(),
+  max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1).optional(),
+  total_seats: z.number("Total seats must be a number").min(1, "Total seats must be at least 1").optional(),
 });
+
+export type EventSize = z.infer<typeof eventSizeSchema>;
 
 export const eventToggleSchema = z.object({
   event_type: z.enum(["EVENT", "WORKSHOP"]).optional(),
