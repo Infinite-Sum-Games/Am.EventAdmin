@@ -168,11 +168,27 @@ function GeneralTab({ data }: { data: EventData }) {
     }
   })
 
+  // delete event poster url mutation
+  const { mutate: deletePosterUrl, isPending: isDeletingPosterUrl } = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const response = await axiosClient.delete(api.DELETE_EVENT_POSTER_URL(id));
+      return response.data;
+    },
+    onSuccess: () => {
+      useEventEditorStore.getState().setEventData({ poster_url: "" });
+      toast.success("Poster URL deleted successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to delete Poster URL");
+    }
+  });
+
   const handleApplyUrl = async () => {
-    updatePosterUrl({
-      id: data.id,
-      poster_url: inputUrl
-    })
+    if (inputUrl === "") {
+      deletePosterUrl({ id: data.id });
+    } else {
+      updatePosterUrl({ id: data.id, poster_url: inputUrl });
+    }
   };
 
   const handleUpdateDetails = () => {
@@ -331,7 +347,7 @@ function GeneralTab({ data }: { data: EventData }) {
                 />
                 <Button
                   onClick={handleApplyUrl}
-                  disabled={!hasImageURLChanged || isUpdatingPosterUrl}
+                  disabled={!hasImageURLChanged || isUpdatingPosterUrl || isDeletingPosterUrl}
                 >
                   {isUpdatingPosterUrl ? "Applying..." : "Apply"} <Check className="ml-2 h-4 w-4" />
                 </Button>
