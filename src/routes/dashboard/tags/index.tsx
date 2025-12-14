@@ -68,8 +68,8 @@ function TagsPage() {
           {/* Create Tag Button */}
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-1 h-4 w-4" /> Create New Tag
+              <Button className="flex items-center cursor-pointer">
+                <Plus className="h-4 w-4" />Create New Tag
               </Button>
             </DialogTrigger>
             <DialogContent>
@@ -122,6 +122,7 @@ function TagsPage() {
                   variant="default" 
                   onClick={() => setTagToEdit(tag)}
                   title="Edit Tag"
+                  className="flex items-center cursor-pointer"
                 >
                   <Edit3 className="h-4 w-4" /> Edit
                 </Button>
@@ -129,6 +130,7 @@ function TagsPage() {
                   variant="destructive" 
                   onClick={() => setTagToDeleteId(tag.id)}
                   title="Delete Tag"
+                  className="flex items-center cursor-pointer"
                 >
                   <Trash2 className="h-4 w-4" /> Delete
                 </Button>

@@ -11,7 +11,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   Binoculars,
-  PlusCircle,
   Trash2,
   Edit3,
   Building,
@@ -124,8 +123,8 @@ function OrgsPage() {
           {/* Create Organizer Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <Plus className="mr-1 h-4 w-4" />Create
+              <Button className="w-auto flex items-center cursor-pointer">
+                <Plus className="h-4 w-4" />Create Organizer
               </Button>
             </DialogTrigger>
 
@@ -194,8 +193,8 @@ function OrgsPage() {
                       onOpenChange={setIsEditDialogOpen}
                     >
                       <DialogTrigger asChild>
-                        <Button type="button" onClick={() => setEditOrg(org)}>
-                          <Edit3 className="mr-2 h-4 w-4" /> Edit
+                        <Button type="button" onClick={() => setEditOrg(org)} className="flex items-center cursor-pointer">
+                          <Edit3 className="h-4 w-4" />Edit
                         </Button>
                       </DialogTrigger>
 
@@ -229,8 +228,9 @@ function OrgsPage() {
                       type="button"
                       variant="destructive"
                       onClick={() => deleteOrg(org.id)}
+                      className="flex items-center cursor-pointer"
                     >
-                      <Trash2 className="w-5 h-5" /> Delete
+                      <Trash2 className="w-5 h-5" />Delete
                     </Button>
                   </div>
                 </div>

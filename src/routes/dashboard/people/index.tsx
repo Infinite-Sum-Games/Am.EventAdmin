@@ -102,8 +102,8 @@ function PeoplePage() {
 
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto shadow-sm">
-                                <Plus className="mr-1 h-4 w-4" /> Add Person
+                            <Button className="w-auto shadow-sm cursor-pointer">
+                                <Plus className="h-4 w-4" />Add Person
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
@@ -190,14 +190,14 @@ function PeoplePage() {
                                 <div className="flex w-full divide-x border-t-0 p-0 m-0">
                                     <Button 
                                         variant="default" 
-                                        className="flex-1 h-12 rounded-none hover:bg-background hover:text-blue-400" 
+                                        className="flex-1 h-12 rounded-none cursor-pointer" 
                                         onClick={() => setEditingPerson(person)}
                                     >
                                         <Edit3 className="mr-2 h-4 w-4" /> Edit
                                     </Button>
                                     <Button 
                                         variant="destructive" 
-                                        className="flex-1 h-12 rounded-none hover:bg-red-50 hover:text-destructive" 
+                                        className="flex-1 h-12 rounded-none cursor-pointer" 
                                         onClick={() => setPersonToDelete(person.id)}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" /> Delete
