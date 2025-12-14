@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { queryOptions, useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Binoculars, PlusCircle, Trash2, Edit3, Mail, Phone } from "lucide-react";
+import { Binoculars, PlusCircle, Trash2, Edit3, Mail, Phone, Search, Briefcase, Plus } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
@@ -23,6 +23,7 @@ import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import type { PeopleData } from '@/types/people';
 import { toast } from 'sonner';
+import { Separator } from "@/components/ui/separator";
 
 // --- Data Fetching ---
 const peopleQueryOptions = queryOptions({
@@ -48,9 +49,7 @@ function PeoplePage() {
     
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingPerson, setEditingPerson] = useState<PeopleData | null>(null);
-    
     const [personToDelete, setPersonToDelete] = useState<string | null>(null);
-    
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredPeople = useMemo(() => {
@@ -81,22 +80,31 @@ function PeoplePage() {
     });
 
     return (
-        <div className="flex flex-col gap-4">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <h1 className="text-2xl font-semibold">People</h1>
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <Input
-                        type="text"
-                        placeholder="Search by name, email, or profession..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full md:max-w-xs"
-                    />
+        <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto">
+            {/* Header Section */}
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b pb-4">
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold tracking-tight">People</h1>
+                    <p className="text-muted-foreground">Manage your guests and contacts.</p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                    <div className="relative w-full md:w-64">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            type="text"
+                            placeholder="Search people..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-9 bg-background"
+                        />
+                    </div>
 
-                    {/* Create Person Button */}
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button className="w-full sm:w-auto"><PlusCircle className="h-4 w-4" /> Add New Person</Button>
+                            <Button className="w-full sm:w-auto shadow-sm">
+                                <Plus className="mr-1 h-4 w-4" /> Add Person
+                            </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
@@ -111,6 +119,95 @@ function PeoplePage() {
                     </Dialog>
                 </div>
             </div>
+
+            {/* Content Section */}
+            {(!filteredPeople || filteredPeople.length === 0) ? (
+                <div className="flex flex-col items-center justify-center bg-muted/10 border-2 border-dashed rounded-xl py-16 mt-4 animate-in fade-in-50">
+                    <div className="bg-muted p-4 rounded-full mb-4">
+                         <Binoculars className="w-8 h-8 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium">No people found</h3>
+                    <p className="text-sm text-muted-foreground mt-1 text-center max-w-xs">
+                        {searchTerm ? "Try adjusting your search terms." : "Get started by adding a new person to your list."}
+                    </p>
+                </div>
+            ) : (
+                <div className="grid grid-cols-4 gap-4">
+                    {filteredPeople.map((person: any) => (
+                        <Card key={person.id} className="group overflow-hidden transition-all hover:shadow-md flex flex-col p-0">
+                            <CardContent className="p-6 flex flex-col gap-4 items-start">
+                                {/* Header: Avatar & Name */}
+                                <div className="h-full flex items-center gap-4 justify-center align-middle">
+                                    <Avatar className="h-12 w-12 border-2 border-background shadow-sm">
+                                        <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                                            {getInitials(person.name)}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex flex-col overflow-hidden">
+                                        <h2 className="text-lg font-semibold truncate leading-tight" title={person.name}>
+                                            {person.name}
+                                        </h2>
+                                        {person.profession && (
+                                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-1">
+                                                <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                                                <span className="truncate">{person.profession}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <Separator />
+
+                                {/* Contact Details */}
+                                <div className="flex flex-col gap-2.5 text-sm">
+                                    <a 
+                                        href={`mailto:${person.email}`} 
+                                        className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group/link p-1.5 rounded-md hover:bg-muted/50 -ml-1.5"
+                                        title={person.email}
+                                    >
+                                        <div className="bg-primary/5 p-1.5 rounded-md group-hover/link:bg-primary/10 transition-colors">
+                                            <Mail className="h-4 w-4 text-primary" />
+                                        </div>
+                                        <span className="truncate">{person.email}</span>
+                                    </a>
+                                    
+                                    {person.phone_number && (
+                                        <a 
+                                            href={`tel:${person.phone_number}`} 
+                                            className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group/link p-1.5 rounded-md hover:bg-muted/50 -ml-1.5"
+                                        >
+                                            <div className="bg-primary/5 p-1.5 rounded-md group-hover/link:bg-primary/10 transition-colors">
+                                                <Phone className="h-4 w-4 text-primary" />
+                                            </div>
+                                            <span className="truncate">{person.phone_number}</span>
+                                        </a>
+                                    )}
+                                </div>
+                            </CardContent>
+
+                            {/* Actions Footer */}
+                            <CardFooter className="p-0 border-t bg-muted/5 m-0 [.border-t]:pt-0">
+                                <div className="flex w-full divide-x border-t-0 p-0 m-0">
+                                    <Button 
+                                        variant="default" 
+                                        className="flex-1 h-12 rounded-none hover:bg-background hover:text-blue-400" 
+                                        onClick={() => setEditingPerson(person)}
+                                    >
+                                        <Edit3 className="mr-2 h-4 w-4" /> Edit
+                                    </Button>
+                                    <Button 
+                                        variant="destructive" 
+                                        className="flex-1 h-12 rounded-none hover:bg-red-50 hover:text-destructive" 
+                                        onClick={() => setPersonToDelete(person.id)}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                    </Button>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            )}
 
             {/* Edit Dialog */}
             <Dialog open={!!editingPerson} onOpenChange={(open) => !open && setEditingPerson(null)}>
@@ -136,9 +233,9 @@ function PeoplePage() {
             <AlertDialog open={!!personToDelete} onOpenChange={(open) => !open && setPersonToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete Contact?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the person from the database.
+                            Are you sure you want to delete this person? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -151,60 +248,11 @@ function PeoplePage() {
                             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                             disabled={isDeleting}
                         >
-                            {isDeleting ? "Deleting..." : "Delete"}
+                            {isDeleting ? "Deleting..." : "Delete Person"}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
-            {(!filteredPeople || filteredPeople.length === 0) ? (
-                <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
-                    <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
-                    <p className="text-lg font-semibold mt-4">No people found matching your search.</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {filteredPeople.map((person: any) => (
-                        <Card key={person.id} className="flex flex-col text-center">
-                            <CardHeader className="flex flex-col items-center">
-                                <Avatar className="h-20 w-20 mb-2 text-xl">
-                                    <AvatarFallback>{getInitials(person.name)}</AvatarFallback>
-                                </Avatar>
-                                <h2 className="text-xl font-semibold">{person.name}</h2>
-                                <p className="text-sm text-muted-foreground">{person.profession}</p>
-                            </CardHeader>
-                            <CardContent className="grow">
-                                <div className="flex flex-col gap-2 text-sm">
-                                    <a href={`mailto:${person.email}`} className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary">
-                                        <Mail className="h-4 w-4" />
-                                        <span>{person.email}</span>
-                                    </a>
-                                    <a href={`tel:${person.phone_number}`} className="flex items-center justify-center gap-2 text-muted-foreground hover:text-primary">
-                                        <Phone className="h-4 w-4" />
-                                        <span>{person.phone_number}</span>
-                                    </a>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex gap-2 border-t">
-                                <Button 
-                                    variant="outline" 
-                                    className="flex-1" 
-                                    onClick={() => setEditingPerson(person)}
-                                >
-                                    <Edit3 className="h-4 w-4" /> Edit
-                                </Button>
-                                <Button 
-                                    variant="destructive" 
-                                    className="flex-1 group" 
-                                    onClick={() => setPersonToDelete(person.id)}
-                                >
-                                    <Trash2 className="h-4 w-4" /> Delete
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }
