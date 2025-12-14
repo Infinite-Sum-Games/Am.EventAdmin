@@ -34,7 +34,8 @@ export const eventToggleSchema = z.object({
   attendance_mode: z.enum(["SOLO", "DUO"]).optional(),
   is_technical: z.boolean().optional(),
   is_completed: z.boolean().optional(),
-}); 
+  is_published: z.boolean().optional(),
+});
 
 export type EventModes = z.infer<typeof eventToggleSchema>;
 
@@ -42,6 +43,8 @@ export const eventOrganizersSchema = z.object({
   id: z.uuid().optional(),
   organizer_id: z.uuid("Organizer ID must be a valid UUID").optional(),
 });
+
+export type EventOrganizers = z.infer<typeof eventOrganizersSchema>;
 
 export const eventPeopleSchema = z.object({
   id: z.uuid().optional(),
