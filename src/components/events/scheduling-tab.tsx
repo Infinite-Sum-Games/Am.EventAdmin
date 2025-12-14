@@ -4,8 +4,8 @@ import {
   Calendar as CalendarIcon, 
   Clock, 
   MapPin, 
-  Pencil, 
-  Trash2, 
+  Trash2,
+  Edit3, 
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent} from "@/components/ui/card";
@@ -266,13 +266,13 @@ function ScheduleCard({
 
                 {/* Actions Menu */} 
                 <div className="flex items-center space-x-2">
-                    <Button variant="secondary" size="icon" onClick={onEdit}>
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
+                    <Button variant="secondary" onClick={onEdit}>
+                        <Edit3 className="h-4 w-4" />
+                        <span className="">Edit</span>
                     </Button>
-                    <Button variant="destructive" size="icon" onClick={onDelete}>
+                    <Button variant="destructive" onClick={onDelete}>
                         <Trash2 className="h-4 w-4" />
-                        <span className="sr-only">Delete</span>
+                        <span className="">Delete</span>
                     </Button>
                 </div>
 
