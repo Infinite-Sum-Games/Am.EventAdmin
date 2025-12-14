@@ -29,7 +29,7 @@ import { Separator } from "@/components/ui/separator";
 const peopleQueryOptions = queryOptions({
     queryKey: ['people'],
     queryFn: async () => {
-        const response = axiosClient.get(api.GET_ALL_PEOPLE);
+        const response = axiosClient.get(api.FETCH_ALL_PEOPLE);
         const res = await response;
         return res.data.people ?? [];
     }

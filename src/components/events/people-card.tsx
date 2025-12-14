@@ -36,7 +36,7 @@ export function PeopleCard({ data }: { data: EventData }) {
   const { data:AVAILABLE_PEOPLE = [], isLoading} = useQuery<People[]>({
     queryKey: ["all-people"],
     queryFn: async () => {
-      const response = await axiosClient.get(api.GET_ALL_PEOPLE);
+      const response = await axiosClient.get(api.FETCH_ALL_PEOPLE);
       return response.data.people;
     }
   });
