@@ -54,15 +54,14 @@ function TagsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 p-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto">
+      <div className="flex items-center justify-between border-b pb-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Tags</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
+          <p className="text-muted-foreground">
             Manage tags used to categorize your data.
           </p>
         </div>
-
         
         <div className="flex items-center">
           <Input type="text" placeholder="Search tags..." className="mr-4" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
