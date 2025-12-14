@@ -52,7 +52,6 @@ export function TagsCard({ data }: { data: EventData }) {
     mutationFn: async (payload: EventTags) => {
       // zod validation
       const validatedData = eventTagsSchema.safeParse(payload);
-      console.log("Validated Data:", payload);
       if (!validatedData.success) {
         const errorMessages = validatedData.error.issues.map((issue) => issue.message).join("\n");
         throw new Error(errorMessages);
