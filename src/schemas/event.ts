@@ -11,9 +11,7 @@ export const eventDetailsSchema = z.object({
 
 export type EventDetails = z.infer<typeof eventDetailsSchema>;
 
-export const posterSchema = z.object({
-  poster_url: z.url("Poster image must be a valid URL").optional(),
-});
+export const posterSchema = z.url("Poster image must be a valid URL").optional();
 
 export const isPublishSchema = z.object({
   is_published: z.boolean().default(false),

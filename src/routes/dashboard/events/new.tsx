@@ -25,7 +25,7 @@ import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
-import { eventDetailsSchema, type EventDetails } from '@/schemas/event';
+import { eventDetailsSchema, posterSchema, type EventDetails } from '@/schemas/event';
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import { useMutation } from '@tanstack/react-query';
@@ -116,18 +116,16 @@ function GeneralTab({ data }: { data: EventData }) {
   const hasImageURLChanged = inputUrl !== (data.poster_url || "");
 
   // update basic event details mutation.
-  const { mutate: updateDetails, isPending, error} = useMutation({
+  const { mutate: updateDetails, isPending: isUpdatingDetails, error} = useMutation({
     mutationFn: async ({id,payload}: {id: string, payload: EventDetails})  => {
       // validate data
       const validatedData = eventDetailsSchema.safeParse(payload);
       // make the zod errors into a single error message
       if (!validatedData.success) {
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
-        console.error("error :", errorMessages)
         throw new Error(errorMessages);
       }
       const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
-      console.log("response: ", response)
       return response.data;
     },
     onSuccess: (_, { payload }) => {
@@ -142,16 +140,39 @@ function GeneralTab({ data }: { data: EventData }) {
     toast.success("Event details updated successfully!");
   },
   
-  onError: (error) => {
-    console.error(error);
+  onError: () => {
     toast.error("Failed to update event details.");
   }
   })
 
+  // update event poster url mutation
+  const { mutate: updatePosterUrl, isPending: isUpdatingPosterUrl } = useMutation({
+    mutationFn: async ({ id, poster_url }: { id: string; poster_url: string }) => {
+      // zod validation
+      const validatedData = posterSchema.safeParse(poster_url)
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        console.error("error :", errorMessages)
+        throw new Error(errorMessages);
+      }
+
+      const response = await axiosClient.post(api.UPDATE_EVENT_POSTER_URL(id), validatedData.data)
+      return response.data
+    },
+    onSuccess: (_, { poster_url }) => {
+      useEventEditorStore.getState().setEventData({ poster_url });
+      toast.success("Poster URL updated successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to update Poster URL")
+    }
+  })
+
   const handleApplyUrl = async () => {
-    useEventEditorStore.getState().setEventData({ poster_url: inputUrl });
-    console.log("API CALL: Uploading/Verifying URL:", inputUrl);
-    toast.success("Poster URL updated successfully!");
+    updatePosterUrl({
+      id: data.id,
+      poster_url: inputUrl
+    })
   };
 
   const handleUpdateDetails = () => {
@@ -180,10 +201,10 @@ function GeneralTab({ data }: { data: EventData }) {
             <Button 
               onClick={handleUpdateDetails} 
               size="sm"
-              disabled={!hasDetailsChanged || isPending}
+              disabled={!hasDetailsChanged || isUpdatingDetails}
             >
               <Save className="mr-2 h-4 w-4" /> 
-              {isPending ? "Saving..." : "Save Changes"}
+              {isUpdatingDetails ? "Saving..." : "Save Changes"}
             </Button>
           </div>
           <CardContent className="space-y-4">
@@ -310,10 +331,9 @@ function GeneralTab({ data }: { data: EventData }) {
                 />
                 <Button 
                   onClick={handleApplyUrl} 
-                  variant="secondary"
-                  disabled={!hasImageURLChanged}
+                  disabled={!hasImageURLChanged || isUpdatingPosterUrl}
                 >
-                  Apply <Check className="ml-2 h-4 w-4" />
+                  {isUpdatingPosterUrl ? "Applying..." : "Apply"} <Check className="ml-2 h-4 w-4" />
                 </Button>
               </div>
             </div>
