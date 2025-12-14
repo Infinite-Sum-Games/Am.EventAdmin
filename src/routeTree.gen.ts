@@ -21,7 +21,6 @@ import { Route as DashboardOrgsIndexRouteImport } from './routes/dashboard/orgs/
 import { Route as DashboardEventsIndexRouteImport } from './routes/dashboard/events/index'
 import { Route as DashboardRevenueTransactionsRouteImport } from './routes/dashboard/revenue/transactions'
 import { Route as DashboardParticipantsSearchRouteImport } from './routes/dashboard/participants/search'
-import { Route as DashboardEventsEditRouteImport } from './routes/dashboard/events/edit'
 import { Route as DashboardEventsEventIdRouteImport } from './routes/dashboard/events/$eventId'
 
 const DashboardRoute = DashboardRouteImport.update({
@@ -87,11 +86,6 @@ const DashboardParticipantsSearchRoute =
     path: '/participants/search',
     getParentRoute: () => DashboardRoute,
   } as any)
-const DashboardEventsEditRoute = DashboardEventsEditRouteImport.update({
-  id: '/events/edit',
-  path: '/events/edit',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardEventsEventIdRoute = DashboardEventsEventIdRouteImport.update({
   id: '/events/$eventId',
   path: '/events/$eventId',
@@ -103,7 +97,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
-  '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/participants/search': typeof DashboardParticipantsSearchRoute
   '/dashboard/revenue/transactions': typeof DashboardRevenueTransactionsRoute
   '/dashboard/events': typeof DashboardEventsIndexRoute
@@ -118,7 +111,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
-  '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/participants/search': typeof DashboardParticipantsSearchRoute
   '/dashboard/revenue/transactions': typeof DashboardRevenueTransactionsRoute
   '/dashboard/events': typeof DashboardEventsIndexRoute
@@ -135,7 +127,6 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
-  '/dashboard/events/edit': typeof DashboardEventsEditRoute
   '/dashboard/participants/search': typeof DashboardParticipantsSearchRoute
   '/dashboard/revenue/transactions': typeof DashboardRevenueTransactionsRoute
   '/dashboard/events/': typeof DashboardEventsIndexRoute
@@ -153,7 +144,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/'
     | '/dashboard/events/$eventId'
-    | '/dashboard/events/edit'
     | '/dashboard/participants/search'
     | '/dashboard/revenue/transactions'
     | '/dashboard/events'
@@ -168,7 +158,6 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/dashboard/events/$eventId'
-    | '/dashboard/events/edit'
     | '/dashboard/participants/search'
     | '/dashboard/revenue/transactions'
     | '/dashboard/events'
@@ -184,7 +173,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/dashboard/'
     | '/dashboard/events/$eventId'
-    | '/dashboard/events/edit'
     | '/dashboard/participants/search'
     | '/dashboard/revenue/transactions'
     | '/dashboard/events/'
@@ -287,13 +275,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardParticipantsSearchRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/events/edit': {
-      id: '/dashboard/events/edit'
-      path: '/events/edit'
-      fullPath: '/dashboard/events/edit'
-      preLoaderRoute: typeof DashboardEventsEditRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/events/$eventId': {
       id: '/dashboard/events/$eventId'
       path: '/events/$eventId'
@@ -307,7 +288,6 @@ declare module '@tanstack/react-router' {
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
   DashboardEventsEventIdRoute: typeof DashboardEventsEventIdRoute
-  DashboardEventsEditRoute: typeof DashboardEventsEditRoute
   DashboardParticipantsSearchRoute: typeof DashboardParticipantsSearchRoute
   DashboardRevenueTransactionsRoute: typeof DashboardRevenueTransactionsRoute
   DashboardEventsIndexRoute: typeof DashboardEventsIndexRoute
@@ -322,7 +302,6 @@ interface DashboardRouteChildren {
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
   DashboardEventsEventIdRoute: DashboardEventsEventIdRoute,
-  DashboardEventsEditRoute: DashboardEventsEditRoute,
   DashboardParticipantsSearchRoute: DashboardParticipantsSearchRoute,
   DashboardRevenueTransactionsRoute: DashboardRevenueTransactionsRoute,
   DashboardEventsIndexRoute: DashboardEventsIndexRoute,
