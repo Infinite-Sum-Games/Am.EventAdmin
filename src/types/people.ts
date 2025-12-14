@@ -1,9 +1,12 @@
-export interface PeopleData {
+export interface People {
     id: string;
     name: string;
-    email: string;
     phone_number: string;
-    profession?: string;
-    event_id?: string;
-    event_day?: number[];
+    email: string;
+    profession: string;
 }
+
+export type GetAllPeopleResponse = {
+  message: string;
+  people: People[];
+};

@@ -23,18 +23,24 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useEventEditorStore, type EventData, type people } from "@/stores/useEventEditorStore";
-
-// --- Mock Data (Replace with your API data) ---
-const AVAILABLE_PEOPLE: people[] = [
-    { id: "p1", name: "Alice Johnson" },
-    { id: "p2", name: "Bob Smith" },
-    { id: "p3", name: "Charlie Brown" },
-    { id: "p4", name: "Diana Prince" },
-    { id: "p5", name: "Edward Elric" },
-];
+import { type EventData, type people } from "@/stores/useEventEditorStore";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import type { People } from "@/types/people";
+import { axiosClient } from "@/lib/axios";
+import { api } from "@/lib/api";
+import { eventPeopleSchema, type EventPeople } from "@/schemas/event";
+import { toast } from "sonner";
 
 export function PeopleCard({ data }: { data: EventData }) {
+
+  const { data:AVAILABLE_PEOPLE = [], isLoading} = useQuery<People[]>({
+    queryKey: ["all-people"],
+    queryFn: async () => {
+      const response = await axiosClient.get(api.GET_ALL_PEOPLE);
+      return response.data.people;
+    }
+  });
+
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<people[]>(data.people || []);
 
@@ -42,37 +48,70 @@ export function PeopleCard({ data }: { data: EventData }) {
     setSelectedIds(data.people || []);
   }, [data.people]);
 
-  const handleSelect = (id: string) => {
-    const personToAdd = AVAILABLE_PEOPLE.find((person) => person.id === id);
-    if (!personToAdd) return;
+  // mutation to add person to event
+  const { mutate: addPeople } = useMutation({
+    mutationFn: async (payload: EventPeople) => {
+      // zod validation
+      const validatedData = eventPeopleSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(issue => issue.message).join("\n");
+        throw new Error(errorMessages);
+      }
 
-    // already selected -> deselect it
-    const isAlreadySelected = selectedIds.some((person) => person.id === id);
-    if (isAlreadySelected) {
-      const newPeople = selectedIds.filter((person) => person.id !== id);
-      setSelectedIds(newPeople);
-      useEventEditorStore.getState().setEventData({ people: newPeople });
-      return;
+      const response = await axiosClient.post(api.CONNECT_EVENT_PEOPLE, validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, {person_id}) => {
+      const addedPeople = AVAILABLE_PEOPLE.find(person => person.id === person_id);
+      if(addedPeople) {
+        setSelectedIds((prev) => [...prev, addedPeople]);
+      }
+      toast.success("Dignitary added to event successfully");
+    },
+    onError: () => {
+      toast.error("Failed to add dignitary to event");
     }
+  })
 
-    const newPeople = [...selectedIds, personToAdd];
-    setSelectedIds(newPeople);
+  // mutation to remove person from event
+  const { mutate: removePeople } = useMutation({
+    mutationFn: async (payload: EventPeople) => {
+      // zod validation
+      const validatedData = eventPeopleSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(issue => issue.message).join("\n");
+        throw new Error(errorMessages);
+      }
 
-    // TODO: API CALL TO ADD PERSON TO EVENT
-    console.log("API CALL: Add Person", personToAdd);
+      const response = await axiosClient.post(api.DISCONNECT_EVENT_PEOPLE, validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, {person_id}) => {
+      setSelectedIds((prev) => prev.filter(person => person.id !== person_id));
+      toast.success("Dignitary removed from event successfully");
+    },
+    onError: () => {
+      toast.error("Failed to remove dignitary from event");
+    }
+  })
 
-    useEventEditorStore.getState().setEventData({ people: newPeople });
-  };
+
+  const handleSelect = (id: string) => {
+    // if already selected, do handle remove
+    const isAlreadySelected = selectedIds.some(person => person.id === id);
+    if (isAlreadySelected) {
+      removePeople({ person_id: id, id: data.id });
+    }
+    addPeople({ person_id: id, id: data.id });
+  }
 
   const handleRemove = (id: string) => {
-    const newPeople = selectedIds.filter((person) => person.id !== id);
-    setSelectedIds(newPeople);
+    removePeople({ person_id: id, id: data.id });
+  }
 
-    // TODO: API CALL TO REMOVE PERSON FROM EVENT
-    console.log("API CALL: Remove Person ID", id);
-
-    useEventEditorStore.getState().setEventData({ people: newPeople });
-  };
+  if(isLoading) {
+    return <div>Loading People...</div>
+  }
 
   return (
     <Card className="h-full flex flex-col border-none">

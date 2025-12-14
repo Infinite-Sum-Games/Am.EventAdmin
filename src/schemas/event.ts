@@ -51,6 +51,8 @@ export const eventPeopleSchema = z.object({
   person_id: z.uuid("Person ID must be a valid UUID").optional(),
 });
 
+export type EventPeople = z.infer<typeof eventPeopleSchema>;
+
 export const eventTagsSchema = z.object({
   id: z.uuid().optional(),
   tag_id: z.uuid("Tag ID must be a valid UUID").optional(),
