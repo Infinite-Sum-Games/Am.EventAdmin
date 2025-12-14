@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useEventEditorStore, type EventData, type organizers, type people } from "@/stores/useEventEditorStore";
+import { useEventEditorStore, type EventData, type people } from "@/stores/useEventEditorStore";
 
 // --- Mock Data (Replace with your API data) ---
 const AVAILABLE_PEOPLE: people[] = [

@@ -104,13 +104,12 @@ export function EventEditorPage() {
       <Separator className='my-4'/>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="w-full mb-4 grid grid-cols-7 rounded-sm bg-popover h-10">
+        <TabsList className="w-full mb-4 grid grid-cols-6 rounded-sm bg-popover h-10">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="description">Description</TabsTrigger>
           <TabsTrigger value="rules">Rules</TabsTrigger>
           <TabsTrigger value="seats">Seats</TabsTrigger>
-          <TabsTrigger value="modes">Modes/Orgs/Tags</TabsTrigger>
-          <TabsTrigger value="people">People</TabsTrigger>
+          <TabsTrigger value="modes">Metadata</TabsTrigger>
           <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
         </TabsList>
 
@@ -136,10 +135,6 @@ export function EventEditorPage() {
 
         <TabsContent value="scheduling">
           <SchedulingTab data={eventData} />
-        </TabsContent>
-
-        <TabsContent value="people">
-          <div>People Content</div>
         </TabsContent>
       </Tabs>
     </div>
