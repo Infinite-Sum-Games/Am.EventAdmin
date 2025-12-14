@@ -8,7 +8,7 @@ function RouteComponent() {
 }
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEventEditorStore, type EventData } from "@/stores/useEventEditorStore";
+import { type EventData } from "@/stores/useEventEditorStore";
 import { Button } from '@/components/ui/button';
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
@@ -958,6 +958,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
         attendance_mode: inputAttendanceMode,
         is_technical: inputIsTechnical === "YES",
         is_completed: inputIsCompleted === "YES",
+        is_published: data.is_published,
       }
     });
   }
