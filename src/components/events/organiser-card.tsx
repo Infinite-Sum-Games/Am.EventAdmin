@@ -23,18 +23,25 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { useEventEditorStore, type EventData, type organizers } from "@/stores/useEventEditorStore";
-
-// --- Mock Data (Replace with your API data) ---
-const AVAILABLE_ORGANIZERS: organizers[] = [
-  { id: "org-1", name: "Coding Club" },
-  { id: "org-2", name: "Student Council" },
-  { id: "org-3", name: "Robotics Society" },
-  { id: "org-4", name: "Design Team" },
-  { id: "org-5", name: "Debate Club" },
-];
+import { type EventData, type organizers } from "@/stores/useEventEditorStore";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { axiosClient } from "@/lib/axios";
+import { api } from "@/lib/api";
+import type { Organizer } from "@/types/organizers";
+import { eventOrganizersSchema, type EventOrganizers } from "@/schemas/event";
+import { toast } from "sonner";
 
 export function OrganizersCard({ data }: { data: EventData }) {
+  // fetch all organizers from the API
+  // TODO: match query tags with existing tags in ORGANIZERS page
+  const { data: AVAILABLE_ORGANIZERS = [], isLoading } = useQuery<Organizer[]>({
+    queryKey: ["all_organizers"],
+    queryFn: async () => {
+      const response = await axiosClient.get(api.FETCH_ALL_ORGANIZERS);
+      return response.data.organizers;
+    },
+  });
+
   const [open, setOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<organizers[]>(data.organizers || []);
 
@@ -42,37 +49,71 @@ export function OrganizersCard({ data }: { data: EventData }) {
     setSelectedIds(data.organizers || []);
   }, [data.organizers]);
 
-  const handleSelect = (id: string) => {
-    const organizerToAdd = AVAILABLE_ORGANIZERS.find((org) => org.id === id);
-    if (!organizerToAdd) return;
+  // mutation to add organizer to event
+  const { mutate: addOrganizer } = useMutation({
+    mutationFn: async (payload: EventOrganizers) => {
+      // zod validation
+      const validatedData = eventOrganizersSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
 
-    // already selected -> deselect it
-    const isAlreadySelected = selectedIds.some((org) => org.id === id);
+      const response = await axiosClient.post(api.CONNECT_EVENT_ORGANIZER, validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, { organizer_id }) => {
+      const organizerToAdd = AVAILABLE_ORGANIZERS.find(org => org.id === organizer_id);
+      if (organizerToAdd) {
+        setSelectedIds(prev => [...prev, { id: organizerToAdd.id, name: organizerToAdd.organizer_name }]);
+      }
+      toast.success("Organizer added successfully");
+    },
+    onError: () => {
+      toast.error("Failed to add organizer");
+    },
+  });
+
+  // mutation to remove organizer from event
+  const { mutate: removeOrganizer } = useMutation({
+    mutationFn: async (payload: EventOrganizers) => {
+      // zod validation
+      const validatedData = eventOrganizersSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
+
+      const response = await axiosClient.post(api.DISCONNECT_EVENT_ORGANIZER, validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, { organizer_id }) => {
+      setSelectedIds(prev => prev.filter(org => org.id !== organizer_id));
+      toast.success("Organizer removed successfully");
+    },
+    onError: () => {
+      toast.error("Failed to remove organizer");
+    },
+  });
+
+
+  const handleSelect = (id: string) => {
+    // if already selected, do handle remove
+    const isAlreadySelected = selectedIds.some(org => org.id === id);
     if (isAlreadySelected) {
-      const newOrganizers = selectedIds.filter((org) => org.id !== id);
-      setSelectedIds(newOrganizers);
-      useEventEditorStore.getState().setEventData({ organizers: newOrganizers });
+      handleRemove(id);
       return;
     }
-
-    const newOrganizers = [...selectedIds, organizerToAdd];
-    setSelectedIds(newOrganizers);
-
-    // TODO: API CALL TO ADD ORGANIZER TO EVENT
-    console.log("API CALL: Add Organizer", organizerToAdd);
-
-    useEventEditorStore.getState().setEventData({ organizers: newOrganizers });
+    addOrganizer({ id: data.id, organizer_id: id });
   };
 
   const handleRemove = (id: string) => {
-    const newOrganizers = selectedIds.filter((org) => org.id !== id);
-    setSelectedIds(newOrganizers);
-
-    // TODO: API CALL TO REMOVE ORGANIZER FROM EVENT
-    console.log("API CALL: Remove Organizer ID", id);
-
-    useEventEditorStore.getState().setEventData({ organizers: newOrganizers });
+    removeOrganizer({ id: data.id, organizer_id: id });
   };
+
+  if (isLoading) {
+    return <div>Loading organizers...</div>;
+  }
 
   return (
     <Card className="h-full flex flex-col border-none">
@@ -112,16 +153,16 @@ export function OrganizersCard({ data }: { data: EventData }) {
                     return (
                         <CommandItem
                             key={org.id}
-                            value={org.name}
+                            value={org.organizer_name}
                             onSelect={() => org.id && handleSelect(org.id)}
                         >
                             <div className="flex items-center gap-2 flex-1">
                                 <Avatar className="h-6 w-6">
                                     <AvatarFallback className="text-[10px]">
-                                        {org.name.slice(0, 2).toUpperCase()}
+                                        {org.organizer_name.slice(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span>{org.name}</span>
+                                <span>{org.organizer_name}</span>
                             </div>
                             {isSelected && <Check className="ml-auto h-4 w-4" />}
                         </CommandItem>
