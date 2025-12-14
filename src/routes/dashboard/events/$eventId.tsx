@@ -25,7 +25,7 @@ import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
-import { eventDetailsSchema, eventSizeSchema, posterSchema, type EventDetails, type EventSize } from '@/schemas/event';
+import { eventDetailsSchema, eventSizeSchema, eventToggleSchema, posterSchema, type EventDetails, type EventModes, type EventSize } from '@/schemas/event';
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -904,6 +904,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
   const [inputIsTechnical, setInputIsTechnical] = useState(data.is_technical ? "YES" : "NO");
   const [inputIsCompleted, setInputIsCompleted] = useState(data.is_completed ? "YES" : "NO");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     setInputEventType(data.event_type);
@@ -920,18 +921,45 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
     (inputIsTechnical === "YES") !== data.is_technical ||
     (inputIsCompleted === "YES") !== data.is_completed;
 
+  const { mutate: updateModes, isPending: isUpdatingModes, error: updateModesError } = useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: EventModes }) => {
+      // zod validation
+      const validatedData = eventToggleSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
+      
+      const response = await axiosClient.post(api.UPDATE_EVENT_MODES(id), validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, { id, payload }) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...payload };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+
+      toast.success("Updated event modes successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to update event modes.");
+    }
+  });
+
 
   // Update Event Modes
   const handleUpdateEventModes = () => {
-    useEventEditorStore.getState().setEventData({
-      event_type: inputEventType,
-      is_offline: inputIsOffline === "OFFLINE",
-      attendance_mode: inputAttendanceMode,
-      is_technical: inputIsTechnical === "YES",
-      is_completed: inputIsCompleted === "YES",
+    updateModes({
+      id: data.id,
+      payload: {
+        event_type: inputEventType,
+        is_offline: inputIsOffline === "OFFLINE",
+        attendance_mode: inputAttendanceMode,
+        is_technical: inputIsTechnical === "YES",
+        is_completed: inputIsCompleted === "YES",
+      }
     });
-    console.log("API CALL:", "Updating Modes");
-    toast.success("Updated modes successfully!");
   }
   return (
     <div className="flex flex-col gap-6">
@@ -947,10 +975,11 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             </div>
             <Button
               onClick={handleUpdateEventModes}
-              disabled={!hasModesChanged}
+              disabled={!hasModesChanged || isUpdatingModes}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> Save Modes
+              <Save className="mr-2 h-4 w-4" /> 
+              {isUpdatingModes ? "Saving..." : "Save Changes"}
             </Button>
           </CardHeader>
           <CardContent className="grid gap-2">
@@ -1077,6 +1106,11 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
+
+            <ErrorMessage
+              title="Failed to update event configuration"
+              message={updateModesError?.message}
+            />
 
           </CardContent>
         </Card>

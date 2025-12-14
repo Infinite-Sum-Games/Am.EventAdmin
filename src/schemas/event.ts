@@ -36,6 +36,8 @@ export const eventToggleSchema = z.object({
   is_completed: z.boolean().optional(),
 }); 
 
+export type EventModes = z.infer<typeof eventToggleSchema>;
+
 export const eventOrganizersSchema = z.object({
   id: z.uuid().optional(),
   organizer_id: z.uuid("Organizer ID must be a valid UUID").optional(),

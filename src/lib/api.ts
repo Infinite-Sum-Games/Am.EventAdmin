@@ -33,4 +33,5 @@ export const api = {
 
   UPDATE_EVENT_SIZE: (id: string) => `${CURRENT_BASE_URL}/events/admin/size/${id}`,
 
+  UPDATE_EVENT_MODES: (id: string) => `${CURRENT_BASE_URL}/events/admin/toggle/${id}`,
 };
