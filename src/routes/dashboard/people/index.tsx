@@ -3,22 +3,22 @@ import { queryOptions, useSuspenseQuery, useQueryClient, useMutation } from "@ta
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Binoculars, PlusCircle, Trash2, Edit3, Mail, Phone, Search, Briefcase, Plus } from "lucide-react";
+import { Binoculars, Trash2, Edit3, Mail, Phone, Search, Briefcase, Plus } from "lucide-react";
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input"; 
+import { Input } from "@/components/ui/input";
 import { NewPersonForm } from "@/components/people/new-person-form";
-import { EditPersonForm } from "@/components/people/edit-person-form"; 
+import { EditPersonForm } from "@/components/people/edit-person-form";
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import type { PeopleData } from '@/types/people';
@@ -46,7 +46,7 @@ const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').su
 function PeoplePage() {
     const queryClient = useQueryClient();
     const { data: people } = useSuspenseQuery(peopleQueryOptions);
-    
+
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingPerson, setEditingPerson] = useState<PeopleData | null>(null);
     const [personToDelete, setPersonToDelete] = useState<string | null>(null);
@@ -82,12 +82,12 @@ function PeoplePage() {
     return (
         <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto">
             {/* Header Section */}
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between border-b pb-4">
+            <div className="flex gap-4 flex-row justify-between items-center border-b pb-4">
                 <div className="space-y-1">
                     <h1 className="text-3xl font-bold tracking-tight">People</h1>
                     <p className="text-muted-foreground">Manage your guests and contacts.</p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                     <div className="relative w-full md:w-64">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -124,7 +124,7 @@ function PeoplePage() {
             {(!filteredPeople || filteredPeople.length === 0) ? (
                 <div className="flex flex-col items-center justify-center bg-muted/10 border-2 border-dashed rounded-xl py-16 mt-4 animate-in fade-in-50">
                     <div className="bg-muted p-4 rounded-full mb-4">
-                         <Binoculars className="w-8 h-8 text-muted-foreground" />
+                        <Binoculars className="w-8 h-8 text-muted-foreground" />
                     </div>
                     <h3 className="text-lg font-medium">No people found</h3>
                     <p className="text-sm text-muted-foreground mt-1 text-center max-w-xs">
@@ -160,8 +160,8 @@ function PeoplePage() {
 
                                 {/* Contact Details */}
                                 <div className="flex flex-col gap-2.5 text-sm">
-                                    <a 
-                                        href={`mailto:${person.email}`} 
+                                    <a
+                                        href={`mailto:${person.email}`}
                                         className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group/link p-1.5 rounded-md hover:bg-muted/50 -ml-1.5"
                                         title={person.email}
                                     >
@@ -170,10 +170,10 @@ function PeoplePage() {
                                         </div>
                                         <span className="truncate">{person.email}</span>
                                     </a>
-                                    
+
                                     {person.phone_number && (
-                                        <a 
-                                            href={`tel:${person.phone_number}`} 
+                                        <a
+                                            href={`tel:${person.phone_number}`}
                                             className="flex items-center gap-3 text-muted-foreground hover:text-primary transition-colors group/link p-1.5 rounded-md hover:bg-muted/50 -ml-1.5"
                                         >
                                             <div className="bg-primary/5 p-1.5 rounded-md group-hover/link:bg-primary/10 transition-colors">
@@ -188,16 +188,16 @@ function PeoplePage() {
                             {/* Actions Footer */}
                             <CardFooter className="p-0 border-t bg-muted/5 m-0 [.border-t]:pt-0">
                                 <div className="flex w-full divide-x border-t-0 p-0 m-0">
-                                    <Button 
-                                        variant="default" 
-                                        className="flex-1 h-12 rounded-none cursor-pointer" 
+                                    <Button
+                                        variant="default"
+                                        className="flex-1 h-12 rounded-none cursor-pointer"
                                         onClick={() => setEditingPerson(person)}
                                     >
                                         <Edit3 className="mr-2 h-4 w-4" /> Edit
                                     </Button>
-                                    <Button 
-                                        variant="destructive" 
-                                        className="flex-1 h-12 rounded-none cursor-pointer" 
+                                    <Button
+                                        variant="destructive"
+                                        className="flex-1 h-12 rounded-none cursor-pointer"
                                         onClick={() => setPersonToDelete(person.id)}
                                     >
                                         <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -216,14 +216,14 @@ function PeoplePage() {
                         <DialogTitle>Edit Person</DialogTitle>
                     </DialogHeader>
                     {editingPerson && (
-                        <EditPersonForm 
+                        <EditPersonForm
                             personId={editingPerson.id}
                             initialData={editingPerson}
                             onSuccess={() => {
                                 toast.success("Person updated successfully.");
                                 setEditingPerson(null);
                                 queryClient.invalidateQueries({ queryKey: ['people'] });
-                            }} 
+                            }}
                         />
                     )}
                 </DialogContent>
@@ -240,7 +240,7 @@ function PeoplePage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction 
+                        <AlertDialogAction
                             onClick={(e) => {
                                 e.preventDefault();
                                 if (personToDelete) deletePerson(personToDelete);

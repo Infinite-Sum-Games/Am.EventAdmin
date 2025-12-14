@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { Binoculars, Trash2, Edit3,Plus } from "lucide-react";
+import { Binoculars, Trash2, Edit3, Plus } from "lucide-react";
 import { queryOptions, useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import type { Tag } from "@/types/db";
 import { useState } from "react";
@@ -9,7 +9,7 @@ import { NewTagForm } from "@/components/tags/new-tag-form";
 import { Card } from "@/components/ui/card";
 import { EditTagForm } from "@/components/tags/edit-tag-form";
 import { axiosClient } from "@/lib/axios";
-import { api } from "@/lib/api";  
+import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 
@@ -18,7 +18,7 @@ const tagsQueryOptions = queryOptions({
   queryKey: ["tags"],
   queryFn: async () => {
     const response = await axiosClient.get(api.FETCH_ALL_TAGS);
-    return response.data.tags as Tag[]; 
+    return response.data.tags as Tag[];
   },
 });
 
@@ -62,7 +62,7 @@ function TagsPage() {
             Manage tags used to categorize your data.
           </p>
         </div>
-        
+
         <div className="flex items-center">
           <Input type="text" placeholder="Search tags..." className="mr-4" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
           {/* Create Tag Button */}
@@ -98,10 +98,10 @@ function TagsPage() {
         </div>
       ) : (
         // Grid Layout for Horizontal Cards
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {filteredTags.map((tag) => (
-            <Card 
-              key={tag.id} 
+            <Card
+              key={tag.id}
               className="flex flex-row items-center justify-between p-4 transition-colors hover:bg-muted/40 hover:shadow-sm"
             >
               {/* Icon & Info */}
@@ -118,16 +118,16 @@ function TagsPage() {
 
               {/* Right Side: Actions */}
               <div className="flex items-center gap-2 pl-2">
-                <Button 
-                  variant="default" 
+                <Button
+                  variant="default"
                   onClick={() => setTagToEdit(tag)}
                   title="Edit Tag"
                   className="flex items-center cursor-pointer"
                 >
                   <Edit3 className="h-4 w-4" /> Edit
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   onClick={() => setTagToDeleteId(tag.id)}
                   title="Delete Tag"
                   className="flex items-center cursor-pointer"
@@ -147,13 +147,13 @@ function TagsPage() {
             <DialogTitle>Edit Tag</DialogTitle>
           </DialogHeader>
           {tagToEdit && (
-            <EditTagForm 
-              tag={tagToEdit} 
+            <EditTagForm
+              tag={tagToEdit}
               onSuccess={() => {
                 setTagToEdit(null);
                 toast.success("Tag updated successfully");
                 queryClient.invalidateQueries({ queryKey: ['tags'] });
-              }} 
+              }}
             />
           )}
         </DialogContent>
@@ -172,8 +172,8 @@ function TagsPage() {
             <Button variant="outline" onClick={() => setTagToDeleteId(null)}>
               Cancel
             </Button>
-            <Button 
-              variant="destructive" 
+            <Button
+              variant="destructive"
               onClick={() => {
                 if (tagToDeleteId) {
                   deleteTagMutation(tagToDeleteId);

@@ -13,7 +13,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { EventCard } from "@/components/events/event-card";
-import type { GetAllEventsResponse } from "@/types/events";
 import { Loader2, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import secureLocalStorage from "react-secure-storage";
@@ -127,15 +126,15 @@ function ViewEventsPage() {
 
   const filteredEvents = useMemo(() => {
     return events.filter(event => {
-        // const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
-        if (searchTerm && !event.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
-        if (statusFilter !== 'ALL' && event.event_status !== statusFilter) return false;
-        // if (dateFilter !== 'ALL' && event.date !== dateFilter) return false;
-        if (event.price > priceRange[0]) return false;
-        if (selectedTags.length > 0 && !selectedTags.every(tag => event.tags.includes(tag))) return false;
-        // Organizer filter is disabled as organizer_name is not in the API response
-        // if (selectedOrgs.length > 0 && !selectedOrgs.includes(event.organizer_name)) return false;
-        return true;
+      // const eventDate = event.event_date.split('T')[0]; // Compare only YYYY-MM-DD
+      if (searchTerm && !event.name.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+      if (statusFilter !== 'ALL' && event.event_status !== statusFilter) return false;
+      // if (dateFilter !== 'ALL' && event.date !== dateFilter) return false;
+      if (event.price > priceRange[0]) return false;
+      if (selectedTags.length > 0 && !selectedTags.every(tag => event.tags.includes(tag))) return false;
+      // Organizer filter is disabled as organizer_name is not in the API response
+      // if (selectedOrgs.length > 0 && !selectedOrgs.includes(event.organizer_name)) return false;
+      return true;
     });
   }, [events, searchTerm, statusFilter, dateFilter, priceRange, selectedTags, selectedOrgs]); // Removed selectedOrgs from dependencies as filter is commented
 
@@ -151,7 +150,7 @@ function ViewEventsPage() {
     },
     onError: () => {
       // console.error("Failed to create event draft:", error);
-      toast.error("Failed to initialize event"); 
+      toast.error("Failed to initialize event");
     },
   });
 
@@ -160,52 +159,52 @@ function ViewEventsPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">View Events</h1>
         <Button onClick={() => handleCreateEvent()} disabled={isCreating}>
-            {isCreating ? (
-                <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                </>
-            ) : (
-                <>
-                    <Plus className="mr-2 h-4 w-4" /> 
-                    Create New Event
-                </>
-            )}
+          {isCreating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Creating...
+            </>
+          ) : (
+            <>
+              <Plus className="mr-2 h-4 w-4" />
+              Create New Event
+            </>
+          )}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
         <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input type="text" placeholder="Search by event name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input type="text" placeholder="Search by event name..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pl-10" />
         </div>
         <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value)}>
-            <SelectTrigger><SelectValue placeholder="Filter by status..." /></SelectTrigger>
-            <SelectContent>
-                <SelectItem value="ALL">All Statuses</SelectItem>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="CLOSED">Closed</SelectItem>
-                <SelectItem value="COMPLETED">Completed</SelectItem>
-            </SelectContent>
+          <SelectTrigger><SelectValue placeholder="Filter by status..." /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Statuses</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="CLOSED">Closed</SelectItem>
+            <SelectItem value="COMPLETED">Completed</SelectItem>
+          </SelectContent>
         </Select>
         <Select value={dateFilter} onValueChange={(value) => setDateFilter(value)}>
-            <SelectTrigger><SelectValue placeholder="Filter by date..." /></SelectTrigger>
-            <SelectContent>
-                <SelectItem value="ALL">All Dates</SelectItem>
-                {/* {uniqueEventDates.map(date => <SelectItem key={date} value={date}>{new Date(date).toLocaleDateString()}</SelectItem>)} */}
-            </SelectContent>
+          <SelectTrigger><SelectValue placeholder="Filter by date..." /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Dates</SelectItem>
+            {/* {uniqueEventDates.map(date => <SelectItem key={date} value={date}>{new Date(date).toLocaleDateString()}</SelectItem>)} */}
+          </SelectContent>
         </Select>
         <MultiSelect data={tagsForFilter} name="Tags" selected={selectedTags} setSelected={setSelectedTags} />
         <MultiSelect data={orgsForFilter} name="Organizers" selected={selectedOrgs} setSelected={setSelectedOrgs} />
         <div className="flex flex-col gap-2">
-            <label className="text-sm text-muted-foreground">Max Price: ₹{priceRange[0]}</label>
-            <Slider value={priceRange} max={maxPrice} step={1000} onValueChange={setPriceRange} />
+          <label className="text-sm text-muted-foreground">Max Price: ₹{priceRange[0]}</label>
+          <Slider value={priceRange} max={maxPrice} step={1000} onValueChange={setPriceRange} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {filteredEvents.map((event) => (
-          <EventCard key={event.event_id} event={event} />
+          <EventCard key={event.id} event={event} />
         ))}
       </div>
     </div>

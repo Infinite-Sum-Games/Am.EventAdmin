@@ -55,7 +55,7 @@ export function EventEditorPage() {
           )}
         </div>
       </div>
-      <Separator className='my-4'/>
+      <Separator className='my-4' />
 
       <Tabs defaultValue="general" className="w-full">
         <TabsList className="w-full mb-4 grid grid-cols-6 rounded-sm bg-popover h-10">
@@ -102,7 +102,7 @@ function GeneralTab({ data }: { data: EventData }) {
   const [inputUrl, setInputUrl] = useState(data.poster_url || "");
   const [inputPrice, setInputPrice] = useState(data.price || 0);
   const [inputIsPerHead, setInputIsPerHead] = useState(data.is_per_head || false);
-  
+
   // Sync state on load
   useEffect(() => {
     setInputUrl(data.poster_url || "");
@@ -116,8 +116,8 @@ function GeneralTab({ data }: { data: EventData }) {
   const hasImageURLChanged = inputUrl !== (data.poster_url || "");
 
   // update basic event details mutation.
-  const { mutate: updateDetails, isPending: isUpdatingDetails, error} = useMutation({
-    mutationFn: async ({id,payload}: {id: string, payload: EventDetails})  => {
+  const { mutate: updateDetails, isPending: isUpdatingDetails, error } = useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: EventDetails }) => {
       // validate data
       const validatedData = eventDetailsSchema.safeParse(payload);
       // make the zod errors into a single error message
@@ -130,19 +130,19 @@ function GeneralTab({ data }: { data: EventData }) {
     },
     onSuccess: (_, { payload }) => {
       console.log("payload", payload)
-    useEventEditorStore.getState().setEventData({
-      name: payload.name,
-      blurb: payload.blurb,
-      price: payload.price,
-      is_per_head: payload.is_per_head
-    });
-    
-    toast.success("Event details updated successfully!");
-  },
-  
-  onError: () => {
-    toast.error("Failed to update event details.");
-  }
+      useEventEditorStore.getState().setEventData({
+        name: payload.name,
+        blurb: payload.blurb,
+        price: payload.price,
+        is_per_head: payload.is_per_head
+      });
+
+      toast.success("Event details updated successfully!");
+    },
+
+    onError: () => {
+      toast.error("Failed to update event details.");
+    }
   })
 
   // update event poster url mutation
@@ -198,115 +198,115 @@ function GeneralTab({ data }: { data: EventData }) {
               <CardTitle className="text-base">Basic Details</CardTitle>
               <CardDescription>The core information shown on the event card.</CardDescription>
             </CardHeader>
-            <Button 
-              onClick={handleUpdateDetails} 
+            <Button
+              onClick={handleUpdateDetails}
               size="sm"
               disabled={!hasDetailsChanged || isUpdatingDetails}
             >
-              <Save className="mr-2 h-4 w-4" /> 
+              <Save className="mr-2 h-4 w-4" />
               {isUpdatingDetails ? "Saving..." : "Save Changes"}
             </Button>
           </div>
           <CardContent className="space-y-4">
-            
+
             {/* Name & Blurb Section */}
             <div className="space-y-4">
-                <div className="space-y-3">
+              <div className="space-y-3">
                 <Label htmlFor="event-name">Event Name</Label>
                 <Input
-                    id="event-name"
-                    placeholder="e.g. Annual Tech Symposium 2024"
-                    value={inputName}
-                    onChange={(e) => setInputName(e.target.value)}
-                    className="font-medium"
+                  id="event-name"
+                  placeholder="e.g. Annual Tech Symposium 2024"
+                  value={inputName}
+                  onChange={(e) => setInputName(e.target.value)}
+                  className="font-medium"
                 />
-                </div>
+              </div>
 
-                <div className="space-y-3">
+              <div className="space-y-3">
                 <Label htmlFor="event-blurb">Short Blurb <span className="text-muted-foreground font-normal">(Max 120 chars)</span></Label>
                 <Textarea
-                    id="event-blurb"
-                    placeholder="A catchy one-liner describing the event..."
-                    rows={3}
-                    maxLength={120}
-                    value={inputBlurb}
-                    onChange={(e) => setInputBlurb(e.target.value)}
-                    className="resize-none"
+                  id="event-blurb"
+                  placeholder="A catchy one-liner describing the event..."
+                  rows={3}
+                  maxLength={120}
+                  value={inputBlurb}
+                  onChange={(e) => setInputBlurb(e.target.value)}
+                  className="resize-none"
                 />
                 <p className="text-[0.8rem] text-muted-foreground text-right">
-                    {inputBlurb.length}/120
+                  {inputBlurb.length}/120
                 </p>
-                </div>
+              </div>
             </div>
 
             <Separator />
 
             {/* Pricing Section */}
             <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold">Pricing Configuration</h3>
-                </div>
-                
-                <div className="flex flex-row gap-6">
-                    {/* Price Input */}
-                    <div className="flex-1 space-y-3">
-                        <Label htmlFor="event-price">Ticket Price</Label>
-                        <div className="relative">
-                            <IndianRupee className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                id="event-price"
-                                type="number"
-                                placeholder="0"
-                                min={0}
-                                value={inputPrice}
-                                onChange={(e) => setInputPrice(parseInt(e.target.value, 10))}
-                                className="pl-8 font-mono"
-                            />
-                        </div>
-                        <p className="text-[0.8rem] text-muted-foreground">
-                            Set to 0 for free events.
-                        </p>
-                    </div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold">Pricing Configuration</h3>
+              </div>
 
-                    {/* Fee Structure Toggle Group */}
-                    <div className="space-y-3">
-                         <Label>Fee Structure</Label>
-                         <ToggleGroup 
-                            type="single" 
-                            variant="outline"
-                            className="justify-start"
-                            value={inputIsPerHead ? "PER_HEAD" : "PER_TEAM"}
-                            onValueChange={(value) => {
-                                if (!value) return; // Prevent unselecting
-                                if (value === "PER_HEAD" && data.is_group){
-                                  toast.error("Per Person pricing is not allowed for Group Events.");
-                                  return;
-                                }
-                                if (value === "FIXED" && !data.is_group) {
-                                    toast.error("Fixed pricing is not allowed for Individual Events.");
-                                    return;
-                                }
-                                setInputIsPerHead(value === "PER_HEAD");
-                            }}
-                         >
-                             <ToggleGroupItem value="PER_HEAD" className="flex-1">
-                                <User className="mr-2 h-4 w-4" /> Per Person
-                             </ToggleGroupItem>
-                              <ToggleGroupItem value="PER_TEAM" className="flex-1">
-                                <Users className="mr-2 h-4 w-4" />Per Team
-                             </ToggleGroupItem>
-                         </ToggleGroup>
-                         <p className="text-[0.8rem] text-muted-foreground">
-                            {inputIsPerHead 
-                                ? "Ticket price is calculated per person." 
-                                : "Ticket price is fixed per team/group."}
-                        </p>
-                    </div>
+              <div className="flex flex-row gap-6">
+                {/* Price Input */}
+                <div className="flex-1 space-y-3">
+                  <Label htmlFor="event-price">Ticket Price</Label>
+                  <div className="relative">
+                    <IndianRupee className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="event-price"
+                      type="number"
+                      placeholder="0"
+                      min={0}
+                      value={inputPrice}
+                      onChange={(e) => setInputPrice(parseInt(e.target.value, 10))}
+                      className="pl-8 font-mono"
+                    />
+                  </div>
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    Set to 0 for free events.
+                  </p>
                 </div>
+
+                {/* Fee Structure Toggle Group */}
+                <div className="space-y-3">
+                  <Label>Fee Structure</Label>
+                  <ToggleGroup
+                    type="single"
+                    variant="outline"
+                    className="justify-start"
+                    value={inputIsPerHead ? "PER_HEAD" : "PER_TEAM"}
+                    onValueChange={(value) => {
+                      if (!value) return; // Prevent unselecting
+                      if (value === "PER_HEAD" && data.is_group) {
+                        toast.error("Per Person pricing is not allowed for Group Events.");
+                        return;
+                      }
+                      if (value === "FIXED" && !data.is_group) {
+                        toast.error("Fixed pricing is not allowed for Individual Events.");
+                        return;
+                      }
+                      setInputIsPerHead(value === "PER_HEAD");
+                    }}
+                  >
+                    <ToggleGroupItem value="PER_HEAD" className="flex-1">
+                      <User className="mr-2 h-4 w-4" /> Per Person
+                    </ToggleGroupItem>
+                    <ToggleGroupItem value="PER_TEAM" className="flex-1">
+                      <Users className="mr-2 h-4 w-4" />Per Team
+                    </ToggleGroupItem>
+                  </ToggleGroup>
+                  <p className="text-[0.8rem] text-muted-foreground">
+                    {inputIsPerHead
+                      ? "Ticket price is calculated per person."
+                      : "Ticket price is fixed per team/group."}
+                  </p>
+                </div>
+              </div>
             </div>
-            <ErrorMessage 
-              title="Failed to update event details" 
-              message={error?.message} 
+            <ErrorMessage
+              title="Failed to update event details"
+              message={error?.message}
             />
           </CardContent>
         </Card>
@@ -329,8 +329,8 @@ function GeneralTab({ data }: { data: EventData }) {
                   onChange={(e) => setInputUrl(e.target.value)}
                   className="flex-1 font-mono text-sm"
                 />
-                <Button 
-                  onClick={handleApplyUrl} 
+                <Button
+                  onClick={handleApplyUrl}
                   disabled={!hasImageURLChanged || isUpdatingPosterUrl}
                 >
                   {isUpdatingPosterUrl ? "Applying..." : "Apply"} <Check className="ml-2 h-4 w-4" />
@@ -343,41 +343,41 @@ function GeneralTab({ data }: { data: EventData }) {
 
       {/* Live Preview */}
       <div className="w-full lg:w-80 xl:w-96 shrink-0 space-y-2 flex flex-col justify-center">
-        
-        <div className="relative aspect-2/3 w-full rounded-lg border-2 border-dashed bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all border-muted-foreground/50">
-            
-            {/* Preview Badge */}
-            <div className="absolute top-3 left-3 z-10">
-                {hasImageURLChanged && (
-                    <Badge variant="secondary" className="shadow-sm backdrop-blur-md bg-background/80">
-                        <Info className="mr-1 h-3 w-3 text-blue-500" /> Previewing (Unsaved)
-                    </Badge>
-                )}
-            </div>
 
-            {/* Image Handling */}
-            {inputUrl ? (
-              <img 
-                src={inputUrl} 
-                alt="Event Poster Preview" 
-                className="object-cover w-full h-full animate-in fade-in duration-500"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = ""; 
-                  (e.target as HTMLImageElement).alt = "Invalid Image URL";
-                }}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground gap-2">
-                <div className="rounded-full bg-muted p-4 mb-2">
-                   <ImageIcon className="h-8 w-8 opacity-50" />
-                </div>
-                <p className="text-sm font-medium">No Poster Uploaded</p>
-                <p className="text-xs max-w-45">
-                  Enter a valid URL to see a preview of your event poster.
-                </p>
-              </div>
+        <div className="relative aspect-2/3 w-full rounded-lg border-2 border-dashed bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all border-muted-foreground/50">
+
+          {/* Preview Badge */}
+          <div className="absolute top-3 left-3 z-10">
+            {hasImageURLChanged && (
+              <Badge variant="secondary" className="shadow-sm backdrop-blur-md bg-background/80">
+                <Info className="mr-1 h-3 w-3 text-blue-500" /> Previewing (Unsaved)
+              </Badge>
             )}
-            
+          </div>
+
+          {/* Image Handling */}
+          {inputUrl ? (
+            <img
+              src={inputUrl}
+              alt="Event Poster Preview"
+              className="object-cover w-full h-full animate-in fade-in duration-500"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = "";
+                (e.target as HTMLImageElement).alt = "Invalid Image URL";
+              }}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground gap-2">
+              <div className="rounded-full bg-muted p-4 mb-2">
+                <ImageIcon className="h-8 w-8 opacity-50" />
+              </div>
+              <p className="text-sm font-medium">No Poster Uploaded</p>
+              <p className="text-xs max-w-45">
+                Enter a valid URL to see a preview of your event poster.
+              </p>
+            </div>
+          )}
+
         </div>
         <Label className="text-muted-foreground pl-1 self-center">Live Preview</Label>
       </div>
@@ -419,7 +419,7 @@ function DescriptionTab({ data }: { data: EventData }) {
   return (
     <div className="h-full mx-auto">
       <Card className="h-full flex flex-col border-none shadow-none md:border md:shadow-sm">
-        
+
         <CardHeader className="px-0 md:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -430,12 +430,12 @@ function DescriptionTab({ data }: { data: EventData }) {
                 Provide a detailed overview of your event. Markdown formatting is supported.
               </CardDescription>
             </div>
-            
+
             {/* Action Button*/}
-            <Button 
-                onClick={handleUpdateDescription}
-                disabled={!hasDescriptionChanged}
-                className="flex"
+            <Button
+              onClick={handleUpdateDescription}
+              disabled={!hasDescriptionChanged}
+              className="flex"
             >
               <Save className="mr-2 h-4 w-4" /> Save Changes
             </Button>
@@ -443,19 +443,19 @@ function DescriptionTab({ data }: { data: EventData }) {
         </CardHeader>
 
         <CardContent className="flex-1 px-0 md:px-6 pb-6">
-            {/* Editor Container */}
-            <div className="min-h-125">
-                <Suspense fallback={<EditorSkeleton />}>
-                    <MDXEditorLazy 
-                        markdown={inputDescription} 
-                        onChange={(newMarkdown) => setInputDescription(newMarkdown || "")}
-                    />
-                </Suspense>
-            </div>
-            
-            <p className="text-xs text-muted-foreground mt-3 text-right">
-                Use headings (#), lists (-), and bold text (**text**) to format your content.
-            </p>
+          {/* Editor Container */}
+          <div className="min-h-125">
+            <Suspense fallback={<EditorSkeleton />}>
+              <MDXEditorLazy
+                markdown={inputDescription}
+                onChange={(newMarkdown) => setInputDescription(newMarkdown || "")}
+              />
+            </Suspense>
+          </div>
+
+          <p className="text-xs text-muted-foreground mt-3 text-right">
+            Use headings (#), lists (-), and bold text (**text**) to format your content.
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -477,7 +477,7 @@ function RulesTab({ data }: { data: EventData }) {
 
   const handleUpdateRules = () => {
     useEventEditorStore.getState().setEventData({ rules: inputRules });
-    
+
     console.log("API CALL:", "Updating Rules:", inputRules);
     toast.success("Updated rules successfully!");
   }
@@ -485,7 +485,7 @@ function RulesTab({ data }: { data: EventData }) {
   return (
     <div className="h-full mx-auto">
       <Card className="h-full flex flex-col border-none shadow-none md:border md:shadow-sm">
-        
+
         <CardHeader className="px-0 md:px-6">
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -496,12 +496,12 @@ function RulesTab({ data }: { data: EventData }) {
                 Define the rules, judging criteria, and regulations for participants.
               </CardDescription>
             </div>
-            
+
             {/* Action Button */}
-            <Button 
-                onClick={handleUpdateRules}
-                disabled={!hasRulesChanged}
-                className="flex"
+            <Button
+              onClick={handleUpdateRules}
+              disabled={!hasRulesChanged}
+              className="flex"
             >
               <Save className="mr-2 h-4 w-4" /> Save Rules
             </Button>
@@ -509,18 +509,18 @@ function RulesTab({ data }: { data: EventData }) {
         </CardHeader>
 
         <CardContent className="flex-1 px-0 md:px-6 pb-6">
-            <div className="min-h-125">
-                <Suspense fallback={<EditorSkeleton />}>
-                    <MDXEditorLazy 
-                        markdown={inputRules} 
-                        onChange={(newMarkdown) => setInputRules(newMarkdown || "")}
-                    />
-                </Suspense>
-            </div>
+          <div className="min-h-125">
+            <Suspense fallback={<EditorSkeleton />}>
+              <MDXEditorLazy
+                markdown={inputRules}
+                onChange={(newMarkdown) => setInputRules(newMarkdown || "")}
+              />
+            </Suspense>
+          </div>
 
-            <p className="text-xs text-muted-foreground mt-3 text-right">
-                Tip: Use bullet points (-) to make rules easy to scan.
-            </p>
+          <p className="text-xs text-muted-foreground mt-3 text-right">
+            Tip: Use bullet points (-) to make rules easy to scan.
+          </p>
         </CardContent>
       </Card>
     </div>
@@ -528,13 +528,13 @@ function RulesTab({ data }: { data: EventData }) {
 }
 
 // is group, team sizes, seats
-function SeatsTab({ data }: { data: EventData }) { 
+function SeatsTab({ data }: { data: EventData }) {
   const [inputIsGroup, setInputIsGroup] = useState(data.is_group);
   const [inputMinTeamSize, setInputMinTeamSize] = useState(data.min_teamsize);
   const [inputMaxTeamSize, setInputMaxTeamSize] = useState(data.max_teamsize);
   const [inputMaxNoOfTeams, setInputMaxNoOfTeams] = useState(0);
   const [inputTotalSeats, setInputTotalSeats] = useState(data.total_seats);
-  
+
   useEffect(() => {
     setInputIsGroup(data.is_group);
     setInputMinTeamSize(data.min_teamsize);
@@ -543,7 +543,7 @@ function SeatsTab({ data }: { data: EventData }) {
     setInputTotalSeats(data.total_seats);
   }, [data.is_group, data.min_teamsize, data.max_teamsize, data.total_seats]);
 
-  const hadSeatsChanged = inputIsGroup !== data.is_group || 
+  const hadSeatsChanged = inputIsGroup !== data.is_group ||
     (inputIsGroup && (inputMinTeamSize !== data.min_teamsize || inputMaxTeamSize !== data.max_teamsize || inputMaxNoOfTeams !== data.total_seats)) ||
     (!inputIsGroup && inputTotalSeats !== data.total_seats);
 
@@ -569,7 +569,7 @@ function SeatsTab({ data }: { data: EventData }) {
   return (
     <div className="h-full mx-auto">
       <Card className="h-full flex flex-col border-none shadow-none md:border md:shadow-sm">
-        
+
         {/* Header */}
         <CardHeader className="px-0 md:px-6">
           <div className="flex items-center justify-between">
@@ -582,10 +582,10 @@ function SeatsTab({ data }: { data: EventData }) {
               </CardDescription>
             </div>
             {/* Action Button */}
-            <Button 
-                disabled={!hadSeatsChanged} 
-                onClick={handleUpdateSeats}
-                className="flex"
+            <Button
+              disabled={!hadSeatsChanged}
+              onClick={handleUpdateSeats}
+              className="flex"
             >
               <Save className="mr-2 h-4 w-4" /> Update Seats
             </Button>
@@ -593,27 +593,27 @@ function SeatsTab({ data }: { data: EventData }) {
         </CardHeader>
 
         <CardContent className="flex-1 px-0 md:px-6 pb-6 space-y-6">
-          
+
           {/* 1. Participation Mode Toggle */}
           <div className="bg-muted/30 p-4 rounded-lg border">
             <SettingRow
               label="Participation Mode"
               description="How do users register for this event?"
             >
-              <ToggleGroup 
-                type="single" 
+              <ToggleGroup
+                type="single"
                 variant="outline"
                 className="justify-start sm:justify-end"
                 value={inputIsGroup ? "YES" : "NO"}
                 onValueChange={(value) => {
                   if (!value) return;
                   setInputIsGroup(value === "YES");
-                  if(value === "YES") {
-                      setInputMinTeamSize(1);
-                      setInputMaxTeamSize(1);
-                      setInputMaxNoOfTeams(1);
+                  if (value === "YES") {
+                    setInputMinTeamSize(1);
+                    setInputMaxTeamSize(1);
+                    setInputMaxNoOfTeams(1);
                   } else {
-                      setInputTotalSeats(0);
+                    setInputTotalSeats(0);
                   }
                 }}
               >
@@ -633,98 +633,98 @@ function SeatsTab({ data }: { data: EventData }) {
           <div className="animate-in fade-in slide-in-from-top-2 duration-300">
             {inputIsGroup ? (
               <div className="space-y-6">
-                
+
                 {/* Team Size + Registration Limit */}
                 <div className="flex flex-col md:flex-row gap-6">
-                    
-                    {/* Left Side: Team Size Logic */}
-                    <div className="flex-1 space-y-2">
-                        <Label className="text-base font-medium">Team Size Constraints</Label>
-                        <div className="flex items-end gap-3">
-                            <div className="space-y-1.5 flex-1">
-                                <Label htmlFor="min-size" className="text-xs text-muted-foreground">Minimum</Label>
-                                <Input
-                                    id="min-size"
-                                    type="number"
-                                    value={inputMinTeamSize}
-                                    max={inputMaxTeamSize}
-                                    min="1"
-                                    className="text-center"
-                                    onChange={(e) => setInputMinTeamSize(parseInt(e.target.value, 10) || 1)}
-                                />
-                            </div>
-                            <ArrowRight className="h-4 w-4 text-muted-foreground mb-3" />
-                            <div className="space-y-1.5 flex-1">
-                                <Label htmlFor="max-size" className="text-xs text-muted-foreground">Maximum</Label>
-                                <Input
-                                    id="max-size"
-                                    type="number"
-                                    value={inputMaxTeamSize}
-                                    max="10"
-                                    min="1"
-                                    className="text-center"
-                                    onChange={(e) => setInputMaxTeamSize(parseInt(e.target.value, 10) || 1)}
-                                />
-                            </div>
-                        </div>
-                    </div>
 
-                    {/* Vertical Divider */}
-                    <div className="w-px bg-border self-stretch mx-2" />
-
-                    {/* Registration Limit */}
-                    <div className="flex-1 space-y-2">
-                         <Label className="text-base font-medium">Registration Limit</Label>
-                         <div className="flex flex-col space-y-1.5">
-                            <Label htmlFor="max-teams" className="text-xs text-muted-foreground">Max Teams Allowed</Label>
-                            <Input
-                                id="max-teams"
-                                type="number"
-                                value={inputMaxNoOfTeams}
-                                min="1"
-                                onChange={(e) => setInputMaxNoOfTeams(parseInt(e.target.value, 10) || 1)}
-                            />
-                         </div>
+                  {/* Left Side: Team Size Logic */}
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-base font-medium">Team Size Constraints</Label>
+                    <div className="flex items-end gap-3">
+                      <div className="space-y-1.5 flex-1">
+                        <Label htmlFor="min-size" className="text-xs text-muted-foreground">Minimum</Label>
+                        <Input
+                          id="min-size"
+                          type="number"
+                          value={inputMinTeamSize}
+                          max={inputMaxTeamSize}
+                          min="1"
+                          className="text-center"
+                          onChange={(e) => setInputMinTeamSize(parseInt(e.target.value, 10) || 1)}
+                        />
+                      </div>
+                      <ArrowRight className="h-4 w-4 text-muted-foreground mb-3" />
+                      <div className="space-y-1.5 flex-1">
+                        <Label htmlFor="max-size" className="text-xs text-muted-foreground">Maximum</Label>
+                        <Input
+                          id="max-size"
+                          type="number"
+                          value={inputMaxTeamSize}
+                          max="10"
+                          min="1"
+                          className="text-center"
+                          onChange={(e) => setInputMaxTeamSize(parseInt(e.target.value, 10) || 1)}
+                        />
+                      </div>
                     </div>
+                  </div>
+
+                  {/* Vertical Divider */}
+                  <div className="w-px bg-border self-stretch mx-2" />
+
+                  {/* Registration Limit */}
+                  <div className="flex-1 space-y-2">
+                    <Label className="text-base font-medium">Registration Limit</Label>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="max-teams" className="text-xs text-muted-foreground">Max Teams Allowed</Label>
+                      <Input
+                        id="max-teams"
+                        type="number"
+                        value={inputMaxNoOfTeams}
+                        min="1"
+                        onChange={(e) => setInputMaxNoOfTeams(parseInt(e.target.value, 10) || 1)}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <Separator className="my-2" />
 
                 {/* Estimated Capacity */}
                 <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-lg p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium">
-                                <Info className="h-4 w-4" /> Estimated Total Capacity
-                            </div>
-                            <p className="text-sm text-blue-600/80 dark:text-blue-400/80">
-                                This is the theoretical maximum number of people attending if every team is full.
-                            </p>
-                        </div>
-                        <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
-                             <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
-                             <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                                {inputMaxNoOfTeams * inputMaxTeamSize}
-                             </p>
-                        </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-blue-700 dark:text-blue-400 font-medium">
+                        <Info className="h-4 w-4" /> Estimated Total Capacity
+                      </div>
+                      <p className="text-sm text-blue-600/80 dark:text-blue-400/80">
+                        This is the theoretical maximum number of people attending if every team is full.
+                      </p>
                     </div>
+                    <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
+                      <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                        {inputMaxNoOfTeams * inputMaxTeamSize}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
               </div>
             ) : (
               // Individual Mode
-              <SettingRow 
+              <SettingRow
                 label="Total Seat Capacity"
                 description="The total number of individual tickets/registrations available."
               >
                 <div className="relative max-w-[200px]">
-                    <Input
-                        type="number"
-                        value={inputTotalSeats}
-                        className="pl-9"
-                        onChange={(e) => setInputTotalSeats(parseInt(e.target.value, 10))}
-                    />
-                    <Armchair className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    type="number"
+                    value={inputTotalSeats}
+                    className="pl-9"
+                    onChange={(e) => setInputTotalSeats(parseInt(e.target.value, 10))}
+                  />
+                  <Armchair className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 </div>
               </SettingRow>
             )}
@@ -737,14 +737,14 @@ function SeatsTab({ data }: { data: EventData }) {
 }
 
 
-function SettingRow({ 
-  label, 
-  description, 
-  children 
-}: { 
-  label: string; 
-  description?: string; 
-  children: React.ReactNode 
+function SettingRow({
+  label,
+  description,
+  children
+}: {
+  label: string;
+  description?: string;
+  children: React.ReactNode
 }) {
   return (
     <div className="flex flex-row items-center justify-between py-4">
@@ -757,7 +757,7 @@ function SettingRow({
   );
 }
 
-function ModesTagsOrgsTab({ data }: { data: EventData }) { 
+function ModesTagsOrgsTab({ data }: { data: EventData }) {
   const [inputEventType, setInputEventType] = useState(data.event_type || "EVENT");
   const [inputIsOffline, setInputIsOffline] = useState(data.is_offline ? "OFFLINE" : "ONLINE");
   const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
@@ -773,7 +773,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical, data.is_completed]);
 
 
-  const hasModesChanged =  inputEventType !== data.event_type ||
+  const hasModesChanged = inputEventType !== data.event_type ||
     inputIsOffline !== (data.is_offline ? "OFFLINE" : "ONLINE") ||
     inputAttendanceMode !== data.attendance_mode ||
     (inputIsTechnical === "YES") !== data.is_technical ||
@@ -804,25 +804,25 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 Set the fundamental modes and settings for your event.
               </CardDescription>
             </div>
-            <Button 
-                  onClick={handleUpdateEventModes}
-                  disabled={!hasModesChanged}
-                  className="flex"
-              >
-                <Save className="mr-2 h-4 w-4" /> Save Modes
-              </Button>
+            <Button
+              onClick={handleUpdateEventModes}
+              disabled={!hasModesChanged}
+              className="flex"
+            >
+              <Save className="mr-2 h-4 w-4" /> Save Modes
+            </Button>
           </CardHeader>
           <CardContent className="grid gap-2">
-            
+
             {/* Event Type */}
-            <SettingRow 
-              label="Event Type" 
+            <SettingRow
+              label="Event Type"
               description="Is this a workshop or a general event?"
             >
-              <ToggleGroup 
-                type="single" 
+              <ToggleGroup
+                type="single"
                 variant="outline"
-                value={inputEventType} 
+                value={inputEventType}
                 onValueChange={(value) => {
                   if (!value) return;
                   setInputEventType(value as "EVENT" | "WORKSHOP");
@@ -840,12 +840,12 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <Separator />
 
             {/* Event Mode */}
-            <SettingRow 
-              label="Location Mode" 
+            <SettingRow
+              label="Location Mode"
               description="Is this event held online or offline?"
             >
-              <ToggleGroup 
-                type="single" 
+              <ToggleGroup
+                type="single"
                 variant="outline"
                 value={inputIsOffline}
                 onValueChange={(value) => {
@@ -865,12 +865,12 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <Separator />
 
             {/* Attendance Mode */}
-            <SettingRow 
-              label="Attendance Tracking" 
+            <SettingRow
+              label="Attendance Tracking"
               description="How should participants mark their presence?"
             >
-              <ToggleGroup 
-                type="single" 
+              <ToggleGroup
+                type="single"
                 variant="outline"
                 value={inputAttendanceMode}
                 onValueChange={(value) => {
@@ -890,7 +890,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
             <Separator />
 
             {/* IsTechnical */}
-            <SettingRow 
+            <SettingRow
               label="Technical Event"
               description="Is this event technical in nature?"
             >
