@@ -30,6 +30,7 @@ import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
+import { da } from 'date-fns/locale';
 
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
@@ -130,7 +131,7 @@ function GeneralTab({ data }: { data: EventData }) {
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
         throw new Error(errorMessages);
       }
-      
+
       const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
       return response.data;
     },
@@ -140,7 +141,7 @@ function GeneralTab({ data }: { data: EventData }) {
         return { ...oldData, ...payload };
       });
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      
+
       toast.success("Event details updated successfully!");
     },
     onError: () => {
@@ -165,7 +166,7 @@ function GeneralTab({ data }: { data: EventData }) {
         if (!oldData) return oldData;
         return { ...oldData, poster_url };
       });
-      
+
       toast.success("Poster URL updated successfully!");
     },
     onError: (error) => {
@@ -365,13 +366,13 @@ function GeneralTab({ data }: { data: EventData }) {
               </div>
             </div>
             <ErrorMessage
-            title="Failed to update Poster URL"
-            message={isUpdatingPosterUrl ? "Updating..." : updatePosterError?.message}
-          />
-          <ErrorMessage
-            title="Failed to delete Poster URL"
-            message={isDeletingPosterUrl ? "Deleting..." : deletePosterError?.message}
-          />
+              title="Failed to update Poster URL"
+              message={isUpdatingPosterUrl ? "Updating..." : updatePosterError?.message}
+            />
+            <ErrorMessage
+              title="Failed to delete Poster URL"
+              message={isDeletingPosterUrl ? "Deleting..." : deletePosterError?.message}
+            />
           </CardContent>
         </Card>
       </div>
@@ -446,7 +447,7 @@ function DescriptionTab({ data }: { data: EventData }) {
 
   const hasDescriptionChanged = inputDescription !== (data.description || "");
 
-    // update description mutation
+  // update description mutation
   const { mutate: updateDescription, isPending: isUpdatingDescription, error: updateDescriptionError } = useMutation({
     mutationFn: async ({ id, payload }: { id: string, payload: EventDetails }) => {
       // Zod validation
@@ -455,7 +456,7 @@ function DescriptionTab({ data }: { data: EventData }) {
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
         throw new Error(errorMessages);
       }
-      
+
       const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
       return response.data;
     },
@@ -465,11 +466,11 @@ function DescriptionTab({ data }: { data: EventData }) {
         return { ...oldData, ...payload };
       });
       queryClient.invalidateQueries({ queryKey: ['events'] });
-      
-      toast.success("Event details updated successfully!");
+
+      toast.success("Updated event description successfully!");
     },
     onError: () => {
-      toast.error("Failed to update event details.");
+      toast.error("Failed to update event description.");
     }
   });
 
@@ -541,6 +542,7 @@ function DescriptionTab({ data }: { data: EventData }) {
 // rules
 function RulesTab({ data }: { data: EventData }) {
   const [inputRules, setInputRules] = useState(data.rules || "");
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Sync external changes only if input is empty (first load)
@@ -551,11 +553,44 @@ function RulesTab({ data }: { data: EventData }) {
 
   const hasRulesChanged = inputRules !== (data.rules || "");
 
-  const handleUpdateRules = () => {
-    useEventEditorStore.getState().setEventData({ rules: inputRules });
+  const { mutate: updateRules, isPending: isUpdatingRules, error: updateRulesError } = useMutation({
+    mutationFn: async ({ id, payload }: { id: string, payload: EventDetails }) => {
+      // Zod validation
+      const validatedData = eventDetailsSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
 
-    console.log("API CALL:", "Updating Rules:", inputRules);
-    toast.success("Updated rules successfully!");
+      const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
+      return response.data;
+    },
+    onSuccess: (_, { id, payload }) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        return { ...oldData, ...payload };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+
+      toast.success("Updated event rules successfully!");
+    },
+    onError: () => {
+      toast.error("Failed to update event rules.");
+    }
+  });
+
+  const handleUpdateRules = () => {
+    updateRules({
+      id: data.id,
+      payload: {
+        name: data.name,
+        blurb: data.blurb,
+        price: data.price,
+        is_per_head: data.is_per_head,
+        description: data.description,
+        rules: inputRules,
+      }
+    });
   }
 
   return (
@@ -576,10 +611,11 @@ function RulesTab({ data }: { data: EventData }) {
             {/* Action Button */}
             <Button
               onClick={handleUpdateRules}
-              disabled={!hasRulesChanged}
+              disabled={!hasRulesChanged || isUpdatingRules}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> Save Rules
+              <Save className="mr-2 h-4 w-4" />
+              {isUpdatingRules ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </CardHeader>
@@ -597,6 +633,10 @@ function RulesTab({ data }: { data: EventData }) {
           <p className="text-xs text-muted-foreground mt-3 text-right">
             Tip: Use bullet points (-) to make rules easy to scan.
           </p>
+          <ErrorMessage
+            title='Failed to update rules'
+            message={updateRulesError?.message}
+          />
         </CardContent>
       </Card>
     </div>
