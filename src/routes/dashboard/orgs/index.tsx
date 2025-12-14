@@ -16,6 +16,7 @@ import {
   Edit3,
   Building,
   Users,
+  Plus,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
@@ -96,11 +97,14 @@ function OrgsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold">Organizers</h1>
+    <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
+      <div className="flex flex-row gap-4 items-center justify-between border-b pb-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Organizers</h1>
+          <p className="text-muted-foreground">Add new organizers to manage your events.</p>
+        </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="flex flex-row items-center gap-2 ">
           <Select
             value={typeFilter}
             onValueChange={(value) =>
@@ -121,7 +125,7 @@ function OrgsPage() {
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="w-full sm:w-auto">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create
+                <Plus className="mr-1 h-4 w-4" />Create
               </Button>
             </DialogTrigger>
 
@@ -152,7 +156,7 @@ function OrgsPage() {
           </p>
         </div>
       ) : (
-        <Card className="py-1">
+        <Card className="py-0 mt-1">
           <div className="flex flex-col">
             {filteredOrgs.map((org, index) => (
               <div key={org.id}>
@@ -167,13 +171,7 @@ function OrgsPage() {
                     <div className="flex items-center gap-2">
                       <p className="font-semibold">{org.organizer_name}</p>
 
-                      <Badge
-                        variant={
-                          org.organizer_type === "DEPARTMENT"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
+                      <Badge>
                         {org.organizer_type === "DEPARTMENT" ? (
                           <Building className="mr-1 h-3 w-3" />
                         ) : (
@@ -229,11 +227,10 @@ function OrgsPage() {
 
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="icon"
+                      variant="destructive"
                       onClick={() => deleteOrg(org.id)}
                     >
-                      <Trash2 className="w-5 h-5 text-red-500" />
+                      <Trash2 className="w-5 h-5" /> Delete
                     </Button>
                   </div>
                 </div>
