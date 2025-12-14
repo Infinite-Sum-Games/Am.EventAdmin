@@ -26,5 +26,6 @@ export const api = {
   DELETE_PEOPLE: (id: string) => `${CURRENT_BASE_URL}/people/${id}`,
 
   CREATE_EVENT: `${CURRENT_BASE_URL}/events/admin/new`,
+  UPDATE_BASIC_EVENT_DETAILS: (id : string) => `${CURRENT_BASE_URL}/events/admin/details/${id}`,
   UPDATE_EVENT_POSTER_URL: `${CURRENT_BASE_URL}/events/admin/poster`,
 };

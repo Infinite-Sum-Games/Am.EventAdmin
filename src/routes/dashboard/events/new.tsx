@@ -25,64 +25,14 @@ import { OrganizersCard } from '@/components/events/organiser-card';
 import { TagsCard } from '@/components/events/tag-card';
 import { SchedulingTab } from '@/components/events/scheduling-tab';
 import { PeopleCard } from '@/components/events/people-card';
+import { eventDetailsSchema, type EventDetails } from '@/schemas/event';
+import { axiosClient } from '@/lib/axios';
+import { api } from '@/lib/api';
+import { useMutation } from '@tanstack/react-query';
+import { ErrorMessage } from '@/components/events/error-message';
 
 export function EventEditorPage() {
-  const mockData: EventData = {
-    attendance_mode: "SOLO",
-    id: "fd0c3fd9-464b-4187-b6cc-5633968d51e7",
-    name: "Sample Event",
-    blurb: "This is a sample event for demonstration purposes.",
-    description: "#Event Description\n\nThis event is designed to showcase the event editor functionality.",
-    rules: "1. Be respectful.\n2. Follow the guidelines.",
-    poster_url: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2070&auto=format&fit=crop",
-    is_published: true,
-    event_type: "EVENT",
-    event_status: "ACTIVE",
-    is_group: true,
-    is_offline: true,
-    is_technical: false,
-    price: 0,
-    is_per_head: false,
-    total_seats: 40,
-    min_teamsize: 2,
-    max_teamsize: 4,
-    organizers: [
-      { id: "org1", name: "Organizer One" },
-      { id: "org2", name: "Organizer Two" },
-    ],
-    people: [
-      { id: "person1", name: "Speaker One" },
-      { id: "person2", name: "Speaker Two" },
-    ],
-    tags: [
-      { id: "tag1", name: "Technology" },
-      { id: "tag2", name: "Workshop" },
-    ],
-    schedules: [
-      {
-        id: "schedule1",
-        event_date: "2024-10-15",
-        start_time: "10:00",
-        end_time: "12:00",
-        venue: "Main Hall",
-      },
-      {
-        id: "schedule2",
-        event_date: "2024-10-16",
-        start_time: "14:00",
-        end_time: "16:00",
-        venue: "Conference Room A",
-      },
-    ],
-    // message from response
-    message: "Event draft created successfully.",
-  }
-  
   const { eventData } = useEventEditorStore();
-
-  if (!eventData) {
-    useEventEditorStore.getState().initializeEvent(mockData);
-  }
 
   if (!eventData) return <div className='text-center'>Loading Editor...</div>;
 
@@ -145,7 +95,7 @@ export function EventEditorPage() {
   );
 }
 
-// name, blurb, poster
+// name, blurb, price, is_per_head, poster 
 function GeneralTab({ data }: { data: EventData }) {
   const [inputName, setInputName] = useState(data.name);
   const [inputBlurb, setInputBlurb] = useState(data.blurb || "");
@@ -165,6 +115,39 @@ function GeneralTab({ data }: { data: EventData }) {
   const hasDetailsChanged = inputName !== data.name || inputBlurb !== (data.blurb || "") || inputPrice !== data.price || inputIsPerHead !== data.is_per_head;
   const hasImageURLChanged = inputUrl !== (data.poster_url || "");
 
+  // update basic event details mutation.
+  const { mutate: updateDetails, isPending, error} = useMutation({
+    mutationFn: async ({id,payload}: {id: string, payload: EventDetails})  => {
+      // validate data
+      const validatedData = eventDetailsSchema.safeParse(payload);
+      // make the zod errors into a single error message
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        console.error("error :", errorMessages)
+        throw new Error(errorMessages);
+      }
+      const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
+      console.log("response: ", response)
+      return response.data;
+    },
+    onSuccess: (_, { payload }) => {
+      console.log("payload", payload)
+    useEventEditorStore.getState().setEventData({
+      name: payload.name,
+      blurb: payload.blurb,
+      price: payload.price,
+      is_per_head: payload.is_per_head
+    });
+    
+    toast.success("Event details updated successfully!");
+  },
+  
+  onError: (error) => {
+    console.error(error);
+    toast.error("Failed to update event details.");
+  }
+  })
+
   const handleApplyUrl = async () => {
     useEventEditorStore.getState().setEventData({ poster_url: inputUrl });
     console.log("API CALL: Uploading/Verifying URL:", inputUrl);
@@ -172,14 +155,15 @@ function GeneralTab({ data }: { data: EventData }) {
   };
 
   const handleUpdateDetails = () => {
-    useEventEditorStore.getState().setEventData({ 
-      name: inputName,
-      blurb: inputBlurb,
-      price: inputPrice,
-      is_per_head: inputIsPerHead,
+    updateDetails({
+      id: data.id,
+      payload: {
+        name: inputName,
+        blurb: inputBlurb,
+        price: inputPrice,
+        is_per_head: inputIsPerHead
+      }
     });
-    console.log("API CALL: Updating Details", { name: inputName, blurb: inputBlurb, price: inputPrice, is_per_head: inputIsPerHead });
-    toast.success("Updated details successfully!");
   }
 
   return (
@@ -193,13 +177,14 @@ function GeneralTab({ data }: { data: EventData }) {
               <CardTitle className="text-base">Basic Details</CardTitle>
               <CardDescription>The core information shown on the event card.</CardDescription>
             </CardHeader>
-          <Button 
+            <Button 
               onClick={handleUpdateDetails} 
               size="sm"
-              disabled={!hasDetailsChanged}
+              disabled={!hasDetailsChanged || isPending}
             >
-              <Save className="mr-2 h-4 w-4" /> Save Changes
-          </Button>
+              <Save className="mr-2 h-4 w-4" /> 
+              {isPending ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
           <CardContent className="space-y-4">
             
@@ -298,7 +283,10 @@ function GeneralTab({ data }: { data: EventData }) {
                     </div>
                 </div>
             </div>
-
+            <ErrorMessage 
+              title="Failed to update event details" 
+              message={error?.message} 
+            />
           </CardContent>
         </Card>
 
@@ -754,19 +742,22 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   const [inputIsOffline, setInputIsOffline] = useState(data.is_offline ? "OFFLINE" : "ONLINE");
   const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
   const [inputIsTechnical, setInputIsTechnical] = useState(data.is_technical ? "YES" : "NO");
-  
+  const [inputIsCompleted, setInputIsCompleted] = useState(data.is_completed ? "YES" : "NO");
+
   useEffect(() => {
     setInputEventType(data.event_type);
     setInputIsOffline(data.is_offline ? "OFFLINE" : "ONLINE");
     setInputAttendanceMode(data.attendance_mode);
     setInputIsTechnical(data.is_technical ? "YES" : "NO");
-  }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical]);
+    setInputIsCompleted(data.is_completed ? "YES" : "NO");
+  }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical, data.is_completed]);
 
 
   const hasModesChanged =  inputEventType !== data.event_type ||
     inputIsOffline !== (data.is_offline ? "OFFLINE" : "ONLINE") ||
     inputAttendanceMode !== data.attendance_mode ||
-    (inputIsTechnical === "YES") !== data.is_technical;
+    (inputIsTechnical === "YES") !== data.is_technical ||
+    (inputIsCompleted === "YES") !== data.is_completed;
 
 
   // Update Event Modes
@@ -776,6 +767,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
       is_offline: inputIsOffline === "OFFLINE",
       attendance_mode: inputAttendanceMode,
       is_technical: inputIsTechnical === "YES",
+      is_completed: inputIsCompleted === "YES",
     });
     console.log("API CALL:", "Updating Modes");
     toast.success("Updated modes successfully!");
@@ -867,10 +859,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="SOLO" title="Scan once to attend">
-                  <LogIn className="mr-2 h-4 w-4" /> Check-in Only
+                  <LogIn className="mr-2 h-4 w-4" /> Entry only
                 </ToggleGroupItem>
                 <ToggleGroupItem value="DUO" title="Scan start and end">
-                  <ArrowRightLeft className="mr-2 h-4 w-4" /> In & Out
+                  <ArrowRightLeft className="mr-2 h-4 w-4" /> Entry & Exit
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -889,6 +881,31 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 onValueChange={(value) => {
                   if (!value) return;
                   setInputIsTechnical(value);
+                }}
+              >
+                <ToggleGroupItem value="NO">
+                  <XCircle className="mr-2 h-4 w-4" /> No
+                </ToggleGroupItem>
+                <ToggleGroupItem value="YES" className="">
+                  <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
+                </ToggleGroupItem>
+              </ToggleGroup>
+            </SettingRow>
+
+            <Separator />
+
+            {/* Is Completed */}
+            <SettingRow
+              label="Mark as Completed"
+              description="Is this event completed?"
+            >
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={inputIsCompleted}
+                onValueChange={(value) => {
+                  if (!value) return;
+                  setInputIsCompleted(value);
                 }}
               >
                 <ToggleGroupItem value="NO">

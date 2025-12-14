@@ -12,10 +12,10 @@ export interface EventData {
   is_offline: boolean,
   is_published: boolean,
   is_technical: boolean,
+  is_completed: boolean,
   max_teamsize: number,
   // message from response
-  message: string,
-
+  message?: string,
   min_teamsize: number,
   organizers: organizers[],
   people: people[],
