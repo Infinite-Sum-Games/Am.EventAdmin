@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { OrganizerType } from "@/types/db";
+import type { OrganizerType } from "@/types/organizers";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
 import { EditOrgForm } from "@/components/orgs/edit-org-form";
@@ -76,7 +76,7 @@ function OrgsPage() {
 
   const filteredOrgs = useMemo(() => {
     if (typeFilter === "ALL") return orgs;
-    return orgs.filter((org) => org.organizer_type === typeFilter);
+    return orgs.filter((org) => org.org_type === typeFilter);
   }, [orgs, typeFilter]);
 
   const deleteOrg = async (orgId: string) => {
@@ -162,21 +162,21 @@ function OrgsPage() {
                 <div className="flex items-center gap-4 p-4">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback>
-                      {getInitials(org.organizer_name)}
+                      {getInitials(org.name)}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="grid gap-1 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold">{org.organizer_name}</p>
+                      <p className="font-semibold">{org.name}</p>
 
                       <Badge>
-                        {org.organizer_type === "DEPARTMENT" ? (
+                        {org.org_type === "DEPARTMENT" ? (
                           <Building className="mr-1 h-3 w-3" />
                         ) : (
                           <Users className="mr-1 h-3 w-3" />
                         )}
-                        {org.organizer_type}
+                        {org.org_type}
                       </Badge>
                     </div>
 
@@ -206,9 +206,9 @@ function OrgsPage() {
                         {editOrg && (
                           <EditOrgForm
                             id={editOrg.id}
-                            name={editOrg.organizer_name}
-                            email={editOrg.organizer_email}
-                            org_type={editOrg.organizer_type}
+                            name={editOrg.name}
+                            email={editOrg.email}
+                            org_type={editOrg.org_type}
                             student_head={editOrg.student_head}
                             student_co_head={editOrg.student_co_head || ""}
                             faculty_head={editOrg.faculty_head}

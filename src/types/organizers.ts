@@ -1,8 +1,10 @@
+export type OrganizerType = "DEPARTMENT" | "CLUB";
+
 export type Organizer = {
   id: string;
-  organizer_name: string;
-  organizer_email: string;
-  organizer_type: "DEPARTMENT" | "CLUB";
+  name: string;
+  email: string;
+  org_type: OrganizerType;
   student_head: string;
   student_co_head: string | null;
   faculty_head: string;

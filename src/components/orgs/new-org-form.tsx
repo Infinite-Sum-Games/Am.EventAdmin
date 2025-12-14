@@ -9,7 +9,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PlusCircle } from "lucide-react";
-import type { OrganizerType } from "@/types/db";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import sha256 from "crypto-js/sha256";
@@ -19,6 +18,7 @@ import type z from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
+import type { OrganizerType } from "@/types/organizers";
 
 type OrgData = z.infer<typeof OrgSchema>;
 

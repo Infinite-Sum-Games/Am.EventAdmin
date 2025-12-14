@@ -65,7 +65,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
     onSuccess: (_, { organizer_id }) => {
       const organizerToAdd = AVAILABLE_ORGANIZERS.find(org => org.id === organizer_id);
       if (organizerToAdd) {
-        setSelectedIds(prev => [...prev, { id: organizerToAdd.id, name: organizerToAdd.organizer_name }]);
+        setSelectedIds(prev => [...prev, { id: organizerToAdd.id, name: organizerToAdd.name }]);
       }
       toast.success("Organizer added successfully");
     },
@@ -153,16 +153,16 @@ export function OrganizersCard({ data }: { data: EventData }) {
                     return (
                         <CommandItem
                             key={org.id}
-                            value={org.organizer_name}
+                            value={org.name}
                             onSelect={() => org.id && handleSelect(org.id)}
                         >
                             <div className="flex items-center gap-2 flex-1">
                                 <Avatar className="h-6 w-6">
                                     <AvatarFallback className="text-[10px]">
-                                        {org.organizer_name.slice(0, 2).toUpperCase()}
+                                        {org.name.slice(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
-                                <span>{org.organizer_name}</span>
+                                <span>{org.name}</span>
                             </div>
                             {isSelected && <Check className="ml-auto h-4 w-4" />}
                         </CommandItem>

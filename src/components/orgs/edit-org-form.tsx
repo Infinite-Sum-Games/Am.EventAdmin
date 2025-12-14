@@ -9,11 +9,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Edit3 } from "lucide-react";
-import type { OrganizerType } from "@/types/db";
+import type { OrganizerType } from "@/types/organizers";
 import SHA256 from "crypto-js/sha256";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
-import { useQueryClient, useMutation } from "@tanstack/react-query"; // Import useMutation
+import { useQueryClient, useMutation } from "@tanstack/react-query"; 
 import { toast } from "sonner";
 
 import { useForm } from "react-hook-form";
