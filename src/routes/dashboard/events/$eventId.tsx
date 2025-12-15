@@ -33,11 +33,60 @@ import { ErrorMessage } from '@/components/events/error-message';
 
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
+  const queryClient = useQueryClient();
 
   const { data: eventData, isLoading } = useQuery({
     queryKey: ['event', eventId],
     queryFn: () => axiosClient.get(api.FETCH_EVENT_BY_ID(eventId)).then(r => r.data),
   })
+
+  // mutations for publish/unpublish
+  const { mutate: publishEvent } = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosClient.post(api.PUBLISH_EVENT(id));
+      return response.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (oldData) {
+          return { ...oldData, is_published: true };
+        }
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success("Event published successfully.");
+    },
+    onError: () => {
+      toast.error("Failed to publish event.");
+    }
+  })
+
+  // mutation for unpublish
+  const { mutate: unpublishEvent } = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosClient.delete(api.UNPUBLISH_EVENT(id));
+      return response.data;
+    },
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (oldData) {
+          return { ...oldData, is_published: false };
+        }
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success("Event unpublished successfully.");
+    },
+    onError: () => {
+      toast.error("Failed to unpublish event.");
+    }
+  })
+
+  const handlePublishToggle = () => {
+    if (eventData.is_published) {
+      unpublishEvent(eventId);
+    } else {
+      publishEvent(eventId);
+    }
+  };
 
   if (isLoading || !eventData) return <div>Loading Event...</div>
 
@@ -49,14 +98,11 @@ export function EventEditorPage() {
           <span className="text-sm text-muted-foreground">ID: {eventData.id}</span>
         </div>
         <div>
-          <Button variant="outline" className="mr-4">
-            <Eye /> Preview
-          </Button>
           {eventData.is_published ? (
-            <Button variant="destructive">
+            <Button variant="destructive" onClick={handlePublishToggle}>
               <Unlink />Unpublish</Button>
           ) : (
-            <Button><BookCheck />Publish</Button>
+            <Button onClick={handlePublishToggle}><BookCheck />Publish</Button>
           )}
         </div>
       </div>
