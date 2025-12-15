@@ -1,5 +1,6 @@
 import React from 'react';
-import { XCircle } from 'lucide-react'; 
+import { XCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 /**
  * Props for the ErrorMessage component.
@@ -13,11 +14,11 @@ interface ErrorMessageProps {
 }
 
 /**
- * A reusable component to display a formatted error message box.
+ * A reusable component to display a formatted error message box using Shadcn UI.
  * It uses the 'whitespace-pre-wrap' utility class to ensure 
  * newline characters (\n) are rendered as line breaks.
- * * @param {ErrorMessageProps} props The component props.
- * @returns {JSX.Element} The error message component.
+ * @param {ErrorMessageProps} props The component props.
+ * @returns {JSX.Element | null} The error message component.
  */
 export const ErrorMessage: React.FC<ErrorMessageProps> = ({ title, message }) => {
   if (!message) {
@@ -25,20 +26,12 @@ export const ErrorMessage: React.FC<ErrorMessageProps> = ({ title, message }) =>
   }
 
   return (
-    <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 rounded-lg p-4 mt-4">
-      <div className="flex items-start">
-        <XCircle className="h-4 w-4  text-red-600 dark:text-red-400 shrink-0 mt-0.5 mr-2" />
-        <div>
-          <p className="text-base font-medium text-red-800 dark:text-red-300">
-            {title}
-          </p>
-          <p className="text-sm text-red-700 dark:text-red-400 mt-1 whitespace-pre-wrap">
-            {/* The core functionality: The whitespace-pre-wrap class ensures 
-                that \n characters from your Zod error message show as new lines. */}
-            {message}
-          </p>
-        </div>
-      </div>
-    </div>
+    <Alert variant="destructive" className="mt-4">
+      <XCircle className="h-4 w-4" />
+      <AlertTitle className='font-bold text-base'>{title}</AlertTitle>
+      <AlertDescription className="whitespace-pre-wrap">
+        {message}
+      </AlertDescription>
+    </Alert>
   );
 };
