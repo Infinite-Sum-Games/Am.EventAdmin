@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardWipIndexRouteImport } from './routes/dashboard/wip/index'
 import { Route as DashboardTagsIndexRouteImport } from './routes/dashboard/tags/index'
 import { Route as DashboardStudentsIndexRouteImport } from './routes/dashboard/students/index'
 import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
@@ -36,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardWipIndexRoute = DashboardWipIndexRouteImport.update({
+  id: '/wip/',
+  path: '/wip/',
   getParentRoute: () => DashboardRoute,
 } as any)
 const DashboardTagsIndexRoute = DashboardTagsIndexRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/students': typeof DashboardStudentsIndexRoute
   '/dashboard/tags': typeof DashboardTagsIndexRoute
+  '/dashboard/wip': typeof DashboardWipIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByTo {
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/students': typeof DashboardStudentsIndexRoute
   '/dashboard/tags': typeof DashboardTagsIndexRoute
+  '/dashboard/wip': typeof DashboardWipIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/students/': typeof DashboardStudentsIndexRoute
   '/dashboard/tags/': typeof DashboardTagsIndexRoute
+  '/dashboard/wip/': typeof DashboardWipIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -153,6 +162,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/students'
     | '/dashboard/tags'
+    | '/dashboard/wip'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -167,6 +177,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/students'
     | '/dashboard/tags'
+    | '/dashboard/wip'
   id:
     | '__root__'
     | '/'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue/'
     | '/dashboard/students/'
     | '/dashboard/tags/'
+    | '/dashboard/wip/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -210,6 +222,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/wip/': {
+      id: '/dashboard/wip/'
+      path: '/wip'
+      fullPath: '/dashboard/wip'
+      preLoaderRoute: typeof DashboardWipIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/tags/': {
@@ -297,6 +316,7 @@ interface DashboardRouteChildren {
   DashboardRevenueIndexRoute: typeof DashboardRevenueIndexRoute
   DashboardStudentsIndexRoute: typeof DashboardStudentsIndexRoute
   DashboardTagsIndexRoute: typeof DashboardTagsIndexRoute
+  DashboardWipIndexRoute: typeof DashboardWipIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -311,6 +331,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardRevenueIndexRoute: DashboardRevenueIndexRoute,
   DashboardStudentsIndexRoute: DashboardStudentsIndexRoute,
   DashboardTagsIndexRoute: DashboardTagsIndexRoute,
+  DashboardWipIndexRoute: DashboardWipIndexRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
