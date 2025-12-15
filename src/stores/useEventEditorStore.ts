@@ -27,7 +27,7 @@ export interface EventData {
   total_seats: number,
   seats_filled: number,
   tags?: tags[],
-  updated_at?: string,
+  updated_at: string,
 }
 
 export interface organizers {
