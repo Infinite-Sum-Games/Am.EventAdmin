@@ -64,7 +64,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
         if (!oldData) return oldData;
         const addedOrganizer = AVAILABLE_ORGANIZERS.find(org => org.id === organizer_id);
         // this is a crappy way to do it, but works for now
-        const updatedOrganizers = addedOrganizer ? [...(oldData.organizers || []), { id: addedOrganizer.id, name: addedOrganizer.name }] : (oldData.organizers || []);
+        const updatedOrganizers = addedOrganizer ? [...(oldData.organizers || []), addedOrganizer] : (oldData.organizers || []);
         return { ...oldData, organizers: updatedOrganizers };
       });
       queryClient.invalidateQueries({ queryKey: ['events'] });

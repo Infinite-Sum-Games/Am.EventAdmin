@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, ChevronsUpDown, Plus, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { type EventData, type people } from "@/stores/useEventEditorStore";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { People } from "@/types/people";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
@@ -42,11 +42,8 @@ export function PeopleCard({ data }: { data: EventData }) {
   });
 
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<people[]>(data.people || []);
-
-  useEffect(() => {
-    setSelectedIds(data.people || []);
-  }, [data.people]);
+  const selectedPeople = data.people || [];
+  const queryClient = useQueryClient();
 
   // mutation to add person to event
   const { mutate: addPeople } = useMutation({
@@ -62,10 +59,14 @@ export function PeopleCard({ data }: { data: EventData }) {
       return response.data;
     },
     onSuccess: (_, {person_id}) => {
-      const addedPeople = AVAILABLE_PEOPLE.find(person => person.id === person_id);
-      if(addedPeople) {
-        setSelectedIds((prev) => [...prev, addedPeople]);
-      }
+      queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const addedPeople = AVAILABLE_PEOPLE.find(p => p.id === person_id);
+        const updatedPeople = addedPeople ? [...(oldData.people || []), addedPeople] : oldData.people || [];
+        return { ...oldData, people: updatedPeople };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Dignitary added to event successfully");
     },
     onError: () => {
@@ -87,7 +88,13 @@ export function PeopleCard({ data }: { data: EventData }) {
       return response.data;
     },
     onSuccess: (_, {person_id}) => {
-      setSelectedIds((prev) => prev.filter(person => person.id !== person_id));
+      queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const updatedPeople = (oldData.people || []).filter(p => p.id !== person_id);
+        return { ...oldData, people: updatedPeople };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Dignitary removed from event successfully");
     },
     onError: () => {
@@ -97,11 +104,6 @@ export function PeopleCard({ data }: { data: EventData }) {
 
 
   const handleSelect = (id: string) => {
-    // if already selected, do handle remove
-    const isAlreadySelected = selectedIds.some(person => person.id === id);
-    if (isAlreadySelected) {
-      removePeople({ person_id: id, id: data.id });
-    }
     addPeople({ person_id: id, id: data.id });
   }
 
@@ -146,7 +148,7 @@ export function PeopleCard({ data }: { data: EventData }) {
                 <CommandEmpty>No dignitary found.</CommandEmpty>
                 <CommandGroup heading="Available Dignitaries">
                   {AVAILABLE_PEOPLE.map((person) => {
-                    const selectedPersonIds = selectedIds.map((o: people) => o.id);
+                    const selectedPersonIds = selectedPeople.map((o: people) => o.id);
                     const isSelected = selectedPersonIds.includes(person.id);
                     return (
                         <CommandItem
@@ -173,13 +175,13 @@ export function PeopleCard({ data }: { data: EventData }) {
         </Popover>
         
         <div className="flex flex-wrap gap-2 min-h-10 items-center">
-            {selectedIds.length === 0 && (
+            {selectedPeople.length === 0 && (
                 <span className="text-sm text-muted-foreground italic">
                     No dignitaries added yet.
                 </span>
             )}
 
-            {selectedIds.map((person: people) => {
+            {selectedPeople.map((person: people) => {
                 if (!person) return null;
                 
                 return (

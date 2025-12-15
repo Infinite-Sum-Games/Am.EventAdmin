@@ -62,7 +62,7 @@ export function TagsCard({ data }: { data: EventData }) {
       queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
         if (!oldData) return oldData;
         const addedTag = AVAILABLE_TAGS.find(tag => tag.id === tag_id);
-        const updatedTags = addedTag ? [...(oldData.tags || []), { id: addedTag.id, name: addedTag.name }] : (oldData.tags || []);
+        const updatedTags = addedTag ? [...(oldData.tags || []), addedTag] : (oldData.tags || []);
         return { ...oldData, tags: updatedTags };
       });
 
