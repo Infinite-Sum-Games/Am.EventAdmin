@@ -33,14 +33,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { OrganizerType } from "@/types/organizers";
+import type { Organizer, OrganizerType } from "@/types/organizers";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
 import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
-import type { UpdateOrganizerInput } from "@/schemas/orgs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const orgsQueryOptions = queryOptions({
@@ -74,7 +73,7 @@ function OrgsPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editOrg, setEditOrg] = useState<UpdateOrganizerInput | null>(null);
+  const [editOrg, setEditOrg] = useState<Organizer | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
@@ -211,9 +210,15 @@ function OrgsPage() {
                           <DialogTitle>Edit Organizer</DialogTitle>
                         </DialogHeader>
 
-                        {editOrg && (
+                        {editOrg && editOrg.email && editOrg.student_head && editOrg.faculty_head && (
                           <EditOrgForm
-                            organizer={editOrg}
+                            organizer={{
+                              ...editOrg,
+                              email: editOrg.email,
+                              student_head: editOrg.student_head,
+                              faculty_head: editOrg.faculty_head,
+                              student_co_head: editOrg.student_co_head ?? undefined,
+                            }}
                             onSuccess={() => {
                               toast.success("Organizer edited successfully");
                               setIsEditDialogOpen(false);
