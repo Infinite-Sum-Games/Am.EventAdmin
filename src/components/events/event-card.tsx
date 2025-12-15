@@ -16,7 +16,8 @@ import {
   Wrench,
   Image,
   ArrowRight,
-  Activity
+  Activity,
+  PencilLine
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EventData } from "@/stores/useEventEditorStore";
@@ -73,10 +74,13 @@ export function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Active Badge */}
-        {event.event_status === "ACTIVE" && (
+        {(event.event_status === "ACTIVE" || event.event_status === "CLOSED") && (
           <div className="absolute top-3 right-3 z-10">
-            <Badge className="px-2 py-1 text-xs backdrop-blur-sm rounded-sm bg-green-600/80 text-white shadow-md">
-              <Activity className="w-4 h-4 mr-1" />Active
+            <Badge className={cn("px-2 py-1 text-xs backdrop-blur-sm rounded-sm shadow-md", {
+              "bg-green-600/80 text-white": event.event_status === "ACTIVE",
+              "bg-yellow-800/80 text-white": event.event_status === "CLOSED",
+            })}>
+              {event.event_status == "ACTIVE" ? <Activity className="w-4 h-4 mr-1" /> : <PencilLine className="w-4 h-4 mr-1" />}{event.event_status == "ACTIVE" ? "ACTIVE" : "DRAFT"}
             </Badge>
           </div>
         )}
