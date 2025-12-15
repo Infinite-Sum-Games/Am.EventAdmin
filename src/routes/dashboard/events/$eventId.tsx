@@ -30,10 +30,12 @@ import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
   const queryClient = useQueryClient();
+  const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false);
 
   const { data: eventData, isLoading } = useQuery({
     queryKey: ['event', eventId],
@@ -86,6 +88,7 @@ export function EventEditorPage() {
     } else {
       publishEvent(eventId);
     }
+    setIsPublishConfirmOpen(false);
   };
 
   if (isLoading || !eventData) return <div>Loading Event...</div>
@@ -99,10 +102,10 @@ export function EventEditorPage() {
         </div>
         <div>
           {eventData.is_published ? (
-            <Button variant="destructive" onClick={handlePublishToggle}>
+            <Button variant="destructive" onClick={() => setIsPublishConfirmOpen(true)}>
               <Unlink />Unpublish</Button>
           ) : (
-            <Button onClick={handlePublishToggle}><BookCheck />Publish</Button>
+            <Button className='bg-green-500 hover:bg-green-600' onClick={() => setIsPublishConfirmOpen(true)}><BookCheck />Publish</Button>
           )}
         </div>
       </div>
@@ -142,6 +145,29 @@ export function EventEditorPage() {
           <SchedulingTab data={eventData} />
         </TabsContent>
       </Tabs>
+
+      <AlertDialog open={isPublishConfirmOpen} onOpenChange={setIsPublishConfirmOpen}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{eventData.is_published ? "Unpublish Event?" : "Ready to Publish?"}</AlertDialogTitle>
+        <AlertDialogDescription>
+          {eventData.is_published ? "This will remove the event from public listings. Participants will no longer be able to view it." : "This will make the event visible to all participants. Are you sure you are ready to go live?"}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+  
+        <AlertDialogAction 
+            onClick={handlePublishToggle}
+            className={eventData.is_published ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}
+        >
+            {eventData.is_published ? "Unpublish" : "Publish Event"}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+
+
     </div>
   );
 }
