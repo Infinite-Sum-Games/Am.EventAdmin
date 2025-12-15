@@ -1,12 +1,12 @@
 import { z } from "zod";
 
 export const eventDetailsSchema = z.object({
-  name: z.string().min(1, "Name must be at least 1 characters").optional(),
-  blurb: z.string().max(120, "Blurb must be short (120 chars max)").optional(),
-  description: z.string().max(1500, "Description is too long (1500 chars max)").optional(),
-  rules: z.string().max(1500, "Rules is too long (1500 chars max)").optional(),
-  price: z.number("Price must be a number.").min(0, "Price cannot be negative").optional(),
-  is_per_head: z.boolean().optional(),
+  name: z.string().min(1, "Name must be at least 1 characters"),
+  blurb: z.string().max(120, "Blurb must be short (120 chars max)"),
+  description: z.string().max(1500, "Description is too long (1500 chars max)"),
+  rules: z.string().max(1500, "Rules is too long (1500 chars max)"),
+  price: z.number("Price must be a number.").min(0, "Price cannot be negative"),
+  is_per_head: z.boolean()
 });
 
 export type EventDetails = z.infer<typeof eventDetailsSchema>;
@@ -20,55 +20,50 @@ export const isPublishSchema = z.object({
 });
 
 export const eventSizeSchema = z.object({
-  is_group: z.boolean().optional(),
-  min_teamsize: z.number("Minimum team size must be a number").min(1, "Minimum team size must be at least 1").default(1).optional(),
-  max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1).optional(),
-  total_seats: z.number("Total seats must be a number").min(1, "Total seats must be at least 1").optional(),
+  is_group: z.boolean(),
+  min_teamsize: z.number("Minimum team size must be a number").min(1, "Minimum team size must be at least 1").default(1),
+  max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1),
+  total_seats: z.number("Total seats must be a number").min(1, "Total seats must be at least 1"),
 });
 
 export type EventSize = z.infer<typeof eventSizeSchema>;
 
 export const eventToggleSchema = z.object({
-  event_type: z.enum(["EVENT", "WORKSHOP"]).optional(),
-  is_offline: z.boolean().optional(),
-  attendance_mode: z.enum(["SOLO", "DUO"]).optional(),
-  is_technical: z.boolean().optional(),
-  is_completed: z.boolean().optional(),
-  is_published: z.boolean().optional(),
+  event_type: z.enum(["EVENT", "WORKSHOP"]),
+  is_offline: z.boolean(),
+  attendance_mode: z.enum(["SOLO", "DUO"]),
+  is_technical: z.boolean(),
+  is_completed: z.boolean(),
+  is_published: z.boolean()
 });
 
 export type EventModes = z.infer<typeof eventToggleSchema>;
 
 export const eventOrganizersSchema = z.object({
-  id: z.uuid().optional(),
-  organizer_id: z.uuid("Organizer ID must be a valid UUID").optional(),
+  id: z.uuid(),
+  organizer_id: z.uuid("Organizer ID must be a valid UUID"),
 });
 
 export type EventOrganizers = z.infer<typeof eventOrganizersSchema>;
 
 export const eventPeopleSchema = z.object({
-  id: z.uuid().optional(),
-  person_id: z.uuid("Person ID must be a valid UUID").optional(),
+  id: z.uuid(),
+  person_id: z.uuid("Person ID must be a valid UUID")
 });
 
 export type EventPeople = z.infer<typeof eventPeopleSchema>;
 
 export const eventTagsSchema = z.object({
-  id: z.uuid().optional(),
-  tag_id: z.uuid("Tag ID must be a valid UUID").optional(),
+  id: z.uuid(),
+  tag_id: z.uuid("Tag ID must be a valid UUID")
 });
 
 export type EventTags = z.infer<typeof eventTagsSchema>;
 
 export const eventScheduleSchema = z.object({
   id: z.uuid().optional(),
-  event_date: z.string().refine((date) => !isNaN(new Date(date).getTime()), {
-    message: "Event date must be a valid date string",
-  }).optional(),
-  start_time: z.string().refine((time) => !isNaN(new Date(`1970-01-01T${time}Z`).getTime()), {
-    message: "Start time must be a valid time string",
-  }).optional(),
-  end_time: z.string().refine((time) => !isNaN(new Date(`1970-01-01T${time}Z`).getTime()), {
-    message: "End time must be a valid time string",
-  }).optional(),
+  event_date: z.iso.date(),
+  start_time: z.iso.datetime(),
+  end_time: z.iso.datetime(),
+  venue: z.string().max(100, "Venue must be at most 100 characters")
 })
