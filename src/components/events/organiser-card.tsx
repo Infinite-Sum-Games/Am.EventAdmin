@@ -185,7 +185,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
         <div className="flex flex-wrap gap-2 min-h-10 items-center">
           {selectedOrganizers.length === 0 && (
             <Card className="border-none w-full m-0 p-0">
-              <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+              <CardContent className="flex flex-col items-center justify-center py-4 text-muted-foreground gap-2">
                 <Users className="h-10 w-10 opacity-20" />
                 <p className="font-medium">No organizers added yet.</p>
                 <p className="text-sm">Click the button above to add organizers.</p>
