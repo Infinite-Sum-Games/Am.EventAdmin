@@ -84,7 +84,7 @@ export function PeopleCard({ data }: { data: EventData }) {
         throw new Error(errorMessages);
       }
 
-      const response = await axiosClient.post(api.DISCONNECT_EVENT_PEOPLE, validatedData.data);
+      const response = await axiosClient.delete(api.DISCONNECT_EVENT_PEOPLE, { data: validatedData.data });
       return response.data;
     },
     onSuccess: (_, {person_id}) => {

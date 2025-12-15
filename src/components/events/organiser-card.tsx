@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Check, ChevronsUpDown, Plus, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +44,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
 
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
+  
   const selectedOrganizers = data.organizers ?? [];
 
   // mutation to add organizer to event
@@ -86,7 +87,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
         throw new Error(errorMessages);
       }
 
-      const response = await axiosClient.post(api.DISCONNECT_EVENT_ORGANIZER, validatedData.data);
+      const response = await axiosClient.delete(api.DISCONNECT_EVENT_ORGANIZER, { data: validatedData.data });
       return response.data;
     },
     onSuccess: (_, { organizer_id }) => {

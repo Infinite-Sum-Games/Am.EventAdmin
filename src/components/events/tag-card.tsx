@@ -84,7 +84,7 @@ export function TagsCard({ data }: { data: EventData }) {
         throw new Error(errorMessages);
       }
 
-      const response = await axiosClient.post(api.DISCONNECT_EVENT_TAG, validatedData.data);
+      const response = await axiosClient.delete(api.DISCONNECT_EVENT_TAG, { data: validatedData.data });
       return response.data;
     },
     onSuccess: (_, { tag_id }) => {
