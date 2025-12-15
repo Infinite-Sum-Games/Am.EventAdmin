@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Notebook, Edit3 } from "lucide-react";
-import { useEventEditorStore, type EventData } from "@/stores/useEventEditorStore";
+import { type EventData } from "@/stores/useEventEditorStore";
 
 interface EventCardProps {
   event: EventData;
@@ -35,7 +35,7 @@ export function EventCard({ event }: EventCardProps) {
         <CardTitle className="mb-2 text-xl">{event.name}</CardTitle>
 
         <div className="mb-4 flex flex-wrap gap-2">
-          {event.tags.map((tag) => (
+          {event.tags && event.tags.map((tag) => (
             <Badge key={tag.name} variant="secondary">
               {tag.name}
             </Badge>
@@ -69,11 +69,10 @@ export function EventCard({ event }: EventCardProps) {
           </Link>
         </Button>
         <Button className="flex-1" onClick={() => {
-          console.log("Setting event data in store:", event);
-          useEventEditorStore.setState({ eventData: event });
         }} asChild>
           <Link
-            to="/dashboard/events/new"
+            to="/dashboard/events/$eventId"
+            params={{ eventId: event.id }}
             className="flex items-center justify-center gap-2"
           >
             <Edit3 className="h-4 w-4" />

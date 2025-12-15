@@ -36,7 +36,7 @@ export function EventEditorPage() {
 
   const { data: eventData, isLoading } = useQuery({
     queryKey: ['event', eventId],
-    queryFn: () => axiosClient.get(`/api/events/${eventId}`).then(r => r.data),
+    queryFn: () => axiosClient.get(api.FETCH_EVENT_BY_ID(eventId)).then(r => r.data),
   })
 
   if (isLoading || !eventData) return <div>Loading Event...</div>
@@ -208,8 +208,8 @@ function GeneralTab({ data }: { data: EventData }) {
         blurb: inputBlurb,
         price: inputPrice,
         is_per_head: inputIsPerHead,
-        description: data.description,
-        rules: data.rules,
+        description: data.description as string,
+        rules: data.rules as string,
       }
     });
   }
@@ -482,7 +482,7 @@ function DescriptionTab({ data }: { data: EventData }) {
         price: data.price,
         is_per_head: data.is_per_head,
         description: inputDescription,
-        rules: data.rules,
+        rules: data.rules as string,
       }
     });
   }
@@ -586,7 +586,7 @@ function RulesTab({ data }: { data: EventData }) {
         blurb: data.blurb,
         price: data.price,
         is_per_head: data.is_per_head,
-        description: data.description,
+        description: data.description as string,
         rules: inputRules,
       }
     });
@@ -840,7 +840,7 @@ function SeatsTab({ data }: { data: EventData }) {
                     <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
                       <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
                       <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                        {inputMaxNoOfTeams * inputMaxTeamSize}
+                        {inputMaxNoOfTeams * (inputMaxTeamSize || 1)}
                       </p>
                     </div>
                   </div>
@@ -909,7 +909,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   useEffect(() => {
     setInputEventType(data.event_type);
     setInputIsOffline(data.is_offline ? "OFFLINE" : "ONLINE");
-    setInputAttendanceMode(data.attendance_mode);
+    setInputAttendanceMode(data.attendance_mode || "SOLO");
     setInputIsTechnical(data.is_technical ? "YES" : "NO");
     setInputIsCompleted(data.is_completed ? "YES" : "NO");
   }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical, data.is_completed]);
@@ -958,7 +958,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
         attendance_mode: inputAttendanceMode,
         is_technical: inputIsTechnical === "YES",
         is_completed: inputIsCompleted === "YES",
-        is_published: data.is_published,
+        is_published: data.is_published || false,
       }
     });
   }
