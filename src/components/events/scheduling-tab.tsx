@@ -1,4 +1,4 @@
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { 
   Plus, 
   Calendar as CalendarIcon, 
@@ -112,7 +112,7 @@ function SchedulingTab({ data }: { data: EventData }) {
   })
 
   // mutation to edit schedule
-  const { mutate: editSchedule, isPending: editSchedulePending, error: editScheduleError } = useMutation({
+  const { mutate: editSchedule } = useMutation({
     mutationFn: async ( payload : EventSchedules ) => {
       console.log("Editing schedule with payload:", payload);
       // zod validation

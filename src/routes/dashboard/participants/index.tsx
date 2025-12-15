@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import WorkInProgressPage from "../wip";
 
 export const Route = createFileRoute("/dashboard/participants/")({

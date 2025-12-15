@@ -21,7 +21,6 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from '@ta
 import { api } from '@/lib/api';
 import { axiosClient } from '@/lib/axios';
 import { Checkbox } from '../ui/checkbox';
-import { z } from 'zod'; 
 import { PeopleSchema } from '@/schemas/people';
 import type { PeopleData } from '@/types/people';
 
