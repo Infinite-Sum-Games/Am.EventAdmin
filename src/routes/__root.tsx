@@ -1,7 +1,13 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { ThemeProvider } from '../components/theme-provider'
-import { Toaster } from '@/components/ui/sonner'
 import { NotFound } from './not-found'
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { ThemeProvider } from "../components/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
+
+export type RouterContext = {
+  queryClient: QueryClient;
+  user: any | null;
+};
 
 function ErrorComponent({ error }: { error: Error }) {
   return (
@@ -9,16 +15,16 @@ function ErrorComponent({ error }: { error: Error }) {
       <h1 className="text-xl font-bold">Something went wrong</h1>
       <pre>{error.message}</pre>
     </div>
-  )
+  );
 }
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<RouterContext>()({
   component: () => (
     <ThemeProvider defaultTheme="dark" attribute="class" storageKey="theme">
       <Outlet />
-      <Toaster position='top-center'/>
+      <Toaster position="top-center" />
     </ThemeProvider>
   ),
   notFoundComponent: NotFound,
   errorComponent: ErrorComponent,
-})
+});
