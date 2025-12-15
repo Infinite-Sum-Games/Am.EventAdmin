@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Edit3 } from "lucide-react";
 import type { OrganizerType } from "@/types/organizers";
-import SHA256 from "crypto-js/sha256";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { useQueryClient, useMutation } from "@tanstack/react-query"; 
@@ -24,11 +23,9 @@ import { EditOrgSchema } from "@/schemas/orgs";
 type EditOrgFormValues = z.infer<typeof EditOrgSchema>;
 
 const updateOrganizer = async (data: EditOrgFormValues) => {
-  const hashedPassword = data.password ? SHA256(data.password).toString() : undefined;
 
   const dataToSend = {
     ...data,
-    password: hashedPassword,
     org_type: data.org_type,
     student_head: data.student_head,
     student_co_head: data.student_co_head || null,
@@ -67,7 +64,6 @@ export function EditOrgForm({
       student_head: student_head,
       student_co_head: student_co_head ?? "", 
       faculty_head: faculty_head,
-      password: "", 
     },
   });
 
@@ -109,20 +105,6 @@ export function EditOrgForm({
         <Input id="email" type="email" {...register("email")} />
         {errors.email && (
           <p className="text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
-      
-      {/* New Password */}
-      <div className="grid gap-2">
-        <Label htmlFor="password">New Password (Leave blank to keep existing)</Label>
-        <Input
-          id="password"
-          type="password"
-          {...register("password")}
-          placeholder="Enter a new password (min 6 chars)"
-        />
-        {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
         )}
       </div>
       
