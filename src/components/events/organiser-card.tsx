@@ -44,7 +44,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
 
   const [open, setOpen] = useState(false);
   const queryClient = useQueryClient();
-  
+
   const selectedOrganizers = data.organizers ?? [];
 
   // mutation to add organizer to event
@@ -144,7 +144,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
               className="w-full justify-between"
             >
               <span className="flex items-center gap-2 text-muted-foreground">
-                  <Plus className="h-4 w-4" /> Add Organizer...
+                <Plus className="h-4 w-4" /> Add Organizer...
               </span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -159,21 +159,21 @@ export function OrganizersCard({ data }: { data: EventData }) {
                     const selectedOrgIds = selectedOrganizers.map((o: organizers) => o.id);
                     const isSelected = selectedOrgIds.includes(org.id);
                     return (
-                        <CommandItem
-                            key={org.id}
-                            value={org.name}
-                            onSelect={() => org.id && handleSelect(org.id)}
-                        >
-                            <div className="flex items-center gap-2 flex-1">
-                                <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="text-[10px]">
-                                        {org.name.slice(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span>{org.name}</span>
-                            </div>
-                            {isSelected && <Check className="ml-auto h-4 w-4" />}
-                        </CommandItem>
+                      <CommandItem
+                        key={org.id}
+                        value={org.name}
+                        onSelect={() => org.id && handleSelect(org.id)}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="text-[10px]">
+                              {org.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{org.name}</span>
+                        </div>
+                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                      </CommandItem>
                     );
                   })}
                 </CommandGroup>
@@ -181,35 +181,39 @@ export function OrganizersCard({ data }: { data: EventData }) {
             </Command>
           </PopoverContent>
         </Popover>
-        
+
         <div className="flex flex-wrap gap-2 min-h-10 items-center">
-            {selectedOrganizers.length === 0 && (
-                <span className="text-sm text-muted-foreground italic">
-                    No organizers added yet.
-                </span>
-            )}
-            
-            {selectedOrganizers.map((org: organizers) => {
-                if (!org) return null;
-                
-                return (
-                    <Badge key={org.id} variant="secondary" className="pl-1 pr-2 py-1 gap-2 text-sm font-normal">
-                        <Avatar className="h-5 w-5">
-                            {/* <AvatarImage src={org.avatar} /> */}
-                            <AvatarFallback className="text-[10px]">
-                                {org.name.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                        </Avatar>
-                        {org.name}
-                        <button 
-                            onClick={() => org.id && handleRemove(org.id)}
-                            className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-muted-foreground/20 p-0.5 transition-colors"
-                        >
-                            <X className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                    </Badge>
-                )
-            })}
+          {selectedOrganizers.length === 0 && (
+            <Card className="border-none w-full m-0 p-0">
+              <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+                <Users className="h-10 w-10 opacity-20" />
+                <p className="font-medium">No organizers added yet.</p>
+                <p className="text-sm">Click the button above to add organizers.</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {selectedOrganizers.map((org: organizers) => {
+            if (!org) return null;
+
+            return (
+              <Badge key={org.id} variant="secondary" className="pl-1 pr-2 py-1 gap-2 text-sm font-normal">
+                <Avatar className="h-5 w-5">
+                  {/* <AvatarImage src={org.avatar} /> */}
+                  <AvatarFallback className="text-[10px]">
+                    {org.name.slice(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {org.name}
+                <button
+                  onClick={() => org.id && handleRemove(org.id)}
+                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-muted-foreground/20 p-0.5 transition-colors"
+                >
+                  <X className="h-3 w-3 text-muted-foreground" />
+                </button>
+              </Badge>
+            )
+          })}
         </div>
 
       </CardContent>
