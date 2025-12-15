@@ -41,10 +41,10 @@ function DashboardOverviewPage() {
   const totalParticipants = events.reduce((acc, event) => acc + event.seats_filled, 0);
   const activeEvents = events.filter(event => event.event_status === 'ACTIVE').length;
 
-  const chartData = events.map(event => ({
-    name: event.event_name.length > 15 ? `${event.event_name.substring(0, 15)}...` : event.event_name,
+  const chartData = events?.map(event => ({
+    name: event.event_name?.length > 15 ? `${event.event_name.substring(0, 15)}...` : event.event_name,
     participants: event.seats_filled,
-  }));
+  })) ?? [];
 
   return (
     <div className="flex flex-col gap-8">
