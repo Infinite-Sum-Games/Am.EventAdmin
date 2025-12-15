@@ -154,7 +154,14 @@ export function PeopleCard({ data }: { data: EventData }) {
                         <CommandItem
                             key={person.id}
                             value={person.name}
-                            onSelect={() => person.id && handleSelect(person.id)}
+                            onSelect={() => {
+                              if (!person.id) return;
+                              if (isSelected) {
+                                handleRemove(person.id);
+                              } else {
+                                handleSelect(person.id);
+                              }
+                            }}
                         >
                             <div className="flex items-center gap-2 flex-1">
                                 <Avatar className="h-6 w-6">
