@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { type EventData, type tags } from "@/stores/useEventEditorStore";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { eventTagsSchema, type EventTags } from "@/schemas/event";
@@ -41,11 +41,9 @@ export function TagsCard({ data }: { data: EventData }) {
   }
 });
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<tags[]>(data.tags || []);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    setSelectedIds(data.tags || []);
-  }, [data.tags]);
+  const selectedTags = data.tags ?? [];
 
   // mutation to add tag to event
   const { mutate: addTag } = useMutation({
@@ -60,11 +58,15 @@ export function TagsCard({ data }: { data: EventData }) {
       const response = await axiosClient.post(api.CONNECT_EVENT_TAG, validatedData.data);
       return response.data;
     },
-    onSuccess: (_, {tag_id}) => {
-      const addedTag = AVAILABLE_TAGS.find(tag => tag.id === tag_id);
-      if (addedTag) {
-        setSelectedIds((prev) => [...prev, addedTag]);
-      }
+    onSuccess: (_, { tag_id }) => {
+      queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const addedTag = AVAILABLE_TAGS.find(tag => tag.id === tag_id);
+        const updatedTags = addedTag ? [...(oldData.tags || []), { id: addedTag.id, name: addedTag.name }] : (oldData.tags || []);
+        return { ...oldData, tags: updatedTags };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Tag added to event successfully");
     },
     onError: () => {
@@ -85,8 +87,13 @@ export function TagsCard({ data }: { data: EventData }) {
       const response = await axiosClient.post(api.DISCONNECT_EVENT_TAG, validatedData.data);
       return response.data;
     },
-    onSuccess: (_, {tag_id}) => {
-      setSelectedIds((prev) => prev.filter(tag => tag.id !== tag_id));
+    onSuccess: (_, { tag_id }) => {
+      queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const updatedTags = (oldData.tags || []).filter(tag => tag.id !== tag_id);
+        return { ...oldData, tags: updatedTags };
+      });
+      queryClient.invalidateQueries({ queryKey: ["events"] });
       toast.success("Tag removed from event successfully");
     },
     onError: () => {
@@ -96,7 +103,7 @@ export function TagsCard({ data }: { data: EventData }) {
 
   const handleSelect = (id: string) => {
     // if already selected, do handle remove
-    const isAlreadySelected = selectedIds.some(tag => tag.id === id);
+    const isAlreadySelected = selectedTags.some(tag => tag.id === id);
     if (isAlreadySelected) {
       handleRemove(id);
       return;
@@ -145,7 +152,7 @@ export function TagsCard({ data }: { data: EventData }) {
                 <CommandEmpty>No tag found.</CommandEmpty>
                 <CommandGroup heading="Available Tags">
                   {AVAILABLE_TAGS.map((tag) => {
-                    const selectedTagIds = selectedIds.map((t: tags) => t.id);
+                    const selectedTagIds = selectedTags.map((t: tags) => t.id);
                     const isSelected = selectedTagIds.includes(tag.id);
                     return (
                       <CommandItem
@@ -172,13 +179,13 @@ export function TagsCard({ data }: { data: EventData }) {
         </Popover>
 
         <div className="flex flex-wrap gap-2 min-h-10 items-center">
-          {selectedIds.length === 0 && (
+          {selectedTags.length === 0 && (
             <span className="text-sm text-muted-foreground italic">
               No tags added yet.
             </span>
           )}
 
-          {selectedIds.map((tag: tags) => {
+          {selectedTags.map((tag: tags) => {
             if (!tag) return null;
 
             return (

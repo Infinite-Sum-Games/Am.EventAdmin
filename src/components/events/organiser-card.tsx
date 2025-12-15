@@ -24,7 +24,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { type EventData, type organizers } from "@/stores/useEventEditorStore";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import type { Organizer } from "@/types/organizers";
@@ -43,11 +43,8 @@ export function OrganizersCard({ data }: { data: EventData }) {
   });
 
   const [open, setOpen] = useState(false);
-  const [selectedIds, setSelectedIds] = useState<organizers[]>(data.organizers || []);
-
-  useEffect(() => {
-    setSelectedIds(data.organizers || []);
-  }, [data.organizers]);
+  const queryClient = useQueryClient();
+  const selectedOrganizers = data.organizers ?? [];
 
   // mutation to add organizer to event
   const { mutate: addOrganizer } = useMutation({
@@ -63,10 +60,15 @@ export function OrganizersCard({ data }: { data: EventData }) {
       return response.data;
     },
     onSuccess: (_, { organizer_id }) => {
-      const organizerToAdd = AVAILABLE_ORGANIZERS.find(org => org.id === organizer_id);
-      if (organizerToAdd) {
-        setSelectedIds(prev => [...prev, { id: organizerToAdd.id, name: organizerToAdd.name }]);
-      }
+      queryClient.setQueryData(['event', data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const addedOrganizer = AVAILABLE_ORGANIZERS.find(org => org.id === organizer_id);
+        // this is a crappy way to do it, but works for now
+        const updatedOrganizers = addedOrganizer ? [...(oldData.organizers || []), { id: addedOrganizer.id, name: addedOrganizer.name }] : (oldData.organizers || []);
+        return { ...oldData, organizers: updatedOrganizers };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+
       toast.success("Organizer added successfully");
     },
     onError: () => {
@@ -88,7 +90,12 @@ export function OrganizersCard({ data }: { data: EventData }) {
       return response.data;
     },
     onSuccess: (_, { organizer_id }) => {
-      setSelectedIds(prev => prev.filter(org => org.id !== organizer_id));
+      queryClient.setQueryData(['event', data.id], (oldData: EventData | undefined) => {
+        if (!oldData) return oldData;
+        const updatedOrganizers = (oldData.organizers || []).filter(org => org.id !== organizer_id);
+        return { ...oldData, organizers: updatedOrganizers };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Organizer removed successfully");
     },
     onError: () => {
@@ -99,7 +106,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
 
   const handleSelect = (id: string) => {
     // if already selected, do handle remove
-    const isAlreadySelected = selectedIds.some(org => org.id === id);
+    const isAlreadySelected = selectedOrganizers.some(org => org.id === id);
     if (isAlreadySelected) {
       handleRemove(id);
       return;
@@ -148,7 +155,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
                 <CommandEmpty>No organizer found.</CommandEmpty>
                 <CommandGroup heading="Available Organizers">
                   {AVAILABLE_ORGANIZERS.map((org) => {
-                    const selectedOrgIds = selectedIds.map((o: organizers) => o.id);
+                    const selectedOrgIds = selectedOrganizers.map((o: organizers) => o.id);
                     const isSelected = selectedOrgIds.includes(org.id);
                     return (
                         <CommandItem
@@ -175,13 +182,13 @@ export function OrganizersCard({ data }: { data: EventData }) {
         </Popover>
         
         <div className="flex flex-wrap gap-2 min-h-10 items-center">
-            {selectedIds.length === 0 && (
+            {selectedOrganizers.length === 0 && (
                 <span className="text-sm text-muted-foreground italic">
                     No organizers added yet.
                 </span>
             )}
             
-            {selectedIds.map((org: organizers) => {
+            {selectedOrganizers.map((org: organizers) => {
                 if (!org) return null;
                 
                 return (
