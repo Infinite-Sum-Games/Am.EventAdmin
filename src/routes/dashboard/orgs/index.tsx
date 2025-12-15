@@ -3,6 +3,7 @@ import {
   queryOptions,
   useSuspenseQuery,
   useQueryClient,
+  useMutation,
 } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -39,6 +40,7 @@ import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import type { UpdateOrganizerInput } from "@/schemas/orgs";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -70,7 +72,7 @@ function OrgsPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editOrg, setEditOrg] = useState<(typeof orgs)[number] | null>(null);
+  const [editOrg, setEditOrg] = useState<UpdateOrganizerInput | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
@@ -79,21 +81,18 @@ function OrgsPage() {
     return orgs.filter((org) => org.org_type === typeFilter);
   }, [orgs, typeFilter]);
 
-  const deleteOrg = async (orgId: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this organizer? This action cannot be undone."
-    );
-
-    if (!confirmDelete) return;
-
-    try {
+  const { mutate: deleteOrg } = useMutation({
+    mutationFn: async (orgId: string) => {
       await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
+    },
+    onSuccess: () => {
       toast.success("Organizer deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
-    } catch (err) {
-      toast.error("Error deleting organizer");
-    }
-  };
+    },
+    onError: () => {
+      toast.error("Failed to delete organizer. This organizer might be linked to existing events.");
+    },
+  });
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
@@ -205,13 +204,7 @@ function OrgsPage() {
 
                         {editOrg && (
                           <EditOrgForm
-                            id={editOrg.id}
-                            name={editOrg.name}
-                            email={editOrg.email}
-                            org_type={editOrg.org_type}
-                            student_head={editOrg.student_head}
-                            student_co_head={editOrg.student_co_head || ""}
-                            faculty_head={editOrg.faculty_head}
+                            organizer={editOrg}
                             onSuccess={() => {
                               toast.success("Organizer edited successfully");
                               setIsEditDialogOpen(false);
