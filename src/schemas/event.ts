@@ -33,8 +33,6 @@ export const eventToggleSchema = z.object({
   is_offline: z.boolean(),
   attendance_mode: z.enum(["SOLO", "DUO"]),
   is_technical: z.boolean(),
-  is_completed: z.boolean(),
-  is_published: z.boolean()
 });
 
 export type EventModes = z.infer<typeof eventToggleSchema>;

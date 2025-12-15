@@ -35,6 +35,9 @@ export const api = {
   PUBLISH_EVENT: (id: string) => `${CURRENT_BASE_URL}/events/admin/publish/${id}`,
   UNPUBLISH_EVENT: (id: string) => `${CURRENT_BASE_URL}/events/admin/publish/${id}`,
 
+  MARK_AS_COMPLETED: (id: string) => `${CURRENT_BASE_URL}/events/admin/completed/${id}`,
+  MARK_AS_INCOMPLETE: (id: string) => `${CURRENT_BASE_URL}/events/admin/completed/${id}`,
+
   UPDATE_EVENT_POSTER_URL: (id: string) => `${CURRENT_BASE_URL}/events/admin/poster/${id}`,
   DELETE_EVENT_POSTER_URL: (id: string) => `${CURRENT_BASE_URL}/events/admin/poster/${id}`,
 

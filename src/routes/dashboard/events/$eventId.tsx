@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, ArrowRight, ArrowRightLeft, BookCheck, Calendar, Check, CheckCircle2, FileText, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlink, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, RotateCcw, Save, ScrollText, Unlink, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -82,6 +82,27 @@ export function EventEditorPage() {
     }
   })
 
+  // one mutation to handle both mark as completed/incomplete
+  const { mutate: toggleCompletedStatus, isPending: isTogglingCompleted } = useMutation({
+    mutationFn: async ({id, markAsCompleted}: {id: string, markAsCompleted: boolean}) => {
+      const response = markAsCompleted ? await axiosClient.post(api.MARK_AS_COMPLETED(id)) : await axiosClient.delete(api.MARK_AS_INCOMPLETE(id));
+      return response.data;
+    },
+    onSuccess: (_, {id, markAsCompleted}) => {
+      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
+        if (oldData) {
+          return { ...oldData, is_completed: markAsCompleted };
+        }
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success(`Event marked as ${markAsCompleted ? "completed" : "active"}.`);
+    },
+    onError: () => {
+      toast.error("Failed to update event status.");
+    }
+  });
+
+
   const handlePublishToggle = () => {
     if (eventData.is_published) {
       unpublishEvent(eventId);
@@ -100,12 +121,59 @@ export function EventEditorPage() {
           <h1 className="text-3xl font-bold">{eventData.name}</h1>
           <span className="text-sm text-muted-foreground">ID: {eventData.id}</span>
         </div>
-        <div>
+        <div className="flex gap-2">
           {eventData.is_published ? (
-            <Button variant="destructive" onClick={() => setIsPublishConfirmOpen(true)}>
-              <Unlink />Unpublish</Button>
+            <>
+              {/* Completion Toggle */}
+              {eventData.is_completed ? (
+                <Button 
+                  variant="secondary" 
+                  disabled={isTogglingCompleted} 
+                  onClick={() => toggleCompletedStatus({id: eventId, markAsCompleted: false})}
+                  className="bg-green-700 hover:bg-green-600 text-white shadow-sm"
+                >
+                  {isTogglingCompleted ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Activity className="h-4 w-4" />
+                  )}
+                  Mark As Active
+                </Button>
+              ) : (
+                <Button 
+                  className="bg-blue-600 hover:bg-blue-700 text-white" 
+                  disabled={isTogglingCompleted} 
+                  onClick={() => toggleCompletedStatus({id: eventId, markAsCompleted: true})}
+                >  
+                  {isTogglingCompleted ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4" />
+                  )}
+                  Mark as Completed
+                </Button>
+              )}
+
+              {/* Unpublish Action */}
+              {/* variant="outline" reduces visual noise next to the solid completion button */}
+              <Button 
+                variant="destructive" 
+                
+                onClick={() => setIsPublishConfirmOpen(true)}
+              >
+                <EyeOff className="h-4 w-4" />
+                Unpublish
+              </Button>
+            </>
           ) : (
-            <Button className='bg-green-500 hover:bg-green-600' onClick={() => setIsPublishConfirmOpen(true)}><BookCheck />Publish</Button>
+            /* Publish Action */
+            <Button 
+              className="bg-green-600 hover:bg-green-700 text-white shadow-sm" 
+              onClick={() => setIsPublishConfirmOpen(true)}
+            >
+              <Globe className="h-4 w-4" />
+              Publish Event
+            </Button>
           )}
         </div>
       </div>
@@ -975,7 +1043,6 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
   const [inputIsOffline, setInputIsOffline] = useState(data.is_offline ? "OFFLINE" : "ONLINE");
   const [inputAttendanceMode, setInputAttendanceMode] = useState(data.attendance_mode || "SOLO");
   const [inputIsTechnical, setInputIsTechnical] = useState(data.is_technical ? "YES" : "NO");
-  const [inputIsCompleted, setInputIsCompleted] = useState(data.is_completed ? "YES" : "NO");
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -983,15 +1050,13 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
     setInputIsOffline(data.is_offline ? "OFFLINE" : "ONLINE");
     setInputAttendanceMode(data.attendance_mode || "SOLO");
     setInputIsTechnical(data.is_technical ? "YES" : "NO");
-    setInputIsCompleted(data.is_completed ? "YES" : "NO");
-  }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical, data.is_completed]);
+  }, [data.event_type, data.is_offline, data.attendance_mode, data.is_technical]);
 
 
   const hasModesChanged = inputEventType !== data.event_type ||
     inputIsOffline !== (data.is_offline ? "OFFLINE" : "ONLINE") ||
     inputAttendanceMode !== data.attendance_mode ||
-    (inputIsTechnical === "YES") !== data.is_technical ||
-    (inputIsCompleted === "YES") !== data.is_completed;
+    (inputIsTechnical === "YES") !== data.is_technical;
 
   const { mutate: updateModes, isPending: isUpdatingModes, error: updateModesError } = useMutation({
     mutationFn: async ({ id, payload }: { id: string, payload: EventModes }) => {
@@ -1019,7 +1084,6 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
     }
   });
 
-
   // Update Event Modes
   const handleUpdateEventModes = () => {
     updateModes({
@@ -1029,8 +1093,6 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
         is_offline: inputIsOffline === "OFFLINE",
         attendance_mode: inputAttendanceMode,
         is_technical: inputIsTechnical === "YES",
-        is_completed: inputIsCompleted === "YES",
-        is_published: data.is_published || false,
       }
     });
   }
@@ -1144,31 +1206,6 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 onValueChange={(value) => {
                   if (!value) return;
                   setInputIsTechnical(value);
-                }}
-              >
-                <ToggleGroupItem value="NO">
-                  <XCircle className="mr-2 h-4 w-4" /> No
-                </ToggleGroupItem>
-                <ToggleGroupItem value="YES" className="">
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </SettingRow>
-
-            <Separator />
-
-            {/* Is Completed */}
-            <SettingRow
-              label="Mark as Completed"
-              description="Is this event completed?"
-            >
-              <ToggleGroup
-                type="single"
-                variant="outline"
-                value={inputIsCompleted}
-                onValueChange={(value) => {
-                  if (!value) return;
-                  setInputIsCompleted(value);
                 }}
               >
                 <ToggleGroupItem value="NO">
