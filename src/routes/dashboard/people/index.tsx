@@ -122,7 +122,7 @@ function PeoplePage() {
 
             {/* Content Section */}
             {(!filteredPeople || filteredPeople.length === 0) ? (
-                <div className="flex flex-col items-center justify-center bg-muted/10 border-2 border-dashed rounded-xl py-16 mt-4 animate-in fade-in-50">
+                <div className="flex flex-col items-center justify-center bg-muted/10 border rounded-xl py-16 mt-4 animate-in fade-in-50">
                     <div className="bg-muted p-4 rounded-full mb-4">
                         <Binoculars className="w-8 h-8 text-muted-foreground" />
                     </div>
