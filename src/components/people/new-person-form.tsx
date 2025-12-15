@@ -2,24 +2,12 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { queryOptions, useMutation, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { axiosClient } from '@/lib/axios';
 import { PeopleSchema } from '@/schemas/people';
 import { AlertCircle, PlusCircle } from 'lucide-react';
 
-
-// Query to fetch all events for the dropdown
-const eventQueryOptions = queryOptions({
-    queryKey: ['events'],
-    queryFn: async () => {
-        const response = await axiosClient.get(api.FETCH_ALL_EVENTS);
-        return (response.data.events || []).map((event: any) => ({
-            label: event.name,
-            value: event.id,
-        }));
-    }
-})
 
 interface NewPersonFormProps {
     onSuccess: () => void;
@@ -35,9 +23,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
     });
     
     const [formError, setFormError] = useState<string | null>(null);
-
-    // const queryClient = useQueryClient();
-    const { data: events } = useSuspenseQuery(eventQueryOptions);
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (data: typeof formData) => {
