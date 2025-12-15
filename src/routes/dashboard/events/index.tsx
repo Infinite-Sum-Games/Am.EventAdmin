@@ -22,7 +22,6 @@ function ViewEventsPage() {
       console.log("Fetched Events:", response);
       return response.data.events;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const [searchTerm, setSearchTerm] = useState("");
