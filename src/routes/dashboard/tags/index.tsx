@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Binoculars, Trash2, Edit3, Plus } from "lucide-react";
 import { queryOptions, useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import type { Tag } from "@/types/db";
+import type { Tags } from "@/types/tags";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { NewTagForm } from "@/components/tags/new-tag-form";
@@ -18,7 +18,7 @@ const tagsQueryOptions = queryOptions({
   queryKey: ["tags"],
   queryFn: async () => {
     const response = await axiosClient.get(api.FETCH_ALL_TAGS);
-    return response.data.tags as Tag[];
+    return response.data.tags as Tags[];
   },
 });
 
@@ -33,7 +33,7 @@ function TagsPage() {
   const queryClient = useQueryClient();
   const { data: tags } = useSuspenseQuery(tagsQueryOptions);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [tagToEdit, setTagToEdit] = useState<Tag | null>(null);
+  const [tagToEdit, setTagToEdit] = useState<Tags | null>(null);
   const [tagToDeleteId, setTagToDeleteId] = useState<string | null>(null);
 
   const filteredTags = tags.filter(tag =>
