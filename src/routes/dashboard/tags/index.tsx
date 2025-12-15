@@ -36,7 +36,7 @@ function TagsPage() {
   const [tagToEdit, setTagToEdit] = useState<Tags | null>(null);
   const [tagToDeleteId, setTagToDeleteId] = useState<string | null>(null);
 
-  const filteredTags = tags.filter(tag =>
+  const filteredTags = tags == null ? [] : tags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -87,7 +87,7 @@ function TagsPage() {
       </div>
 
       {(!filteredTags || filteredTags.length === 0) ? (
-        <div className="flex flex-col items-center justify-center bg-muted/30 border-2 border-dashed border-muted rounded-lg py-12 mt-4">
+        <div className="flex flex-col items-center justify-center bg-muted/30 border-2 border border-muted rounded-lg py-12 mt-4">
           <div className="bg-background p-4 rounded-full mb-4">
             <Binoculars className="w-10 h-10 text-muted-foreground" />
           </div>
