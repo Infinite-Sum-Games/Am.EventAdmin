@@ -9,9 +9,10 @@ const queryClient = new QueryClient();
 
 const router = createRouter({
   routeTree,
-  basepath: '/admin/',
+  basepath: "/admin/",
   context: {
     queryClient,
+    user: null as any,
   },
 });
 
@@ -19,12 +20,9 @@ declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router;
   }
-  interface RouterContext {
-    queryClient: QueryClient;
-  }
 }
 
-const rootElement = document.getElementById('root')!;
+const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
@@ -32,6 +30,6 @@ if (!rootElement.innerHTML) {
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }
