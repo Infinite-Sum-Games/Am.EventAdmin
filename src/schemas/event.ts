@@ -62,8 +62,10 @@ export type EventTags = z.infer<typeof eventTagsSchema>;
 
 export const eventScheduleSchema = z.object({
   id: z.uuid().optional(),
-  event_date: z.iso.date(),
+  event_date: z.iso.datetime(),
   start_time: z.iso.datetime(),
   end_time: z.iso.datetime(),
   venue: z.string().max(100, "Venue must be at most 100 characters")
 })
+
+export type EventSchedules = z.infer<typeof eventScheduleSchema>;

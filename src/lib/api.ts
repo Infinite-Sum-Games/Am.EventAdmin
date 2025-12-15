@@ -26,8 +26,8 @@ export const api = {
 
   // Events
 
-  FETCH_ALL_EVENTS: `${CURRENT_BASE_URL}/events`,
-  FETCH_EVENT_BY_ID: (eventId: string) => `${CURRENT_BASE_URL}/events/${eventId}`,
+  FETCH_ALL_EVENTS: `${CURRENT_BASE_URL}/events/admin`,
+  FETCH_EVENT_BY_ID: (eventId: string) => `${CURRENT_BASE_URL}/events/admin/${eventId}`,
 
   CREATE_EVENT: `${CURRENT_BASE_URL}/events/admin/new`,
   UPDATE_BASIC_EVENT_DETAILS: (id : string) => `${CURRENT_BASE_URL}/events/admin/details/${id}`,
@@ -47,7 +47,7 @@ export const api = {
   CONNECT_EVENT_PEOPLE:`${CURRENT_BASE_URL}/events/admin/people/`,
   DISCONNECT_EVENT_PEOPLE:`${CURRENT_BASE_URL}/events/admin/people/`,
 
-  ADD_EVENT_SCHEDULE:`${CURRENT_BASE_URL}/events/admin/schedule`,
+  ADD_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
   UPDATE_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
   DELETE_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
 };

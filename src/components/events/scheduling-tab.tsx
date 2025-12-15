@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { 
   Plus, 
   Calendar as CalendarIcon, 
@@ -19,9 +19,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useEventEditorStore, type EventData, type schedules } from "@/stores/useEventEditorStore"; 
+import { type EventData, type schedules } from "@/stores/useEventEditorStore"; 
 import { toast } from "sonner";
+import { api } from "@/lib/api";
+import { axiosClient } from "@/lib/axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { eventScheduleSchema, type EventSchedules } from "@/schemas/event";
+import { ErrorMessage } from "./error-message";
+import { buildTimestamp, formatTime, formatTimeWithAMPM } from "@/utils/temporal";
 
 
 // Map specific dates to Day Labels for easy lookup
@@ -34,67 +40,157 @@ const EVENT_DAYS: Record<string, { label: string; shortDate: string }> = {
 function SchedulingTab({ data }: { data: EventData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  const [inputEventDate, setInputEventDate] = useState("");
+  const [inputStartTime, setInputStartTime] = useState("");
+  const [inputEndTime, setInputEndTime] = useState("");
+  const [inputVenue, setInputVenue] = useState("");
+  const schedules = data.schedules || [];
   
+  useEffect(() => {
+    if (!isDialogOpen) {
+      setEditingId(null);
+      setInputEventDate("");
+      setInputStartTime("");
+      setInputEndTime("");
+      setInputVenue("");
+    }
+  } , [schedules, isDialogOpen]);
 
-  const [formData, setFormData] = useState<schedules>({
-    event_date: "",
-    start_time: "",
-    end_time: "",
-    venue: ""
-  });
-
-  const schedules = (data.schedules || []) as schedules[];
+  const queryClient = useQueryClient();  
 
   const handleOpenAdd = () => {
     setEditingId(null);
-    setFormData({ event_date: "", start_time: "", end_time: "", venue: "" });
+    setInputEventDate("");
+    setInputStartTime("");
+    setInputEndTime("");
+    setInputVenue("");
     setIsDialogOpen(true);
   };
 
   const handleOpenEdit = (schedule: schedules) => {
     setEditingId(schedule.id || null);
-    setFormData({ ...schedule });
+    setInputEventDate(schedule.event_date || "");
+    setInputStartTime(formatTime(schedule.start_time) === "--" ? "" : formatTime(schedule.start_time));
+    setInputEndTime(formatTime(schedule.end_time) === "--" ? "" : formatTime(schedule.end_time));
+    setInputVenue(schedule.venue || "");
     setIsDialogOpen(true);
   };
 
+  // mutation to add schedule
+  const { mutate: addSchedule, isPending: addSchedulePending, error: addScheduleError } = useMutation({
+    mutationFn: async ({ id, payload }: { id: string; payload: EventSchedules }) => {
+      console.log("Adding schedule with payload:", payload);
+      // zod validation
+      const validatedData = eventScheduleSchema.safeParse(payload);
+      if (!validatedData.success) {
+        console.log("Validation failed");
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
+
+      const response = await axiosClient.post(api.ADD_EVENT_SCHEDULE(id), validatedData.data);
+      return response.data;
+    },
+    onSuccess: (newSchedule) => {
+      console.log("New schedule added:", newSchedule);
+      queryClient.setQueryData(['event', data.id], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          // Append the actual server response to the array
+          schedules: [...(oldData.schedules || []), newSchedule]
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success("Schedule added successfully.");
+      setIsDialogOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to add schedule.");
+    }
+  })
+
+  // mutation to edit schedule
+  const { mutate: editSchedule, isPending: editSchedulePending, error: editScheduleError } = useMutation({
+    mutationFn: async ( payload : EventSchedules ) => {
+      console.log("Editing schedule with payload:", payload);
+      // zod validation
+      const validatedData = eventScheduleSchema.safeParse(payload);
+      if (!validatedData.success) {
+        console.log("Validation failed");
+        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
+        throw new Error(errorMessages);
+      }
+
+      const response = await axiosClient.put(api.UPDATE_EVENT_SCHEDULE(payload.id!), validatedData.data);
+      return response.data;
+    },
+    onSuccess: (updatedSchedule) => {
+      queryClient.setQueryData(['event', data.id], (oldData: any) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          // Map over the array and replace the matching ID with the server response
+          schedules: oldData.schedules.map((schedule: schedules) => 
+            schedule.id === updatedSchedule.id ? updatedSchedule : schedule
+          )
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success("Schedule updated successfully.");
+      setIsDialogOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to update schedule.");
+    }
+  })
+
+  // mutation to delete schedule
+  const { mutate: deleteSchedule } = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosClient.delete(api.DELETE_EVENT_SCHEDULE(id));
+      return response.data;
+    },
+    onSuccess:(_, id) => {
+      queryClient.setQueryData(['event', data.id], (oldData: any) => {
+        return {
+          ...oldData,
+          schedules: oldData.schedules.filter((schedule: schedules) => schedule.id !== id)
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      toast.success("Schedule deleted successfully.");
+    },
+    onError: () => {
+      toast.error("Failed to delete schedule.");
+    },
+  })
+
   const handleDelete = (id: string) => {
-    const updatedSchedules = schedules.filter(s => s.id !== id);
-    useEventEditorStore.getState().setEventData({ schedules: updatedSchedules });
-    toast.success("Schedule removed");
+    deleteSchedule(id);
   };
 
   const handleSave = () => {
-    // Basic Validation
-    // TODO: add zod schema validation
-    if (!formData.event_date || !formData.start_time || !formData.end_time || !formData.venue) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+    const eventDateISO = buildTimestamp(inputEventDate, "00:00");
+    const startTimeISO = buildTimestamp(inputEventDate, inputStartTime);
+    const endTimeISO = buildTimestamp(inputEventDate, inputEndTime);
 
-    let updatedSchedules = [...schedules];
+    const payload: EventSchedules = {
+      event_date: eventDateISO, 
+      start_time: startTimeISO,
+      end_time: endTimeISO,
+      venue: inputVenue,
+    };
 
     if (editingId) {
-      // Update existing
-      updatedSchedules = updatedSchedules.map(s => 
-        s.id === editingId ? { ...formData, id: editingId } : s
-      );
-      toast.success("Schedule updated");
+      payload.id = editingId;
+      editSchedule( payload );
+      setEditingId(null);
+      return;
     } else {
-      // Create new (Generate temporary ID for UI)
-      const newSchedule = { ...formData}; 
-      updatedSchedules.push(newSchedule);
-      toast.success("Schedule added");
+      addSchedule({ id: data.id, payload });
     }
-
-    // Sort chronologically
-    updatedSchedules.sort((a, b) => {
-      const dateA = new Date(`${a.event_date}T${a.start_time}`);
-      const dateB = new Date(`${b.event_date}T${b.start_time}`);
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    useEventEditorStore.getState().setEventData({ schedules: updatedSchedules });
-    setIsDialogOpen(false);
   };
 
   return (
@@ -119,7 +215,7 @@ function SchedulingTab({ data }: { data: EventData }) {
       <div className="grid gap-4">
         {schedules.length === 0 ? (
            // Empty State
-           <Card className="border-dashed">
+           <Card className="border-none">
              <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
                <CalendarIcon className="h-10 w-10 opacity-20" />
                <p className="font-medium">No schedules added yet.</p>
@@ -149,7 +245,6 @@ function SchedulingTab({ data }: { data: EventData }) {
           </DialogHeader>
           
           <div className="grid gap-4 py-4">
-            
             {/* Custom Day Selector */}
             <div className="space-y-2">
               <Label>Event Day</Label>
@@ -157,9 +252,9 @@ function SchedulingTab({ data }: { data: EventData }) {
                 type="single" 
                 variant="outline"
                 className="w-full"
-                value={formData.event_date}
+                value={inputEventDate}
                 onValueChange={(value) => {
-                  if(value) setFormData({...formData, event_date: value})
+                  if(value) setInputEventDate(value);
                 }}
               >
                 {Object.entries(EVENT_DAYS).map(([dateValue, info]) => (
@@ -176,23 +271,23 @@ function SchedulingTab({ data }: { data: EventData }) {
             </div>
 
             {/* Time Row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 my-2">
                 <div className="grid gap-2">
-                    <Label htmlFor="start">Start Time</Label>
+                    <Label htmlFor="start" className="text-sm">Start Time</Label>
                     <Input 
                         id="start" 
                         type="time" 
-                        value={formData.start_time}
-                        onChange={(e) => setFormData({...formData, start_time: e.target.value})}
+                        value={inputStartTime}
+                        onChange={(e) => setInputStartTime(e.target.value)}
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="end">End Time</Label>
+                    <Label htmlFor="end" className="text-sm">End Time</Label>
                     <Input 
                         id="end" 
                         type="time" 
-                        value={formData.end_time}
-                        onChange={(e) => setFormData({...formData, end_time: e.target.value})}
+                        value={inputEndTime}
+                        onChange={(e) => setInputEndTime(e.target.value)}
                     />
                 </div>
             </div>
@@ -206,17 +301,21 @@ function SchedulingTab({ data }: { data: EventData }) {
                     id="venue" 
                     placeholder="e.g. Main Auditorium" 
                     className="pl-8"
-                    value={formData.venue}
-                    onChange={(e) => setFormData({...formData, venue: e.target.value})}
+                    value={inputVenue}
+                    onChange={(e) => setInputVenue(e.target.value)}
                 />
               </div>
             </div>
+            <ErrorMessage 
+              title="Invalid Input"
+              message={addScheduleError?.message}
+            />
 
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editingId ? "Save Changes" : "Add Schedule"}</Button>
+            <Button onClick={handleSave} disabled={addSchedulePending}>{editingId ? "Save Changes" : "Add Schedule"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -235,8 +334,10 @@ function ScheduleCard({
     onEdit: () => void; 
     onDelete: () => void; 
 }) {
-    // Lookup the "Day X" label based on the date string
-    const dayInfo = EVENT_DAYS[schedule.event_date] || { label: "Day ?", shortDate: schedule.event_date };
+    const rawDate = schedule.event_date ?? "";
+    const normalizedDate = rawDate.split('T')[0]; 
+
+    const dayInfo = EVENT_DAYS[normalizedDate] || { label: "?", shortDate: normalizedDate };
 
     return (
         <Card className="hover:bg-muted/30 transition-colors">
@@ -255,9 +356,9 @@ function ScheduleCard({
                 {/* Details */}
                 <div className="flex-1 grid gap-1">
                     <div className="flex items-center text-sm font-medium">
-                        <Clock className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                        {schedule.start_time} - {schedule.end_time}
-                    </div>
+                    <Clock className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+                    {formatTimeWithAMPM(schedule.start_time)} - {formatTimeWithAMPM(schedule.end_time)}
+                  </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                         <MapPin className="mr-2 h-3.5 w-3.5" />
                         {schedule.venue}
