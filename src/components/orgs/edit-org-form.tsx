@@ -8,69 +8,84 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PlusCircle } from "lucide-react";
+import { Edit3 } from "lucide-react";
+import type { OrganizerType } from "@/types/organizers";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
-import sha256 from "crypto-js/sha256";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { OrgSchema } from "@/schemas/orgs";
-import type z from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation } from "@tanstack/react-query"; 
 import { toast } from "sonner";
+
 import { useForm } from "react-hook-form";
-import type { OrganizerType } from "@/types/organizers";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { EditOrgSchema } from "@/schemas/orgs";
 
-type OrgData = z.infer<typeof OrgSchema>;
+type EditOrgFormValues = z.infer<typeof EditOrgSchema>;
 
-interface NewOrgFormProps {
-  onSuccess: () => void;
-}
+const updateOrganizer = async (data: EditOrgFormValues) => {
 
-const createOrganizer = async (data: OrgData) => {
-  const hashedPassword = sha256(data.password).toString();
+  const dataToSend = {
+    ...data,
+    org_type: data.org_type,
+    student_head: data.student_head,
+    student_co_head: data.student_co_head || null,
+    faculty_head: data.faculty_head,
+  };
 
-  const dataToSend = { ...data, password: hashedPassword }; 
-  console.log("Data to send:", dataToSend);
-
-  const response = await axiosClient.post(api.CREATE_ORGANIZER, dataToSend);
+  const response = await axiosClient.put(api.UPDATE_ORGANIZER(data.id), dataToSend);
   return response.data;
 };
 
-export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
+
+export function EditOrgForm({
+  id,
+  name,
+  email,
+  org_type,
+  student_head,
+  student_co_head,
+  faculty_head,
+  onSuccess,
+}: z.infer<typeof EditOrgSchema> & { onSuccess: () => void }) {
+  const queryClient = useQueryClient();
+
   const {
     register,
     handleSubmit,
     setValue,
-    getValues,
-    reset,
     formState: { errors },
-  } = useForm<OrgData>({
-    resolver: zodResolver(OrgSchema),
+  } = useForm<EditOrgFormValues>({
+    resolver: zodResolver(EditOrgSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      password: "",
-      org_type: undefined,
-      student_head: "",
-      student_co_head: "",
-      faculty_head: "",
+      id: id,
+      name: name,
+      email: email,
+      org_type: org_type,
+      student_head: student_head,
+      student_co_head: student_co_head ?? "", 
+      faculty_head: faculty_head,
     },
   });
 
+
   const mutation = useMutation({
-    mutationFn: createOrganizer,
+    mutationFn: updateOrganizer,
     onSuccess: () => {
-      reset(); 
+      toast.success(`Organizer "${name}" updated successfully.`);
+      queryClient.invalidateQueries({ queryKey: ["orgs"] }); 
+      
       onSuccess();
     },
     onError: () => {
       toast.error("Failed to create organizer. Please try again.");
     },
   });
-  
-  const onSubmit = (data: OrgData) => {
+
+  const onSubmit = (data: EditOrgFormValues) => {
     mutation.mutate(data);
   };
+  
+  const isPending = mutation.isPending;
 
   return (
     <form className="grid gap-4 pt-4" onSubmit={handleSubmit(onSubmit)}>
@@ -83,33 +98,24 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.name.message}</p>
         )}
       </div>
-
+      
       {/* Email */}
       <div className="grid gap-2">
-        <Label htmlFor="email">Official Email</Label>
+        <Label htmlFor="email">Email</Label>
         <Input id="email" type="email" {...register("email")} />
         {errors.email && (
           <p className="text-sm text-red-500">{errors.email.message}</p>
         )}
       </div>
-
-      {/* Password */}
-      <div className="grid gap-2">
-        <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" {...register("password")} />
-        {errors.password && (
-          <p className="text-sm text-red-500">{errors.password.message}</p>
-        )}
-      </div>
-
+      
       {/* Organizer Type */}
       <div className="grid gap-2">
         <Label htmlFor="org_type">Organizer Type</Label>
         <Select
-          onValueChange={(val) => setValue("org_type", val as OrganizerType)}
-          value={getValues("org_type") as OrganizerType}
+          defaultValue={org_type}
+          onValueChange={(val) => setValue("org_type", val as OrganizerType, { shouldValidate: true })}
         >
-          <SelectTrigger id="org_type" className={errors.org_type ? "border-red-500" : ""}>
+          <SelectTrigger id="org_type">
             <SelectValue placeholder="Select type" />
           </SelectTrigger>
           <SelectContent>
@@ -121,7 +127,7 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.org_type.message}</p>
         )}
       </div>
-
+      
       {/* Student Head */}
       <div className="grid gap-2">
         <Label htmlFor="student_head">Student Head</Label>
@@ -130,16 +136,13 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
           <p className="text-sm text-red-500">{errors.student_head.message}</p>
         )}
       </div>
-
+      
       {/* Student Co-Head */}
       <div className="grid gap-2">
         <Label htmlFor="student_co_head">Student Co-Head</Label>
         <Input id="student_co_head" {...register("student_co_head")} />
-        {errors.student_co_head && (
-          <p className="text-sm text-red-500">{errors.student_co_head.message}</p>
-        )}
       </div>
-
+      
       {/* Faculty Head */}
       <div className="grid gap-2">
         <Label htmlFor="faculty_head">Faculty Head</Label>
@@ -149,14 +152,13 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
         )}
       </div>
 
-      {/* Submit Button */}
       <Button 
         type="submit" 
         className="w-full mt-2" 
-        disabled={mutation.isPending}
+        disabled={isPending}
       >
-        {mutation.isPending ? "Creating..." : "Create Organizer"}
-        {!mutation.isPending && <PlusCircle className="ml-2 h-4 w-4" />}
+        {isPending ? "Editing..." : "Edit Organizer"}
+        {!isPending && <Edit3 className="ml-2 h-4 w-4" />}
       </Button>
     </form>
   );

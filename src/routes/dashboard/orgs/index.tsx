@@ -11,11 +11,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
   Binoculars,
-  PlusCircle,
   Trash2,
   Edit3,
   Building,
   Users,
+  Plus,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
@@ -32,12 +32,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { OrganizerType } from "@/types/db";
+import type { OrganizerType } from "@/types/organizers";
 import { NewOrgForm } from "@/components/orgs/new-org-form";
 import type { GetAllOrganizersResponse } from "@/types/organizers";
-import { EditOrgForm } from "@/components/orgs/edit-event-form";
+import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -68,14 +69,14 @@ function OrgsPage() {
   const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false); // ✅ FIXED
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editOrg, setEditOrg] = useState<(typeof orgs)[number] | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
   const filteredOrgs = useMemo(() => {
     if (typeFilter === "ALL") return orgs;
-    return orgs.filter((org) => org.organizer_type === typeFilter);
+    return orgs.filter((org) => org.org_type === typeFilter);
   }, [orgs, typeFilter]);
 
   const deleteOrg = async (orgId: string) => {
@@ -87,29 +88,29 @@ function OrgsPage() {
 
     try {
       await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
-
-      alert("Organizer deleted successfully");
-
+      toast.success("Organizer deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
     } catch (err) {
-      console.error("Delete failed:", err);
-      alert("Error deleting organizer");
+      toast.error("Error deleting organizer");
     }
   };
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold">Organizers</h1>
+    <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
+      <div className="flex flex-row gap-4 items-center justify-between border-b pb-4">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight">Organizers</h1>
+          <p className="text-muted-foreground">Add new organizers to manage your events.</p>
+        </div>
 
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+        <div className="flex flex-row items-center gap-2 ">
           <Select
             value={typeFilter}
             onValueChange={(value) =>
               setTypeFilter(value as OrganizerType | "ALL")
             }
           >
-            <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectTrigger className="w-[180px] mr-2">
               <SelectValue placeholder="Filter by type..." />
             </SelectTrigger>
             <SelectContent>
@@ -118,10 +119,12 @@ function OrgsPage() {
               <SelectItem value="CLUB">Club</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Create Organizer Dialog */}
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <PlusCircle className="mr-2 h-4 w-4" /> Create
+              <Button className="w-auto flex items-center cursor-pointer">
+                <Plus className="h-4 w-4" />Create Organizer
               </Button>
             </DialogTrigger>
 
@@ -132,14 +135,18 @@ function OrgsPage() {
 
               <NewOrgForm
                 onSuccess={() => {
+                  toast.success("Organizer created successfully");
                   setIsDialogOpen(false);
                   queryClient.invalidateQueries({ queryKey: ["orgs"] });
                 }}
               />
             </DialogContent>
           </Dialog>
+
         </div>
       </div>
+
+      {/* Organizers */}
       {!filteredOrgs || filteredOrgs.length === 0 ? (
         <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
           <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
@@ -148,34 +155,28 @@ function OrgsPage() {
           </p>
         </div>
       ) : (
-        <Card>
+        <Card className="py-0 mt-1">
           <div className="flex flex-col">
             {filteredOrgs.map((org, index) => (
               <div key={org.id}>
                 <div className="flex items-center gap-4 p-4">
                   <Avatar className="h-12 w-12">
                     <AvatarFallback>
-                      {getInitials(org.organizer_name)}
+                      {getInitials(org.name)}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="grid gap-1 flex-1">
                     <div className="flex items-center gap-2">
-                      <p className="font-semibold">{org.organizer_name}</p>
+                      <p className="font-semibold">{org.name}</p>
 
-                      <Badge
-                        variant={
-                          org.organizer_type === "DEPARTMENT"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {org.organizer_type === "DEPARTMENT" ? (
+                      <Badge>
+                        {org.org_type === "DEPARTMENT" ? (
                           <Building className="mr-1 h-3 w-3" />
                         ) : (
                           <Users className="mr-1 h-3 w-3" />
                         )}
-                        {org.organizer_type}
+                        {org.org_type}
                       </Badge>
                     </div>
 
@@ -185,13 +186,15 @@ function OrgsPage() {
                   </div>
 
                   <div className="flex gap-2">
+
+                    {/* Edit Organizer Dialog */}
                     <Dialog
                       open={isEditDialogOpen}
                       onOpenChange={setIsEditDialogOpen}
                     >
                       <DialogTrigger asChild>
-                        <Button type="button" onClick={() => setEditOrg(org)}>
-                          <Edit3 className="mr-2 h-4 w-4" /> Edit
+                        <Button type="button" onClick={() => setEditOrg(org)} className="flex items-center cursor-pointer">
+                          <Edit3 className="h-4 w-4" />Edit
                         </Button>
                       </DialogTrigger>
 
@@ -203,13 +206,14 @@ function OrgsPage() {
                         {editOrg && (
                           <EditOrgForm
                             id={editOrg.id}
-                            organizer_name={editOrg.organizer_name}
-                            organizer_email={editOrg.organizer_email}
-                            organizer_type={editOrg.organizer_type}
+                            name={editOrg.name}
+                            email={editOrg.email}
+                            org_type={editOrg.org_type}
                             student_head={editOrg.student_head}
-                            student_co_head={editOrg.student_co_head}
+                            student_co_head={editOrg.student_co_head || ""}
                             faculty_head={editOrg.faculty_head}
                             onSuccess={() => {
+                              toast.success("Organizer edited successfully");
                               setIsEditDialogOpen(false);
                               queryClient.invalidateQueries({
                                 queryKey: ["orgs"],
@@ -219,13 +223,14 @@ function OrgsPage() {
                         )}
                       </DialogContent>
                     </Dialog>
+
                     <Button
                       type="button"
-                      variant="ghost"
-                      size="icon"
+                      variant="destructive"
                       onClick={() => deleteOrg(org.id)}
+                      className="flex items-center cursor-pointer"
                     >
-                      <Trash2 className="w-5 h-5 text-red-500" />
+                      <Trash2 className="w-5 h-5" />Delete
                     </Button>
                   </div>
                 </div>

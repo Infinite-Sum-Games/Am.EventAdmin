@@ -1,11 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { ThemeProvider as TanstackThemeProvider } from "tanstack-theme-kit";
 
-export function ThemeProvider({
-    children,
-    ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-    return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+interface ThemeProviderProps extends React.ComponentProps<typeof TanstackThemeProvider> {}
+
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+    return <TanstackThemeProvider {...props}>{children}</TanstackThemeProvider>;
 }

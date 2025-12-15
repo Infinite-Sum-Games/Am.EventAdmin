@@ -6,7 +6,7 @@ import { Check, AlertCircle } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
-import { TagSchema } from '@/schemas/tag';
+import { TagSchema } from '@/schemas/tags';
 
 interface Tag {
     id: string;
@@ -32,8 +32,14 @@ export function EditTagForm({ tag, onSuccess }: EditTagFormProps) {
 
 const { mutate, isPending } = useMutation({
         mutationFn: async (values: { name: string; abbreviation: string }) => {
-                const validatedData = TagSchema.parse(values);
-                const response = await axiosClient.put(api.UPDATE_TAG(tag.id), validatedData);
+                const validatedData = TagSchema.safeParse(values);
+                if (!validatedData.success) {
+                    const messages = validatedData.error.issues
+                        .map(issue => issue.message)
+                        .join(", ");
+                    throw new Error(messages);
+                }
+                const response = await axiosClient.put(api.UPDATE_TAG(tag.id), validatedData.data);
                 return response.data;
         },
         onSuccess: () => {
@@ -46,7 +52,7 @@ const { mutate, isPending } = useMutation({
                 } else if (status === 400) {
                         setError("Invalid input. Please check your fields.");
                 } else {
-                        setError("Failed to update tag. Please try again.");
+                        setError(err.message || "Failed to update tag.");
                 }
         }
 });

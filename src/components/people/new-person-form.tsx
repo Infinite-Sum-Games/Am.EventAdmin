@@ -24,6 +24,8 @@ import { Checkbox } from '../ui/checkbox';
 import { z } from 'zod'; 
 import { PeopleSchema } from '@/schemas/people';
 
+
+// Query to fetch all events for the dropdown
 const eventQueryOptions = queryOptions({
     queryKey: ['events'],
     queryFn: async () => {
@@ -68,22 +70,22 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
             };
 
             // Validate before sending
-            const validated = PeopleSchema.parse(payload);
-            
-            const response = await axiosClient.post(api.CREATE_PEOPLE, validated);
+            const validated = PeopleSchema.safeParse(payload);
+            if (!validated.success) {
+                const messages = validated.error.issues
+                    .map(issue => issue.message)
+                    .join("; ");
+                console.log("Validation failed:", messages);
+                throw new Error(messages);
+            }
+            const response = await axiosClient.post(api.CREATE_PEOPLE, validated.data);
             return response.data;
         },
         onSuccess: () => {
             onSuccess();
         },
-        onError: (error: any) => {
-            if (error instanceof z.ZodError) {
-                setFormError(error.issues[0].message);
-            } else if (error.response?.status === 400) {
-                setFormError("Invalid input data.");
-            } else {
-                setFormError("Failed to create person. Please try again.");
-            }
+        onError: (err: any) => {
+            setFormError(err.message || "Failed to create person. Please try again.");
         }
     });
 

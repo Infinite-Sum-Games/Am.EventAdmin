@@ -6,7 +6,8 @@ import { AlertCircle, PlusCircle } from 'lucide-react';
 import { axiosClient } from '@/lib/axios';
 import { useMutation } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { TagSchema } from "@/schemas/tag";
+import { TagSchema } from "@/schemas/tags";
+import { set } from 'zod';
 
 interface NewTagFormProps {
   onSuccess: () => void;
@@ -19,8 +20,14 @@ export function NewTagForm({ onSuccess }: NewTagFormProps) {
 
     const { mutate, isPending } = useMutation({
         mutationFn: async (newTag: { name: string; abbreviation: string }) => {
-            const validatedTag = TagSchema.parse(newTag);
-            const response = await axiosClient.post(api.CREATE_TAG, validatedTag);
+            const validatedTag = TagSchema.safeParse(newTag);
+            if (!validatedTag.success) {
+                    const messages = validatedTag.error.issues
+                        .map(issue => issue.message)
+                        .join(", ");
+                    throw new Error(messages);
+                }
+            const response = await axiosClient.post(api.CREATE_TAG, validatedTag.data);
             return response.data;
         },
         onSuccess: () => {
@@ -30,7 +37,7 @@ export function NewTagForm({ onSuccess }: NewTagFormProps) {
             if (err.response?.status === 400) {
                 setError("Invalid input. Please check your fields.");
             } else {
-                setError("Failed to create tag. Please try again.");
+                setError(err.message || "Failed to create tag.");
             }
         }
     });

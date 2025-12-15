@@ -9,19 +9,18 @@ import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/dashboard")({
-    // THIS WONT WORK UNLESS THE BACKEND ENDPOINT ADDS THE SESSION ENDPOINT
-    // beforeLoad: async () => {
-    //     try {
-    //         const response = await axiosClient.get(api.SESSION);
-    //         return {
-    //             user: response.data
-    //         };
-    //     } catch (error) {
-    //         throw redirect({
-    //             to: "/",
-    //         });
-    //     }
-    // },
+    beforeLoad: async () => {
+        try {
+            const response = await axiosClient.get(api.SESSION);
+            return {
+                user: response.data
+            };
+        } catch (error) {
+            throw redirect({
+                to: "/",
+            });
+        }
+    },
     component: DashboardLayout,
 });
 

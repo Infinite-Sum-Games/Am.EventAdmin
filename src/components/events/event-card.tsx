@@ -1,64 +1,145 @@
-import { Link } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Notebook, Edit3 } from 'lucide-react';
-import type { GetAllEventsResponse } from '@/types/events';
+import { useState } from "react"; // Import useState
+import { Link } from "@tanstack/react-router";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Users,
+  User,
+  Trophy,
+  Wrench,
+  Image,
+  ArrowRight
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import type { EventData } from "@/stores/useEventEditorStore";
 
 interface EventCardProps {
-  event: GetAllEventsResponse;
+  event: EventData;
 }
 
 export function EventCard({ event }: EventCardProps) {
-  const seatsPercentage = (event.seats_filled / event.max_seats) * 100;
+  const [imageError, setImageError] = useState(false);
 
+  const getCategoryBadge = () => {
+    const techLabel = event.is_technical ? "Technical" : "Non-Technical";
+    const typeLabel = event.event_type === "WORKSHOP" ? "Workshop" : "Event";
+    const icon = event.event_type === "WORKSHOP" ? <Wrench className="w-3 h-3 mr-1" /> : <Trophy className="w-3 h-3 mr-1" />;
+    return (
+      <Badge className="py-1 px-2 flex items-center shadow-md rounded-sm">
+        {icon} {techLabel} {typeLabel}
+      </Badge>
+    );
+  };
+
+  const progressPercentage = Math.min((event.seats_filled / event.total_seats) * 100, 100);
+  const isSoldOut = event.seats_filled >= event.total_seats;
+  const isClosed = event.event_status === "CLOSED";
+  const hasValidPosterUrl = event.poster_url && event.poster_url.trim() !== "";
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-transform duration-200 hover:scale-[1.02] hover:shadow-lg">
-      <CardHeader className="p-0">
-        <img
-          src={event.event_image_url}
-          alt={event.event_name}
-          className="h-48 w-full object-cover"
-        />
-      </CardHeader>
-      <CardContent className="grow p-4">
-        <CardTitle className="mb-2 text-xl">{event.event_name}</CardTitle>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {event.tags.map((tag) => (
-            <Badge key={tag} variant="secondary">{tag}</Badge>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-          {event.event_description}
-        </p>
-        <div>
-          <div className="flex justify-between text-sm text-muted-foreground">
-            <span>Seats Filled</span>
-            <span>{event.seats_filled} / {event.max_seats}</span>
+    <Card
+      className={cn(
+        "group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-muted gap-0 py-0",
+        isClosed && "grayscale opacity-80"
+      )}
+    >
+      {/* Poster Image */}
+      <div className="relative h-96 w-full aspect-2/3 overflow-hidden bg-muted">
+        {!hasValidPosterUrl || imageError ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground bg-muted/50">
+            <Image className="w-12 h-12 mb-2 opacity-50" />
+            <span className="text-sm font-medium">No Poster Available</span>
           </div>
-          <Progress value={seatsPercentage} className="h-2" />
+        ) : (
+          <img
+            src={event.poster_url}
+            alt={event.name}
+            className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
+            onError={() => setImageError(true)}
+          />
+        )}
+
+        {/* Badges */}
+        <div className="absolute top-3 left-3 z-10">
+          {getCategoryBadge()}
+        </div>
+
+        {/* Is Group Badge */}
+        <div className="absolute bottom-3 right-3 z-10 shadow-md">
+          <Badge className="px-2 py-1 text-xs backdrop-blur-sm rounded-sm">
+            {event.is_group ? <Users className="w-3 h-3 mr-1" /> : <User className="w-3 h-3 mr-1" />}
+            {event.is_group ? `${event.min_teamsize ?? 1}-${event.max_teamsize ?? 1} Team` : "Individual"}
+          </Badge>
+        </div>
+
+        {/* Status Overlay */}
+        {event.event_status == "COMPLETED" && (
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+            <Badge variant="outline" className="text-lg px-4 py-1 uppercase tracking-widest font-bold border-2 border-white/20 shadow-xl">
+              {event.event_status}
+            </Badge>
+          </div>
+        )}
+      </div>
+
+      <CardHeader className="p-4 pb-2">
+        {/* Event Name */}
+        <h3 className="font-bold text-lg leading-tight line-clamp-2 min-h-[1.5em]" title={event.name}>
+          {event.name}
+        </h3>
+      </CardHeader>
+
+      <CardContent className="p-4 pt-0 flex-1 flex flex-col gap-4">
+
+        {/* Seats Filled */}
+        <div className="space-y-1.5">
+          <div className="flex justify-between text-xs">
+            <span className="text-muted-foreground">Seats Filled</span>
+            <span className={cn("font-medium", isSoldOut ? "text-destructive" : "text-primary")}>
+              {event.seats_filled} / {event.total_seats}
+            </span>
+          </div>
+          <Progress value={progressPercentage} className="h-2" />
         </div>
       </CardContent>
-      <CardFooter className="flex gap-2 border-t p-4">
+
+      <CardFooter className="p-4 pt-0 mt-auto flex items-center justify-between gap-4">
+
+        {/* Price */}
+        <div className="flex flex-col">
+          <span className="text-sm text-muted-foreground uppercase font-bold tracking-wider">
+            Price
+          </span>
+          <div className="flex items-baseline gap-1">
+            {event.price === 0 ? (
+              <span className="text-lg font-bold text-green-600">Free</span>
+            ) : (
+              <>
+                <span className="text-lg font-bold">₹{event.price}</span>
+                <span className="text-xs text-muted-foreground">
+                  {event.is_per_head ? "/ person" : "/ team"}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Details Button */}
         <Button
-          variant="secondary"
-          className="flex-1 text-center"
-          asChild
+          className="h-9 px-4 rounded-md"
+          asChild={!isClosed && !isSoldOut}
         >
-          <Link to="/dashboard/events/$eventId" params={{ eventId: event.event_id }}>
-            <Notebook className="h-4 w-4" />
-            Details
-          </Link>
-        </Button>
-        <Button
-          className="flex-1 text-center"
-          asChild
-        >
-          <Link to="/dashboard/events/edit" search={{ id: event.event_id }}>
-            <Edit3 className="h-4 w-4" />
-            Edit
+          <Link to="/dashboard/events/$eventId" params={{ eventId: event.id }} className="flex items-center">
+            <span className="mr-1">Details</span>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </Button>
       </CardFooter>
