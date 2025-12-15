@@ -53,18 +53,3 @@ export interface schedules {
   venue: string;
   updated_at?: string;
 }
-
-interface EventEditorState {
-  eventData: EventData | null;
-  setEventData: (data: Partial<EventData>) => void;
-  initializeEvent: (data: EventData) => void;
-}
-
-export const useEventEditorStore = create<EventEditorState>((set) => ({
-  eventData: null,
-  initializeEvent: (data) => set({ eventData: data }),
-  setEventData: (updates) =>
-    set((state) => ({
-      eventData: state.eventData ? { ...state.eventData, ...updates } : null,
-    })),
-}));
