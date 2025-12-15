@@ -1,32 +1,33 @@
 import { create } from 'zustand';
 
+export type EventType = "EVENT" | "WORKSHOP";
+export type EventStatus = "ACTIVE" | "CLOSED" | "COMPLETED";
 export interface EventData {
-  attendance_mode: "SOLO" | "DUO",
+  attendance_mode?: "SOLO" | "DUO",
   blurb: string,
-  description: string,
+  description?: string,
   id: string,
   name: string,
-  event_type: "EVENT" | "WORKSHOP",
-  event_status: "ACTIVE" | "CLOSED" | "COMPLETED",
+  event_type: EventType,
+  event_status: EventStatus
   is_group: boolean,
-  is_offline: boolean,
-  is_published: boolean,
+  is_offline?: boolean,
+  is_published?: boolean,
   is_technical: boolean,
-  is_completed: boolean,
-  max_teamsize: number,
-  // message from response
-  message?: string,
-  min_teamsize: number,
-  organizers: organizers[],
-  people: people[],
+  is_completed?: boolean,
+  min_teamsize?: number,
+  max_teamsize?: number,
+  organizers?: organizers[],
+  people?: people[],
   poster_url: string,
   price: number,
   is_per_head: boolean,
-  rules: string,
-  schedules: schedules[],
+  rules?: string,
+  schedules?: schedules[],
   total_seats: number,
-  seats_filled?: number,
-  tags: tags[]
+  seats_filled: number,
+  tags?: tags[],
+  updated_at?: string,
 }
 
 export interface organizers {
@@ -50,6 +51,7 @@ export interface schedules {
   start_time: string;
   end_time: string;
   venue: string;
+  updated_at?: string;
 }
 
 interface EventEditorState {
