@@ -41,6 +41,7 @@ import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { UpdateOrganizerInput } from "@/schemas/orgs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -72,6 +73,7 @@ function OrgsPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editOrg, setEditOrg] = useState<UpdateOrganizerInput | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
@@ -93,6 +95,13 @@ function OrgsPage() {
       toast.error("Failed to delete organizer. This organizer might be linked to existing events.");
     },
   });
+
+  const handleDeleteEvent = () => {
+    if (editOrg) {
+      deleteOrg(editOrg.id);
+      setIsDeleteDialogOpen(false);
+    }
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
@@ -220,7 +229,10 @@ function OrgsPage() {
                     <Button
                       type="button"
                       variant="destructive"
-                      onClick={() => deleteOrg(org.id)}
+                      onClick={() => {
+                        setEditOrg(org);
+                        setIsDeleteDialogOpen(true);
+                      }}
                       className="flex items-center cursor-pointer"
                     >
                       <Trash2 className="w-5 h-5" />Delete
@@ -234,6 +246,27 @@ function OrgsPage() {
           </div>
         </Card>
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the event and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleDeleteEvent}
+              className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 cursor-pointer"
+            >
+              Delete Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
