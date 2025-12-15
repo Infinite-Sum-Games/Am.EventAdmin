@@ -3,6 +3,7 @@ import {
   queryOptions,
   useSuspenseQuery,
   useQueryClient,
+  useMutation,
 } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -39,6 +40,8 @@ import { EditOrgForm } from "@/components/orgs/edit-org-form";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import type { UpdateOrganizerInput } from "@/schemas/orgs";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -70,7 +73,8 @@ function OrgsPage() {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editOrg, setEditOrg] = useState<(typeof orgs)[number] | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [editOrg, setEditOrg] = useState<UpdateOrganizerInput | null>(null);
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
@@ -79,21 +83,25 @@ function OrgsPage() {
     return orgs.filter((org) => org.org_type === typeFilter);
   }, [orgs, typeFilter]);
 
-  const deleteOrg = async (orgId: string) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this organizer? This action cannot be undone."
-    );
-
-    if (!confirmDelete) return;
-
-    try {
+  const { mutate: deleteOrg } = useMutation({
+    mutationFn: async (orgId: string) => {
       await axiosClient.delete(api.DELETE_ORGANIZER(orgId));
+    },
+    onSuccess: () => {
       toast.success("Organizer deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["orgs"] });
-    } catch (err) {
-      toast.error("Error deleting organizer");
+    },
+    onError: () => {
+      toast.error("Failed to delete organizer. This organizer might be linked to existing events.");
+    },
+  });
+
+  const handleDeleteEvent = () => {
+    if (editOrg) {
+      deleteOrg(editOrg.id);
+      setIsDeleteDialogOpen(false);
     }
-  };
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
@@ -205,13 +213,7 @@ function OrgsPage() {
 
                         {editOrg && (
                           <EditOrgForm
-                            id={editOrg.id}
-                            name={editOrg.name}
-                            email={editOrg.email}
-                            org_type={editOrg.org_type}
-                            student_head={editOrg.student_head}
-                            student_co_head={editOrg.student_co_head || ""}
-                            faculty_head={editOrg.faculty_head}
+                            organizer={editOrg}
                             onSuccess={() => {
                               toast.success("Organizer edited successfully");
                               setIsEditDialogOpen(false);
@@ -227,7 +229,10 @@ function OrgsPage() {
                     <Button
                       type="button"
                       variant="destructive"
-                      onClick={() => deleteOrg(org.id)}
+                      onClick={() => {
+                        setEditOrg(org);
+                        setIsDeleteDialogOpen(true);
+                      }}
                       className="flex items-center cursor-pointer"
                     >
                       <Trash2 className="w-5 h-5" />Delete
@@ -241,6 +246,27 @@ function OrgsPage() {
           </div>
         </Card>
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the event and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handleDeleteEvent}
+              className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 cursor-pointer"
+            >
+              Delete Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

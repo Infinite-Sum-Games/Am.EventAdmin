@@ -1,3 +1,4 @@
+import { NotFound } from './not-found'
 import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
 import { ThemeProvider } from "../components/theme-provider";
@@ -7,18 +8,6 @@ export type RouterContext = {
   queryClient: QueryClient;
   user: any | null;
 };
-
-function NotFound() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground">
-      <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
-      <p className="text-lg">The page you are looking for does not exist.</p>
-      <a href="/" className="mt-4 text-primary hover:underline">
-        Go to Home
-      </a>
-    </div>
-  );
-}
 
 function ErrorComponent({ error }: { error: Error }) {
   return (

@@ -49,7 +49,7 @@ function TagsPage() {
       queryClient.invalidateQueries({ queryKey: ["tags"] });
     },
     onError: () => {
-      toast.error("Failed to delete tag. Please try again.");
+      toast.error("Failed to delete tag. This tag may be connected to existing existing events");
     }
   });
 

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { 
-  Plus, 
-  Calendar as CalendarIcon, 
-  Clock, 
-  MapPin, 
+import {
+  Plus,
+  Calendar as CalendarIcon,
+  Clock,
+  MapPin,
   Trash2,
-  Edit3, 
+  Edit3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type EventData, type schedules } from "@/stores/useEventEditorStore"; 
+import { type EventData, type schedules } from "@/stores/useEventEditorStore";
 import { toast } from "sonner";
 import { api } from "@/lib/api";
 import { axiosClient } from "@/lib/axios";
@@ -28,6 +28,16 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { eventScheduleSchema, type EventSchedules } from "@/schemas/event";
 import { ErrorMessage } from "./error-message";
 import { buildTimestamp, formatTime, formatTimeWithAMPM } from "@/utils/temporal";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "../ui/alert-dialog";
 
 
 // Map specific dates to Day Labels for easy lookup
@@ -41,12 +51,15 @@ function SchedulingTab({ data }: { data: EventData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
+
   const [inputEventDate, setInputEventDate] = useState("");
   const [inputStartTime, setInputStartTime] = useState("");
   const [inputEndTime, setInputEndTime] = useState("");
   const [inputVenue, setInputVenue] = useState("");
   const schedules = data.schedules || [];
-  
+
   useEffect(() => {
     if (!isDialogOpen) {
       setEditingId(null);
@@ -55,9 +68,9 @@ function SchedulingTab({ data }: { data: EventData }) {
       setInputEndTime("");
       setInputVenue("");
     }
-  } , [schedules, isDialogOpen]);
+  }, [schedules, isDialogOpen]);
 
-  const queryClient = useQueryClient();  
+  const queryClient = useQueryClient();
 
   const handleOpenAdd = () => {
     setEditingId(null);
@@ -80,25 +93,20 @@ function SchedulingTab({ data }: { data: EventData }) {
   // mutation to add schedule
   const { mutate: addSchedule, isPending: addSchedulePending, error: addScheduleError } = useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: EventSchedules }) => {
-      console.log("Adding schedule with payload:", payload);
       // zod validation
       const validatedData = eventScheduleSchema.safeParse(payload);
       if (!validatedData.success) {
-        console.log("Validation failed");
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
         throw new Error(errorMessages);
       }
-
       const response = await axiosClient.post(api.ADD_EVENT_SCHEDULE(id), validatedData.data);
       return response.data;
     },
     onSuccess: (newSchedule) => {
-      console.log("New schedule added:", newSchedule);
       queryClient.setQueryData(['event', data.id], (oldData: any) => {
         if (!oldData) return oldData;
         return {
           ...oldData,
-          // Append the actual server response to the array
           schedules: [...(oldData.schedules || []), newSchedule]
         };
       });
@@ -113,16 +121,12 @@ function SchedulingTab({ data }: { data: EventData }) {
 
   // mutation to edit schedule
   const { mutate: editSchedule } = useMutation({
-    mutationFn: async ( payload : EventSchedules ) => {
-      console.log("Editing schedule with payload:", payload);
-      // zod validation
+    mutationFn: async (payload: EventSchedules) => {
       const validatedData = eventScheduleSchema.safeParse(payload);
       if (!validatedData.success) {
-        console.log("Validation failed");
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
         throw new Error(errorMessages);
       }
-
       const response = await axiosClient.put(api.UPDATE_EVENT_SCHEDULE(payload.id!), validatedData.data);
       return response.data;
     },
@@ -131,8 +135,7 @@ function SchedulingTab({ data }: { data: EventData }) {
         if (!oldData) return oldData;
         return {
           ...oldData,
-          // Map over the array and replace the matching ID with the server response
-          schedules: oldData.schedules.map((schedule: schedules) => 
+          schedules: oldData.schedules.map((schedule: schedules) =>
             schedule.id === updatedSchedule.id ? updatedSchedule : schedule
           )
         };
@@ -152,7 +155,7 @@ function SchedulingTab({ data }: { data: EventData }) {
       const response = await axiosClient.delete(api.DELETE_EVENT_SCHEDULE(id));
       return response.data;
     },
-    onSuccess:(_, id) => {
+    onSuccess: (_, id) => {
       queryClient.setQueryData(['event', data.id], (oldData: any) => {
         return {
           ...oldData,
@@ -168,7 +171,17 @@ function SchedulingTab({ data }: { data: EventData }) {
   })
 
   const handleDelete = (id: string) => {
-    deleteSchedule(id);
+    setDeleteId(id);
+    setIsConfirmDeleteOpen(true);
+  };
+
+  // FIXED: Logic to execute delete after confirmation
+  const handleExecuteDelete = () => {
+    if (deleteId) {
+      deleteSchedule(deleteId);
+    }
+    setIsConfirmDeleteOpen(false);
+    setDeleteId(null);
   };
 
   const handleSave = () => {
@@ -177,7 +190,7 @@ function SchedulingTab({ data }: { data: EventData }) {
     const endTimeISO = buildTimestamp(inputEventDate, inputEndTime);
 
     const payload: EventSchedules = {
-      event_date: eventDateISO, 
+      event_date: eventDateISO,
       start_time: startTimeISO,
       end_time: endTimeISO,
       venue: inputVenue,
@@ -185,7 +198,7 @@ function SchedulingTab({ data }: { data: EventData }) {
 
     if (editingId) {
       payload.id = editingId;
-      editSchedule( payload );
+      editSchedule(payload);
       setEditingId(null);
       return;
     } else {
@@ -195,42 +208,60 @@ function SchedulingTab({ data }: { data: EventData }) {
 
   return (
     <div className="h-full mx-auto space-y-6">
-      
+
       {/* Header Section */}
       <div className="flex items-center justify-between">
         <div>
-            <h2 className="text-xl font-semibold flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" /> Event Schedule
-            </h2>
-            <p className="text-sm text-muted-foreground">
-                Manage dates, times, and venues for your event sessions.
-            </p>
+          <h2 className="text-xl font-semibold flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5" /> Event Schedule
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Manage dates, times, and venues for your event sessions.
+          </p>
         </div>
         <Button onClick={handleOpenAdd}>
-            <Plus className="mr-2 h-4 w-4" /> Add Schedule
+          <Plus className="mr-2 h-4 w-4" /> Add Schedule
         </Button>
       </div>
 
       {/* Schedules List */}
       <div className="grid gap-4">
         {schedules.length === 0 ? (
-           // Empty State
-           <Card className="border-none">
-             <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
-               <CalendarIcon className="h-10 w-10 opacity-20" />
-               <p className="font-medium">No schedules added yet.</p>
-               <p className="text-sm">Click the button above to set a date and venue.</p>
-             </CardContent>
-           </Card>
+          <Card className="border-none">
+            <CardContent className="flex flex-col items-center justify-center py-10 text-muted-foreground gap-2">
+              <CalendarIcon className="h-10 w-10 opacity-20" />
+              <p className="font-medium">No schedules added yet.</p>
+              <p className="text-sm">Click the button above to set a date and venue.</p>
+            </CardContent>
+          </Card>
         ) : (
-            schedules.map((schedule) => (
-                <ScheduleCard 
-                    key={schedule.id} 
-                    schedule={schedule} 
-                    onEdit={() => handleOpenEdit(schedule)}
-                    onDelete={() => handleDelete(schedule.id!)}
-                />
-            ))
+          <>
+            {schedules.map((schedule) => (
+              <ScheduleCard
+                key={schedule.id}
+                schedule={schedule}
+                onEdit={() => handleOpenEdit(schedule)}
+                onDelete={() => handleDelete(schedule.id!)}
+              />
+            ))}
+
+            <AlertDialog open={isConfirmDeleteOpen} onOpenChange={setIsConfirmDeleteOpen}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this schedule? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleExecuteDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </>
         )}
       </div>
 
@@ -243,24 +274,24 @@ function SchedulingTab({ data }: { data: EventData }) {
               Set the timing and location details for this session.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             {/* Custom Day Selector */}
             <div className="space-y-2">
               <Label>Event Day</Label>
-              <ToggleGroup 
-                type="single" 
+              <ToggleGroup
+                type="single"
                 variant="outline"
                 className="w-full"
                 value={inputEventDate}
                 onValueChange={(value) => {
-                  if(value) setInputEventDate(value);
+                  if (value) setInputEventDate(value);
                 }}
               >
                 {Object.entries(EVENT_DAYS).map(([dateValue, info]) => (
-                  <ToggleGroupItem 
-                    key={dateValue} 
-                    value={dateValue} 
+                  <ToggleGroupItem
+                    key={dateValue}
+                    value={dateValue}
                     className="flex-1 flex-col h-fit py-2 "
                   >
                     <span className="font-semibold">Day {info.label}</span>
@@ -272,24 +303,24 @@ function SchedulingTab({ data }: { data: EventData }) {
 
             {/* Time Row */}
             <div className="grid grid-cols-2 gap-4 my-2">
-                <div className="grid gap-2">
-                    <Label htmlFor="start" className="text-sm">Start Time</Label>
-                    <Input 
-                        id="start" 
-                        type="time" 
-                        value={inputStartTime}
-                        onChange={(e) => setInputStartTime(e.target.value)}
-                    />
-                </div>
-                <div className="grid gap-2">
-                    <Label htmlFor="end" className="text-sm">End Time</Label>
-                    <Input 
-                        id="end" 
-                        type="time" 
-                        value={inputEndTime}
-                        onChange={(e) => setInputEndTime(e.target.value)}
-                    />
-                </div>
+              <div className="grid gap-2">
+                <Label htmlFor="start" className="text-sm">Start Time</Label>
+                <Input
+                  id="start"
+                  type="time"
+                  value={inputStartTime}
+                  onChange={(e) => setInputStartTime(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="end" className="text-sm">End Time</Label>
+                <Input
+                  id="end"
+                  type="time"
+                  value={inputEndTime}
+                  onChange={(e) => setInputEndTime(e.target.value)}
+                />
+              </div>
             </div>
 
             {/* Venue */}
@@ -297,16 +328,16 @@ function SchedulingTab({ data }: { data: EventData }) {
               <Label htmlFor="venue">Venue / Location</Label>
               <div className="relative">
                 <MapPin className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input 
-                    id="venue" 
-                    placeholder="e.g. Main Auditorium" 
-                    className="pl-8"
-                    value={inputVenue}
-                    onChange={(e) => setInputVenue(e.target.value)}
+                <Input
+                  id="venue"
+                  placeholder="e.g. Main Auditorium"
+                  className="pl-8"
+                  value={inputVenue}
+                  onChange={(e) => setInputVenue(e.target.value)}
                 />
               </div>
             </div>
-            <ErrorMessage 
+            <ErrorMessage
               title="Invalid Input"
               message={addScheduleError?.message}
             />
@@ -319,67 +350,66 @@ function SchedulingTab({ data }: { data: EventData }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   );
 }
 
 
-function ScheduleCard({ 
-    schedule, 
-    onEdit, 
-    onDelete 
-}: { 
-    schedule: schedules; 
-    onEdit: () => void; 
-    onDelete: () => void; 
+function ScheduleCard({
+  schedule,
+  onEdit,
+  onDelete
+}: {
+  schedule: schedules;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
-    const rawDate = schedule.event_date ?? "";
-    const normalizedDate = rawDate.split('T')[0]; 
+  const rawDate = schedule.event_date ?? "";
+  const normalizedDate = rawDate.split('T')[0];
 
-    const dayInfo = EVENT_DAYS[normalizedDate] || { label: "?", shortDate: normalizedDate };
+  const dayInfo = EVENT_DAYS[normalizedDate] || { label: "?", shortDate: normalizedDate };
 
-    return (
-        <Card className="hover:bg-muted/30 transition-colors">
-            <CardContent className="flex items-center ">
-                
-                {/* Day Block */}
-                <div className="flex flex-col items-center justify-center border rounded-lg w-16 h-16 bg-muted/30 mr-4 shrink-0 shadow-sm">
-                    <span className="text-[10px] font-medium text-muted-foreground uppercase">
-                        Day
-                    </span>
-                    <span className="text-2xl font-bold text-primary">
-                      {dayInfo.label}
-                    </span>
-                </div>
+  return (
+    <Card className="hover:bg-muted/30 transition-colors">
+      <CardContent className="flex items-center ">
 
-                {/* Details */}
-                <div className="flex-1 grid gap-1">
-                    <div className="flex items-center text-sm font-medium">
-                    <Clock className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
-                    {formatTimeWithAMPM(schedule.start_time)} - {formatTimeWithAMPM(schedule.end_time)}
-                  </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                        <MapPin className="mr-2 h-3.5 w-3.5" />
-                        {schedule.venue}
-                    </div>
-                </div>
+        {/* Day Block */}
+        <div className="flex flex-col items-center justify-center border rounded-lg w-16 h-16 bg-muted/30 mr-4 shrink-0 shadow-sm">
+          <span className="text-[10px] font-medium text-muted-foreground uppercase">
+            Day
+          </span>
+          <span className="text-2xl font-bold text-primary">
+            {dayInfo.label}
+          </span>
+        </div>
 
-                {/* Actions Menu */} 
-                <div className="flex items-center space-x-2">
-                    <Button variant="secondary" onClick={onEdit}>
-                        <Edit3 className="h-4 w-4" />
-                        <span className="">Edit</span>
-                    </Button>
-                    <Button variant="destructive" onClick={onDelete}>
-                        <Trash2 className="h-4 w-4" />
-                        <span className="">Delete</span>
-                    </Button>
-                </div>
+        {/* Details */}
+        <div className="flex-1 grid gap-1">
+          <div className="flex items-center text-sm font-medium">
+            <Clock className="mr-2 h-3.5 w-3.5 text-muted-foreground" />
+            {formatTimeWithAMPM(schedule.start_time)} - {formatTimeWithAMPM(schedule.end_time)}
+          </div>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <MapPin className="mr-2 h-3.5 w-3.5" />
+            {schedule.venue}
+          </div>
+        </div>
 
-            </CardContent>
-        </Card>
-    )
+        {/* Actions Menu */}
+        <div className="flex items-center space-x-2">
+          <Button variant="default" onClick={onEdit}>
+            <Edit3 className="h-4 w-4" />
+            <span className="">Edit</span>
+          </Button>
+          <Button variant="destructive" onClick={onDelete}>
+            <Trash2 className="h-4 w-4" />
+            <span className="">Delete</span>
+          </Button>
+        </div>
+
+      </CardContent>
+    </Card>
+  )
 }
 
 export { SchedulingTab };

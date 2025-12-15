@@ -1,3 +1,10 @@
+import { api } from "@/lib/api";
+import { axiosClient } from "@/lib/axios";
+import { updateOrganizerSchema, type UpdateOrganizerInput } from "@/schemas/orgs";
+import type { Organizer } from "@/types/organizers";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,158 +15,186 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Edit3 } from "lucide-react";
-import type { OrganizerType } from "@/types/organizers";
-import { axiosClient } from "@/lib/axios";
-import { api } from "@/lib/api";
-import { useQueryClient, useMutation } from "@tanstack/react-query"; 
-import { toast } from "sonner";
+import { 
+  Building2, 
+  Mail, 
+  User, 
+  GraduationCap, 
+  Loader2, 
+  Save,
+} from "lucide-react";
+import { Separator } from "@/components/ui/separator";
+import { ErrorMessage } from "../events/error-message";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { EditOrgSchema } from "@/schemas/orgs";
+export function EditOrgForm({ organizer, onSuccess }: { organizer: UpdateOrganizerInput; onSuccess: () => void }) {
+  const [name, setName] = useState(organizer.name);
+  const [email, setEmail] = useState(organizer.email);
+  const [orgType, setOrgType] = useState<Organizer["org_type"]>(organizer.org_type);
+  const [facultyHead, setFacultyHead] = useState(organizer.faculty_head);
+  const [studentHead, setStudentHead] = useState(organizer.student_head);
+  const [studentCoHead, setStudentCoHead] = useState(organizer.student_co_head);
 
-type EditOrgFormValues = z.infer<typeof EditOrgSchema>;
-
-const updateOrganizer = async (data: EditOrgFormValues) => {
-
-  const dataToSend = {
-    ...data,
-    org_type: data.org_type,
-    student_head: data.student_head,
-    student_co_head: data.student_co_head || null,
-    faculty_head: data.faculty_head,
-  };
-
-  const response = await axiosClient.put(api.UPDATE_ORGANIZER(data.id), dataToSend);
-  return response.data;
-};
-
-
-export function EditOrgForm({
-  id,
-  name,
-  email,
-  org_type,
-  student_head,
-  student_co_head,
-  faculty_head,
-  onSuccess,
-}: z.infer<typeof EditOrgSchema> & { onSuccess: () => void }) {
   const queryClient = useQueryClient();
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-  } = useForm<EditOrgFormValues>({
-    resolver: zodResolver(EditOrgSchema),
-    defaultValues: {
-      id: id,
-      name: name,
-      email: email,
-      org_type: org_type,
-      student_head: student_head,
-      student_co_head: student_co_head ?? "", 
-      faculty_head: faculty_head,
+  const { mutate: updateOrganizer, isPending, error } = useMutation({
+    mutationFn: async (payload: UpdateOrganizerInput) => {
+      // zod validation
+      const validatedData = updateOrganizerSchema.safeParse(payload);
+      if (!validatedData.success) {
+        const errorMessages = validatedData.error.issues.map(issue => issue.message).join("\n");
+        throw new Error(errorMessages);
+      }
+
+      const response = await axiosClient.put(api.UPDATE_ORGANIZER(payload.id), validatedData.data);
+      return response.data;
     },
-  });
-
-
-  const mutation = useMutation({
-    mutationFn: updateOrganizer,
     onSuccess: () => {
-      toast.success(`Organizer "${name}" updated successfully.`);
-      queryClient.invalidateQueries({ queryKey: ["orgs"] }); 
-      
+      toast.success("Updated organizer successfully!");
+      queryClient.invalidateQueries({ queryKey: ["orgs"] });
       onSuccess();
     },
     onError: () => {
-      toast.error("Failed to create organizer. Please try again.");
+      toast.error("Error updating organizer");
     },
   });
 
-  const onSubmit = (data: EditOrgFormValues) => {
-    mutation.mutate(data);
+  const handleSubmit = () => {
+    updateOrganizer({
+      id: organizer.id,
+      name,
+      email,
+      org_type: orgType,
+      faculty_head: facultyHead,
+      student_head: studentHead,
+      student_co_head: studentCoHead,
+    });
   };
-  
-  const isPending = mutation.isPending;
 
   return (
-    <form className="grid gap-4 pt-4" onSubmit={handleSubmit(onSubmit)}>
+    <div className="space-y-6 p-1">
       
-      {/* Organizer Name */}
-      <div className="grid gap-2">
-        <Label htmlFor="name">Organizer Name</Label>
-        <Input id="name" {...register("name")} />
-        {errors.name && (
-          <p className="text-sm text-red-500">{errors.name.message}</p>
-        )}
-      </div>
-      
-      {/* Email */}
-      <div className="grid gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" {...register("email")} />
-        {errors.email && (
-          <p className="text-sm text-red-500">{errors.email.message}</p>
-        )}
-      </div>
-      
-      {/* Organizer Type */}
-      <div className="grid gap-2">
-        <Label htmlFor="org_type">Organizer Type</Label>
-        <Select
-          defaultValue={org_type}
-          onValueChange={(val) => setValue("org_type", val as OrganizerType, { shouldValidate: true })}
-        >
-          <SelectTrigger id="org_type">
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="DEPARTMENT">Department</SelectItem>
-            <SelectItem value="CLUB">Club</SelectItem>
-          </SelectContent>
-        </Select>
-        {errors.org_type && (
-          <p className="text-sm text-red-500">{errors.org_type.message}</p>
-        )}
-      </div>
-      
-      {/* Student Head */}
-      <div className="grid gap-2">
-        <Label htmlFor="student_head">Student Head</Label>
-        <Input id="student_head" {...register("student_head")} />
-        {errors.student_head && (
-          <p className="text-sm text-red-500">{errors.student_head.message}</p>
-        )}
-      </div>
-      
-      {/* Student Co-Head */}
-      <div className="grid gap-2">
-        <Label htmlFor="student_co_head">Student Co-Head</Label>
-        <Input id="student_co_head" {...register("student_co_head")} />
-      </div>
-      
-      {/* Faculty Head */}
-      <div className="grid gap-2">
-        <Label htmlFor="faculty_head">Faculty Head</Label>
-        <Input id="faculty_head" {...register("faculty_head")} />
-        {errors.faculty_head && (
-          <p className="text-sm text-red-500">{errors.faculty_head.message}</p>
-        )}
+      {/* Section 1: Organization Details */}
+      <div className="space-y-4">        
+        <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-3">
+                <Label htmlFor="name">Organization Name</Label>
+                <div className="relative">
+                    <Building2 className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        id="name"
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="pl-9"
+                        placeholder="e.g. Coding Club"
+                    />
+                </div>
+            </div>
+
+                <div className="space-y-3">
+                    <Label htmlFor="email">Contact Email</Label>
+                    <div className="relative">
+                        <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="pl-9"
+                            placeholder="org@college.edu"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <Label htmlFor="orgType">Type</Label>
+                    <Select value={orgType} onValueChange={(value) => setOrgType(value as Organizer["org_type"])}>
+                    <SelectTrigger id="orgType" className="w-full">
+                        <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="CLUB">Club</SelectItem>
+                        <SelectItem value="DEPARTMENT">Department</SelectItem>
+                    </SelectContent>
+                    </Select>
+                </div>
+            </div>
       </div>
 
-      <Button 
-        type="submit" 
-        className="w-full mt-2" 
-        disabled={isPending}
-      >
-        {isPending ? "Editing..." : "Edit Organizer"}
-        {!isPending && <Edit3 className="ml-2 h-4 w-4" />}
-      </Button>
-    </form>
+      <Separator />
+
+      <div className="space-y-4">
+        <div className="space-y-4">
+            <div className="space-y-3">
+                <Label htmlFor="facultyHead">Faculty Head</Label>
+                <div className="relative">
+                    <GraduationCap className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input
+                        id="facultyHead"
+                        type="text"
+                        value={facultyHead}
+                        onChange={(e) => setFacultyHead(e.target.value)}
+                        className="pl-9"
+                        placeholder="Dr. Smith"
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
+                    <Label htmlFor="studentHead">Student Head</Label>
+                    <div className="relative">
+                        <User className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="studentHead"
+                            type="text"
+                            value={studentHead}
+                            onChange={(e) => setStudentHead(e.target.value)}
+                            className="pl-9"
+                            placeholder="Jane Doe"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-3">
+                    <Label htmlFor="studentCoHead">Student Co-Head</Label>
+                    <div className="relative">
+                        <User className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            id="studentCoHead"
+                            type="text"
+                            value={studentCoHead}
+                            onChange={(e) => setStudentCoHead(e.target.value)}
+                            className="pl-9"
+                            placeholder="John Smith"
+                        />
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+
+      <ErrorMessage title="Failed to update organizer" message={error?.message} />
+
+      <div className="pt-2">
+        <Button
+            onClick={handleSubmit}
+            className="w-full font-semibold"
+            disabled={isPending}
+        >
+            {isPending ? (
+                <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Updating...
+                </>
+            ) : (
+                <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Save Changes
+                </>
+            )}
+        </Button>
+      </div>
+    </div>
   );
 }
