@@ -21,7 +21,7 @@ import { NewPersonForm } from "@/components/people/new-person-form";
 import { EditPersonForm } from "@/components/people/edit-person-form";
 import { axiosClient } from '@/lib/axios';
 import { api } from '@/lib/api';
-import type { PeopleData } from '@/types/people';
+import type { People } from '@/types/people';
 import { toast } from 'sonner';
 import { Separator } from "@/components/ui/separator";
 
@@ -48,7 +48,7 @@ function PeoplePage() {
     const { data: people } = useSuspenseQuery(peopleQueryOptions);
 
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingPerson, setEditingPerson] = useState<PeopleData | null>(null);
+    const [editingPerson, setEditingPerson] = useState<People | null>(null);
     const [personToDelete, setPersonToDelete] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -74,7 +74,7 @@ function PeoplePage() {
             queryClient.invalidateQueries({ queryKey: ['people'] });
         },
         onError: () => {
-            toast.error("Failed to delete person. Please try again.");
+            toast.error("Failed to delete person. This person may be linked to existing events.");
             setPersonToDelete(null);
         }
     });
@@ -245,7 +245,7 @@ function PeoplePage() {
                                 e.preventDefault();
                                 if (personToDelete) deletePerson(personToDelete);
                             }}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 cursor-pointer"
                             disabled={isDeleting}
                         >
                             {isDeleting ? "Deleting..." : "Delete Person"}
