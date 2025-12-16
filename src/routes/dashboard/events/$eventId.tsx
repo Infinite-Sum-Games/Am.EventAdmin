@@ -370,7 +370,7 @@ function GeneralTab({ data }: { data: EventData }) {
               size="sm"
               disabled={!hasDetailsChanged || isUpdatingDetails}
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingDetails ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -454,10 +454,10 @@ function GeneralTab({ data }: { data: EventData }) {
                     }}
                   >
                     <ToggleGroupItem value="PER_HEAD" className="flex-1">
-                      <User className="mr-2 h-4 w-4" /> Per Person
+                      <User className="h-4 w-4" /> Per Person
                     </ToggleGroupItem>
                     <ToggleGroupItem value="PER_TEAM" className="flex-1">
-                      <Users className="mr-2 h-4 w-4" />Per Team
+                      <Users className="h-4 w-4" />Per Team
                     </ToggleGroupItem>
                   </ToggleGroup>
                   <p className="text-[0.8rem] text-muted-foreground">
@@ -645,7 +645,7 @@ function DescriptionTab({ data }: { data: EventData }) {
               disabled={!hasDescriptionChanged || isUpdatingDescription}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingDescription ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -750,7 +750,7 @@ function RulesTab({ data }: { data: EventData }) {
               disabled={!hasRulesChanged || isUpdatingRules}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingRules ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -860,7 +860,7 @@ function SeatsTab({ data }: { data: EventData }) {
               onClick={handleUpdateSeats || isUpdatingSeats}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> 
+              <Save className="h-4 w-4" /> 
               {isUpdatingSeats ? "Updating Seats..." : "Update Seats"}
             </Button>
           </div>
@@ -892,10 +892,10 @@ function SeatsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="NO" className="flex-1 sm:flex-none">
-                  <User className="mr-2 h-4 w-4" /> Individual
+                  <User className="h-4 w-4" /> Individual
                 </ToggleGroupItem>
                 <ToggleGroupItem value="YES" className="flex-1 sm:flex-none">
-                  <Users className="mr-2 h-4 w-4" /> Team / Group
+                  <Users className="h-4 w-4" /> Team / Group
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1111,7 +1111,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
               disabled={!hasModesChanged || isUpdatingModes}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> 
+              <Save className="h-4 w-4" /> 
               {isUpdatingModes ? "Saving..." : "Save Changes"}
             </Button>
           </CardHeader>
@@ -1132,10 +1132,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="EVENT" aria-label="Event">
-                  <Calendar className="mr-2 h-4 w-4" /> Event
+                  <Calendar className="h-4 w-4" /> Event
                 </ToggleGroupItem>
                 <ToggleGroupItem value="WORKSHOP" aria-label="Workshop">
-                  <Presentation className="mr-2 h-4 w-4" /> Workshop
+                  <Presentation className="h-4 w-4" /> Workshop
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1157,10 +1157,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="OFFLINE">
-                  <MapPin className="mr-2 h-4 w-4" /> Offline
+                  <MapPin className="h-4 w-4" /> Offline
                 </ToggleGroupItem>
                 <ToggleGroupItem value="ONLINE">
-                  <Wifi className="mr-2 h-4 w-4" /> Online
+                  <Wifi className="h-4 w-4" /> Online
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1182,10 +1182,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="SOLO" title="Scan once to attend">
-                  <LogIn className="mr-2 h-4 w-4" /> Entry only
+                  <LogIn className="h-4 w-4" /> Entry only
                 </ToggleGroupItem>
                 <ToggleGroupItem value="DUO" title="Scan start and end">
-                  <ArrowRightLeft className="mr-2 h-4 w-4" /> Entry & Exit
+                  <ArrowRightLeft className="h-4 w-4" /> Entry & Exit
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1207,10 +1207,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="NO">
-                  <XCircle className="mr-2 h-4 w-4" /> No
+                  <XCircle className="h-4 w-4" /> No
                 </ToggleGroupItem>
                 <ToggleGroupItem value="YES" className="">
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
+                  <CheckCircle2 className="h-4 w-4" /> Yes
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
