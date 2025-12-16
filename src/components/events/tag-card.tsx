@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, X, Tags as TagsIcon } from "lucide-react";
+import { ChevronsUpDown, Plus, X, Tags as TagsIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -168,7 +168,7 @@ export function TagsCard({ data }: { data: EventData }) {
                                 </Avatar> */}
                           <span>{tag.name}</span>
                         </div>
-                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                        {isSelected && <X className="ml-auto h-4 w-4" />}
                       </CommandItem>
                     );
                   })}
