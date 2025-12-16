@@ -834,6 +834,7 @@ function SeatsTab({ data }: { data: EventData }) {
         min_teamsize: inputIsGroup ? inputMinTeamSize : 1,
         max_teamsize: inputIsGroup ? inputMaxTeamSize : 1,
         total_seats: inputIsGroup ? inputMaxNoOfTeams : inputTotalSeats,
+        is_per_head: data.is_per_head
       }
     });
   }
