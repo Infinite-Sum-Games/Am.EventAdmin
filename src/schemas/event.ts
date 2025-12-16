@@ -23,7 +23,7 @@ export const eventSizeSchema = z.object({
   is_group: z.boolean(),
   min_teamsize: z.number("Minimum team size must be a number").min(1, "Minimum team size must be at least 1").default(1),
   max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1),
-  total_seats: z.number("Total seats must be a number").min(0, "Total seats must be at least 0"),
+  total_seats: z.number("Total seats must be a number").min(1, "Total seats must be at least 1"),
   is_per_head: z.boolean("Is Per Head must be given"),
 }).refine((data) => data.min_teamsize <= data.max_teamsize, {
   message: "Minimum team size must be less than or equal to maximum team size",
