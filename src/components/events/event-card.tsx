@@ -129,7 +129,7 @@ export function EventCard({ event }: EventCardProps) {
           </span>
           <div className="flex items-baseline gap-1">
             {event.price === 0 ? (
-              <span className="text-lg font-bold text-green-600">Free</span>
+              <span className="text-lg font-bold text-muted-foreground">Unset</span>
             ) : (
               <>
                 <span className="text-lg font-bold">₹{event.price}</span>
