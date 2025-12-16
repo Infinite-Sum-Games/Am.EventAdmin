@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const eventDetailsSchema = z.object({
-  name: z.string().min(1, "Name must be at least 1 characters"),
+  name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be short (100 chars max)"),
   blurb: z.string().max(120, "Blurb must be short (120 chars max)"),
   description: z.string().max(1500, "Description is too long (1500 chars max)"),
   rules: z.string().max(1500, "Rules is too long (1500 chars max)"),

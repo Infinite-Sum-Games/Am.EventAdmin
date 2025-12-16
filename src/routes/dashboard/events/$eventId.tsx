@@ -388,6 +388,9 @@ function GeneralTab({ data }: { data: EventData }) {
                   onChange={(e) => setInputName(e.target.value)}
                   className="font-medium"
                 />
+                <p className="text-[0.8rem] text-muted-foreground text-right">
+                  {inputName.length}/100
+                </p>
               </div>
 
               <div className="space-y-3">
