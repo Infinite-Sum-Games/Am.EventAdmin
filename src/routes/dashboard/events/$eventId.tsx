@@ -423,16 +423,13 @@ function GeneralTab({ data }: { data: EventData }) {
                     <Input
                       id="event-price"
                       type="number"
-                      placeholder="0"
+                      placeholder="1"
                       min={0}
                       value={inputPrice}
                       onChange={(e) => setInputPrice(parseInt(e.target.value, 10))}
                       className="pl-8 font-mono"
                     />
                   </div>
-                  <p className="text-[0.8rem] text-muted-foreground">
-                    Set to 0 for free events.
-                  </p>
                 </div>
 
                 {/* Fee Structure Toggle Group */}
