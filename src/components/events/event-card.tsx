@@ -1,5 +1,5 @@
 import { useState } from "react"; // Import useState
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
   Card,
   CardContent,
@@ -28,6 +28,7 @@ interface EventCardProps {
 
 export function EventCard({ event }: EventCardProps) {
   const [imageError, setImageError] = useState(false);
+  const navigate = useNavigate();
 
   const getCategoryBadge = () => {
     const techLabel = event.is_technical ? "Technical" : "Non-Technical";
@@ -48,8 +49,11 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Card
       className={cn(
-        "group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-muted gap-0 py-0",
+        "group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-muted gap-0 py-0 cursor-pointer",
       )}
+      onClick={(e) => {
+        navigate({ to: "/dashboard/events/$eventId", params: { eventId: event.id } });
+      }}
     >
       {/* Poster Image */}
       <div className="relative h-96 w-full aspect-2/3 overflow-hidden bg-muted">
