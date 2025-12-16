@@ -17,11 +17,14 @@ import {
   Building,
   Users,
   Plus,
+  Lock,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -41,6 +44,10 @@ import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { hashPassword } from "@/lib/hash";
+import { ErrorMessage } from "@/components/events/error-message";
 
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
@@ -74,6 +81,9 @@ function OrgsPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editOrg, setEditOrg] = useState<Organizer | null>(null);
+  const [isUpdatePasswordDialogOpen, setIsUpdatePasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [typeFilter, setTypeFilter] = useState<OrganizerType | "ALL">("ALL");
 
@@ -95,12 +105,44 @@ function OrgsPage() {
     },
   });
 
-  const handleDelete= () => {
+  const { mutate: updateOrgPassword, error: updateOrgPasswordError } = useMutation({
+    mutationFn: async ({ orgId, newPassword }: { orgId: string; newPassword: string }) => {
+      const hashedPassword = await hashPassword(newPassword);
+      await axiosClient.put(api.UPDATE_ORGANIZER_PASSWORD(orgId), { password: hashedPassword });
+    },
+    onSuccess: () => {
+      toast.success("Organizer password updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["orgs"] });
+      setNewPassword("");
+      setConfirmPassword("");
+      setIsUpdatePasswordDialogOpen(false);
+    },
+    onError: () => {
+      toast.error("Failed to update organizer password");
+    },
+  });
+
+  const handleDelete = () => {
     if (editOrg) {
       deleteOrg(editOrg.id);
       setIsDeleteDialogOpen(false);
     }
   }
+
+  const handlePasswordUpdate = () => {
+    if (!newPassword || !confirmPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (!editOrg) return;
+    updateOrgPassword({ orgId: editOrg.id, newPassword });
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
@@ -233,7 +275,13 @@ function OrgsPage() {
                         )}
                       </DialogContent>
                     </Dialog>
+                    <Button variant={"default"} className="flex items-center cursor-pointer" onClick={() => {
+                      setEditOrg(org);
+                      setIsUpdatePasswordDialogOpen(true);
+                    }}>
 
+                      <Lock className="w-5 h-5" />Reset Password
+                    </Button>
                     <Button
                       type="button"
                       variant="destructive"
@@ -258,9 +306,9 @@ function OrgsPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Organizer?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the event and cannot be undone.
+              This will permanently delete the organizer and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -275,6 +323,69 @@ function OrgsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Update Password Dialog */}
+      <Dialog
+        open={isUpdatePasswordDialogOpen}
+        onOpenChange={(open) => {
+          setIsUpdatePasswordDialogOpen(open);
+          if (!open) {
+            // Reset fields when closing
+            setNewPassword("");
+            setConfirmPassword("");
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Password</DialogTitle>
+            <DialogDescription>
+              Enter a new password for <span className="font-semibold">{editOrg?.name}</span>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <Input
+                id="new-password"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm new password"
+              />
+            </div>
+          </div>
+
+          <ErrorMessage
+            title="Cant Update Password"
+            message={updateOrgPasswordError?.message}
+          />
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUpdatePasswordDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handlePasswordUpdate}
+              disabled={!newPassword || !confirmPassword}
+            >
+              Update Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

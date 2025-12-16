@@ -112,7 +112,7 @@ function TagsPage() {
                 <div className="flex items-center gap-3 overflow-hidden">
                   <div className="flex flex-col overflow-hidden">
                     <span className="text-sm  truncate">
-                      {tag.abbreviation.toLowerCase()}
+                      {tag.abbreviation.toUpperCase()}
                     </span>
                     <span className="truncate font-medium text-lg text-foreground" title={tag.name}>
                       {tag.name}

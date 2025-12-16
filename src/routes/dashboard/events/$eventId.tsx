@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -51,9 +51,14 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { ...oldData, is_published: true };
+          return { 
+            ...oldData, 
+            is_published: true,
+            is_completed: false 
+          };
         }
       });
+      queryClient.invalidateQueries({ queryKey: ['event', id] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Event published successfully.");
     },
@@ -71,9 +76,13 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { ...oldData, is_published: false };
+          return { 
+             ...oldData, 
+             is_published: false 
+          };
         }
       });
+      queryClient.invalidateQueries({ queryKey: ['event', id] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Event unpublished successfully.");
     },
@@ -248,7 +257,7 @@ function GeneralTab({ data }: { data: EventData }) {
   const [inputUrl, setInputUrl] = useState(data.poster_url || "");
   const [inputPrice, setInputPrice] = useState(data.price || 0);
   const [inputIsPerHead, setInputIsPerHead] = useState(data.is_per_head || false);
-
+  const [isImageError, setIsImageError] = useState(false);
   // Sync state on load
   useEffect(() => {
     setInputUrl(data.poster_url || "");
@@ -256,6 +265,7 @@ function GeneralTab({ data }: { data: EventData }) {
     setInputBlurb(data.blurb || "");
     setInputPrice(data.price || 0);
     setInputIsPerHead(data.is_per_head || false);
+    setIsImageError(false);
   }, [data]);
 
   const hasDetailsChanged = inputName !== data.name || inputBlurb !== (data.blurb || "") || inputPrice !== data.price || inputIsPerHead !== data.is_per_head;
@@ -370,7 +380,7 @@ function GeneralTab({ data }: { data: EventData }) {
               size="sm"
               disabled={!hasDetailsChanged || isUpdatingDetails}
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingDetails ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -384,9 +394,13 @@ function GeneralTab({ data }: { data: EventData }) {
                   id="event-name"
                   placeholder="e.g. Annual Tech Symposium 2024"
                   value={inputName}
+                  maxLength={100}
                   onChange={(e) => setInputName(e.target.value)}
                   className="font-medium"
                 />
+                <p className="text-[0.8rem] text-muted-foreground text-right">
+                  {inputName.length}/100
+                </p>
               </div>
 
               <div className="space-y-3">
@@ -423,50 +437,46 @@ function GeneralTab({ data }: { data: EventData }) {
                     <Input
                       id="event-price"
                       type="number"
-                      placeholder="0"
+                      placeholder="1"
                       min={0}
                       value={inputPrice}
                       onChange={(e) => setInputPrice(parseInt(e.target.value, 10))}
                       className="pl-8 font-mono"
                     />
                   </div>
-                  <p className="text-[0.8rem] text-muted-foreground">
-                    Set to 0 for free events.
-                  </p>
                 </div>
 
                 {/* Fee Structure Toggle Group */}
                 <div className="space-y-3">
-                  <Label>Fee Structure</Label>
+                  <Label>Fee Structure {data.is_group ? <Unlock className="h-4 w-4 text-muted-foreground" /> : <Lock className="h-4 w-4 text-muted-foreground" />}</Label>
                   <ToggleGroup
                     type="single"
                     variant="outline"
                     className="justify-start"
+                    disabled={!data.is_group}
                     value={inputIsPerHead ? "PER_HEAD" : "PER_TEAM"}
                     onValueChange={(value) => {
                       if (!value) return; // Prevent unselecting
-                      if (value === "PER_HEAD" && data.is_group) {
-                        toast.error("Per Person pricing is not allowed for Group Events.");
-                        return;
-                      }
-                      if (value === "FIXED" && !data.is_group) {
-                        toast.error("Fixed pricing is not allowed for Individual Events.");
-                        return;
-                      }
                       setInputIsPerHead(value === "PER_HEAD");
                     }}
                   >
                     <ToggleGroupItem value="PER_HEAD" className="flex-1">
-                      <User className="mr-2 h-4 w-4" /> Per Person
+                      <User className="h-4 w-4" /> Per Person
                     </ToggleGroupItem>
                     <ToggleGroupItem value="PER_TEAM" className="flex-1">
-                      <Users className="mr-2 h-4 w-4" />Per Team
+                      <Users className="h-4 w-4" />Per Team
                     </ToggleGroupItem>
                   </ToggleGroup>
                   <p className="text-[0.8rem] text-muted-foreground">
-                    {inputIsPerHead
-                      ? "Ticket price is calculated per person."
-                      : "Ticket price is fixed per team/group."}
+                      {!data.is_group ? (
+                      <span className="text-xs">
+                        Disabled for individual events
+                      </span>
+                      ) : (
+                      inputIsPerHead
+                        ? "Ticket price is calculated per person."
+                        : "Ticket price is fixed per team/group."
+                      )}
                   </p>
                 </div>
               </div>
@@ -531,28 +541,24 @@ function GeneralTab({ data }: { data: EventData }) {
           </div>
 
           {/* Image Handling */}
-          {inputUrl ? (
+          {inputUrl && !isImageError ? (
             <img
               src={inputUrl}
               alt="Event Poster Preview"
               className="object-cover w-full h-full animate-in fade-in duration-500"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "";
-                (e.target as HTMLImageElement).alt = "Invalid Image URL";
-              }}
+              onError={() => setIsImageError(true)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground gap-2">
               <div className="rounded-full bg-muted p-4 mb-2">
                 <ImageIcon className="h-8 w-8 opacity-50" />
               </div>
-              <p className="text-sm font-medium">No Poster Uploaded</p>
+              <p className="text-sm font-medium">{isImageError ? "Invalid Image URL" : "No Poster Uploaded"}</p>
               <p className="text-xs max-w-45">
-                Enter a valid URL to see a preview of your event poster.
+                {isImageError ? "Please check the URL and try again." : "Enter a valid URL to see a preview of your event poster."}
               </p>
             </div>
           )}
-
         </div>
         <Label className="text-muted-foreground pl-1 self-center">Live Preview</Label>
       </div>
@@ -648,7 +654,7 @@ function DescriptionTab({ data }: { data: EventData }) {
               disabled={!hasDescriptionChanged || isUpdatingDescription}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingDescription ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -753,7 +759,7 @@ function RulesTab({ data }: { data: EventData }) {
               disabled={!hasRulesChanged || isUpdatingRules}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="h-4 w-4" />
               {isUpdatingRules ? "Saving..." : "Save Changes"}
             </Button>
           </div>
@@ -837,6 +843,7 @@ function SeatsTab({ data }: { data: EventData }) {
         min_teamsize: inputIsGroup ? inputMinTeamSize : 1,
         max_teamsize: inputIsGroup ? inputMaxTeamSize : 1,
         total_seats: inputIsGroup ? inputMaxNoOfTeams : inputTotalSeats,
+        is_per_head: data.is_per_head
       }
     });
   }
@@ -862,7 +869,7 @@ function SeatsTab({ data }: { data: EventData }) {
               onClick={handleUpdateSeats || isUpdatingSeats}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> 
+              <Save className="h-4 w-4" /> 
               {isUpdatingSeats ? "Updating Seats..." : "Update Seats"}
             </Button>
           </div>
@@ -887,17 +894,17 @@ function SeatsTab({ data }: { data: EventData }) {
                   if (value === "YES") {
                     setInputMinTeamSize(1);
                     setInputMaxTeamSize(1);
-                    setInputMaxNoOfTeams(1);
+                    setInputMaxNoOfTeams(0);
                   } else {
                     setInputTotalSeats(0);
                   }
                 }}
               >
                 <ToggleGroupItem value="NO" className="flex-1 sm:flex-none">
-                  <User className="mr-2 h-4 w-4" /> Individual
+                  <User className="h-4 w-4" /> Individual
                 </ToggleGroupItem>
                 <ToggleGroupItem value="YES" className="flex-1 sm:flex-none">
-                  <Users className="mr-2 h-4 w-4" /> Team / Group
+                  <Users className="h-4 w-4" /> Team / Group
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -978,7 +985,7 @@ function SeatsTab({ data }: { data: EventData }) {
                       </p>
                     </div>
                     <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Participants</span>
                       <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                         {inputMaxNoOfTeams * (inputMaxTeamSize || 1)}
                       </p>
@@ -1113,7 +1120,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
               disabled={!hasModesChanged || isUpdatingModes}
               className="flex"
             >
-              <Save className="mr-2 h-4 w-4" /> 
+              <Save className="h-4 w-4" /> 
               {isUpdatingModes ? "Saving..." : "Save Changes"}
             </Button>
           </CardHeader>
@@ -1134,10 +1141,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="EVENT" aria-label="Event">
-                  <Calendar className="mr-2 h-4 w-4" /> Event
+                  <Calendar className="h-4 w-4" /> Event
                 </ToggleGroupItem>
                 <ToggleGroupItem value="WORKSHOP" aria-label="Workshop">
-                  <Presentation className="mr-2 h-4 w-4" /> Workshop
+                  <Presentation className="h-4 w-4" /> Workshop
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1159,10 +1166,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="OFFLINE">
-                  <MapPin className="mr-2 h-4 w-4" /> Offline
+                  <MapPin className="h-4 w-4" /> Offline
                 </ToggleGroupItem>
                 <ToggleGroupItem value="ONLINE">
-                  <Wifi className="mr-2 h-4 w-4" /> Online
+                  <Wifi className="h-4 w-4" /> Online
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1184,10 +1191,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="SOLO" title="Scan once to attend">
-                  <LogIn className="mr-2 h-4 w-4" /> Entry only
+                  <LogIn className="h-4 w-4" /> Entry only
                 </ToggleGroupItem>
                 <ToggleGroupItem value="DUO" title="Scan start and end">
-                  <ArrowRightLeft className="mr-2 h-4 w-4" /> Entry & Exit
+                  <ArrowRightLeft className="h-4 w-4" /> Entry & Exit
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>
@@ -1209,10 +1216,10 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
                 }}
               >
                 <ToggleGroupItem value="NO">
-                  <XCircle className="mr-2 h-4 w-4" /> No
+                  <XCircle className="h-4 w-4" /> No
                 </ToggleGroupItem>
                 <ToggleGroupItem value="YES" className="">
-                  <CheckCircle2 className="mr-2 h-4 w-4" /> Yes
+                  <CheckCircle2 className="h-4 w-4" /> Yes
                 </ToggleGroupItem>
               </ToggleGroup>
             </SettingRow>

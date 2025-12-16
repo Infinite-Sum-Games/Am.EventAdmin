@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, Trash2, Users } from "lucide-react"; // Added Trash2
+import { ChevronsUpDown, Plus, Trash2, Users, X } from "lucide-react"; // Added Trash2
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -178,7 +178,7 @@ export function PeopleCard({ data }: { data: EventData }) {
                           </Avatar>
                           <span>{person.name}</span>
                         </div>
-                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                        {isSelected && <X className="ml-auto h-4 w-4" />}
                       </CommandItem>
                     );
                   })}

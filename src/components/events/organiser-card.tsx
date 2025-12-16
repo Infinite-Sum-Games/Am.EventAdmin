@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, X, Users } from "lucide-react";
+import { ChevronsUpDown, Plus, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -172,7 +172,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
                           </Avatar>
                           <span>{org.name}</span>
                         </div>
-                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                        {isSelected && <X className="ml-auto h-4 w-4" />}
                       </CommandItem>
                     );
                   })}
@@ -197,7 +197,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
             if (!org) return null;
 
             return (
-              <Badge key={org.id} variant="secondary" className="pl-1 pr-2 py-1 gap-2 text-sm font-normal">
+              <Badge key={org.id} variant="secondary" className="pl-1 pr-2 py-1 gap-2 text-sm font-normal cursor-default">
                 <Avatar className="h-5 w-5">
                   {/* <AvatarImage src={org.avatar} /> */}
                   <AvatarFallback className="text-[10px]">
@@ -207,7 +207,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
                 {org.name}
                 <button
                   onClick={() => org.id && handleRemove(org.id)}
-                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-muted-foreground/20 p-0.5 transition-colors"
+                  className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-muted-foreground/20 p-0.5 transition-colors cursor-pointer"
                 >
                   <X className="h-3 w-3 text-muted-foreground" />
                 </button>

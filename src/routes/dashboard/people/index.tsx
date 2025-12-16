@@ -84,8 +84,8 @@ function PeoplePage() {
             {/* Header Section */}
             <div className="flex gap-4 flex-row justify-between items-center border-b pb-4">
                 <div className="space-y-1">
-                    <h1 className="text-3xl font-bold tracking-tight">People</h1>
-                    <p className="text-muted-foreground">Manage your guests and contacts.</p>
+                    <h1 className="text-3xl font-bold tracking-tight">Dignitaries</h1>
+                    <p className="text-muted-foreground">Manage your dignitaries and contacts.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -93,7 +93,7 @@ function PeoplePage() {
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             type="text"
-                            placeholder="Search people..."
+                            placeholder="Search dignitaries..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-9 bg-background"
@@ -103,12 +103,12 @@ function PeoplePage() {
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
                             <Button className="w-auto shadow-sm cursor-pointer">
-                                <Plus className="h-4 w-4" />Add Person
+                                <Plus className="h-4 w-4" />Add Dignitary
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Add a New Person</DialogTitle>
+                                <DialogTitle>Add a New Dignitary</DialogTitle>
                             </DialogHeader>
                             <NewPersonForm onSuccess={() => {
                                 toast.success("Person created successfully.");
@@ -126,9 +126,9 @@ function PeoplePage() {
                     <div className="bg-background p-4 rounded-full mb-4">
                         <Binoculars className="w-10 h-10 text-muted-foreground" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground">No people found</h3>
+                    <h3 className="text-lg font-semibold text-foreground">No dignitaries found</h3>
                     <p className="text-sm text-muted-foreground mt-1 mb-4 text-center max-w-sm">
-                        You haven't created any people yet. Click the button above to get started.
+                        You haven't created any dignitaries yet. Click the button above to get started.
                     </p>
                 </div>
             ) : (
@@ -213,7 +213,7 @@ function PeoplePage() {
             <Dialog open={!!editingPerson} onOpenChange={(open) => !open && setEditingPerson(null)}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Edit Person</DialogTitle>
+                        <DialogTitle>Edit Dignitary</DialogTitle>
                     </DialogHeader>
                     {editingPerson && (
                         <EditPersonForm
@@ -233,9 +233,9 @@ function PeoplePage() {
             <AlertDialog open={!!personToDelete} onOpenChange={(open) => !open && setPersonToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Contact?</AlertDialogTitle>
+                        <AlertDialogTitle>Delete Dignitary?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Are you sure you want to delete this person? This action cannot be undone.
+                            Are you sure you want to delete this dignitary? This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

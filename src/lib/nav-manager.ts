@@ -38,7 +38,7 @@ export const managementNavItems: NavItem[] = [
         icon: Tags,
     },
     {
-        title: "People",
+        title: "Dignitaries",
         url: "/dashboard/people",
         icon: Contact,
     },

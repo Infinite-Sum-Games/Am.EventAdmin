@@ -1,10 +1,8 @@
-import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/app-sidebar";
 import { generateNavItems } from "@/lib/nav-manager";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-// import { ModeToggle } from "@/components/ui/theme-toggle"; 
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 
@@ -40,33 +38,16 @@ function DashboardLayout() {
         <SidebarProvider>
             <AppSidebar user={user} navItems={navItems} />
             <SidebarInset>
-                <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                     <div className="flex items-center gap-2">
-                        <SidebarTrigger className="-ml-1" />
+                        {/* <SidebarTrigger className="-ml-1" /> */}
                         <Separator
                             orientation="vertical"
                             className="mr-2 h-4"
                         />
-                        <Breadcrumb>
-                            <BreadcrumbList>
-                                <BreadcrumbItem>
-                                    <BreadcrumbLink asChild>
-                                        <Link to="/dashboard">Anokha 2025</Link>
-                                    </BreadcrumbLink>
-                                </BreadcrumbItem>
-                                <BreadcrumbSeparator />
-                                <BreadcrumbItem>
-                                    <BreadcrumbPage>
-                                        Dashboard
-                                    </BreadcrumbPage>
-                                </BreadcrumbItem>
-                            </BreadcrumbList>
-                        </Breadcrumb>
                     </div>
                     {/* <div className="ml-auto">
                         <ModeToggle />
                     </div> */}
-                </header>
                 <main className="p-4">
                     <Outlet />
                 </main>

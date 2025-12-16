@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const eventDetailsSchema = z.object({
-  name: z.string().min(1, "Name must be at least 1 characters"),
+  name: z.string().min(3, "Name must be at least 3 characters").max(100, "Name must be short (100 chars max)"),
   blurb: z.string().max(120, "Blurb must be short (120 chars max)"),
   description: z.string().max(1500, "Description is too long (1500 chars max)"),
   rules: z.string().max(1500, "Rules is too long (1500 chars max)"),
@@ -23,7 +23,11 @@ export const eventSizeSchema = z.object({
   is_group: z.boolean(),
   min_teamsize: z.number("Minimum team size must be a number").min(1, "Minimum team size must be at least 1").default(1),
   max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1),
-  total_seats: z.number("Total seats must be a number").min(1, "Total seats must be at least 1"),
+  total_seats: z.number("Total seats must be a number").min(0, "Total seats must be at least 0"),
+  is_per_head: z.boolean("Is Per Head must be given"),
+}).refine((data) => data.min_teamsize <= data.max_teamsize, {
+  message: "Minimum team size must be less than or equal to maximum team size",
+  path: ["min_teamsize"],
 });
 
 export type EventSize = z.infer<typeof eventSizeSchema>;

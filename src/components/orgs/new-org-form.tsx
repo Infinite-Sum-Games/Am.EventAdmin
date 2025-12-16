@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ErrorMessage } from "../events/error-message";
+import { hashPassword } from "@/lib/hash";
 
 // Fixed Props Interface
 interface NewOrgFormProps {
@@ -69,12 +70,14 @@ export function NewOrgForm({ onSuccess }: NewOrgFormProps) {
     },
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    // hashing 
+    const hashedPassword = await hashPassword(password);
     createOrganizer({
       name,
       email,
       org_type: orgType,
-      password: password,
+      password: hashedPassword,
       faculty_head: facultyHead,
       student_head: studentHead,
       student_co_head: studentCoHead,
