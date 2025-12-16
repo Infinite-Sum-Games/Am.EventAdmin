@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,8 @@ export const Route = createFileRoute("/dashboard/wip/")({
 });
 
 function WorkInProgressPage() {
+  const navigate = useNavigate();
+
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
       {/* Header */}
@@ -46,11 +48,11 @@ function WorkInProgressPage() {
 
           <Button
             variant="outline"
-            onClick={() => window.history.back()}
+            onClick={() => navigate({to: "/dashboard/events"})}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
-            Go Back
+            Go to Events
           </Button>
         </div>
       </Card>

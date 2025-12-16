@@ -95,7 +95,7 @@ function OrgsPage() {
     },
   });
 
-  const handleDeleteEvent = () => {
+  const handleDelete= () => {
     if (editOrg) {
       deleteOrg(editOrg.id);
       setIsDeleteDialogOpen(false);
@@ -267,10 +267,10 @@ function OrgsPage() {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
 
             <AlertDialogAction
-              onClick={handleDeleteEvent}
+              onClick={handleDelete}
               className="bg-destructive text-white hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 cursor-pointer"
             >
-              Delete Event
+              Delete Organizer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

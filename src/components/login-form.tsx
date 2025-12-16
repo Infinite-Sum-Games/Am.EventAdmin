@@ -54,7 +54,7 @@ export function LoginForm({
       };
       secureLocalStorage.setItem("u", JSON.stringify(userInfo));
 
-      router.navigate({ to: "/dashboard", replace: true });
+      router.navigate({ to: "/dashboard/events", replace: true });
 
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Login failed. Please try again.");
@@ -120,9 +120,9 @@ export function LoginForm({
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Visit Amritotsavam 2025?{" "}
+                Visit Amrita 2026?{" "}
                 <a
-                  href="https://amritotsavam.cb.amrita.edu"
+                  href="https://anokha.amrita.edu/"
                   className="underline underline-offset-4"
                 >
                   Click here

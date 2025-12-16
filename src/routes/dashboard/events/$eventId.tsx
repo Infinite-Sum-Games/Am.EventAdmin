@@ -417,7 +417,7 @@ function GeneralTab({ data }: { data: EventData }) {
               <div className="flex flex-row gap-6">
                 {/* Price Input */}
                 <div className="flex-1 space-y-3">
-                  <Label htmlFor="event-price">Ticket Price</Label>
+                  <Label htmlFor="event-price">Ticket Price<span className="text-xs text-muted-foreground">(Excluding GST)</span></Label>
                   <div className="relative">
                     <IndianRupee className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
