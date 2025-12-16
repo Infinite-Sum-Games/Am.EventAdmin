@@ -58,8 +58,8 @@ function SchedulingTab({ data }: { data: EventData }) {
   const [inputStartTime, setInputStartTime] = useState("");
   const [inputEndTime, setInputEndTime] = useState("");
   const [inputVenue, setInputVenue] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
   const schedules = data.schedules || [];
-
   useEffect(() => {
     if (!isDialogOpen) {
       setEditingId(null);
@@ -67,6 +67,7 @@ function SchedulingTab({ data }: { data: EventData }) {
       setInputStartTime("");
       setInputEndTime("");
       setInputVenue("");
+      setErrorMsg("");
     }
   }, [schedules, isDialogOpen]);
 
@@ -175,7 +176,6 @@ function SchedulingTab({ data }: { data: EventData }) {
     setIsConfirmDeleteOpen(true);
   };
 
-  // FIXED: Logic to execute delete after confirmation
   const handleExecuteDelete = () => {
     if (deleteId) {
       deleteSchedule(deleteId);
@@ -185,6 +185,25 @@ function SchedulingTab({ data }: { data: EventData }) {
   };
 
   const handleSave = () => {
+    if (!inputEventDate) {
+      setErrorMsg("Please select an event day.");
+      return;
+    }
+    if (!inputStartTime) {
+      setErrorMsg("Please enter a start time.");
+      return;
+    }
+    if (!inputEndTime) {
+      setErrorMsg("Please enter an end time.");
+      return;
+    }
+    if (!inputVenue) {
+      setErrorMsg("Please enter a venue.");
+      return;
+    }
+    
+    // REMOVED THE EXTRA 'return;' AND '}' HERE
+
     const eventDateISO = buildTimestamp(inputEventDate, "00:00");
     const startTimeISO = buildTimestamp(inputEventDate, inputStartTime);
     const endTimeISO = buildTimestamp(inputEventDate, inputEndTime);
@@ -267,7 +286,7 @@ function SchedulingTab({ data }: { data: EventData }) {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md bg-popover">
           <DialogHeader>
             <DialogTitle>{editingId ? "Edit Schedule" : "Add Schedule"}</DialogTitle>
             <DialogDescription>
@@ -340,6 +359,10 @@ function SchedulingTab({ data }: { data: EventData }) {
             <ErrorMessage
               title="Invalid Input"
               message={addScheduleError?.message}
+            />
+            <ErrorMessage
+              title="Missing Fields"
+              message={errorMsg}
             />
 
           </div>
