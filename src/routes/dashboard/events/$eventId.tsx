@@ -51,9 +51,14 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { ...oldData, is_published: true };
+          return { 
+            ...oldData, 
+            is_published: true,
+            is_completed: false 
+          };
         }
       });
+      queryClient.invalidateQueries({ queryKey: ['event', id] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Event published successfully.");
     },
@@ -71,9 +76,13 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { ...oldData, is_published: false };
+          return { 
+             ...oldData, 
+             is_published: false 
+          };
         }
       });
+      queryClient.invalidateQueries({ queryKey: ['event', id] });
       queryClient.invalidateQueries({ queryKey: ['events'] });
       toast.success("Event unpublished successfully.");
     },
