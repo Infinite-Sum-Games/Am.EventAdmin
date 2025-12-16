@@ -82,7 +82,7 @@ const { mutate, isPending } = useMutation({
                     id="tagAbbreviation"
                     value={tagAbbreviation}
                     maxLength={10}
-                    min={3}
+                    minLength={3}
                     onChange={(e) => setTagAbbreviation(e.target.value.toUpperCase())}
                     disabled={isPending}
                     required
@@ -98,6 +98,8 @@ const { mutate, isPending } = useMutation({
                     type="text"
                     id="tagName"
                     value={tagName}
+                    maxLength={50}
+                    minLength={3}
                     onChange={(e) => setTagName(e.target.value)}
                     disabled={isPending}
                     required

@@ -64,6 +64,8 @@ export function NewTagForm({ onSuccess }: NewTagFormProps) {
                     type="text"
                     id="tagAbbrevation"
                     value={tagAbbrevation}
+                    maxLength={10}
+                    minLength={3}
                     placeholder="TECH"
                     onChange={(e) => setTagAbbrevation(e.target.value.toUpperCase())}
                     required
@@ -78,6 +80,8 @@ export function NewTagForm({ onSuccess }: NewTagFormProps) {
                     type="text"
                     id="tagName"
                     value={tagName}
+                    maxLength={50}
+                    minLength={3}
                     placeholder="Technology"
                     onChange={(e) => setTagName(e.target.value)}
                     required
