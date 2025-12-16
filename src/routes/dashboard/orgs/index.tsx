@@ -238,7 +238,7 @@ function OrgsPage() {
                       type="button"
                       variant="destructive"
                       onClick={() => {
-                        setEditOrg(org);
+                        // setEditOrg(org);
                         setIsDeleteDialogOpen(true);
                       }}
                       className="flex items-center cursor-pointer"
@@ -258,9 +258,9 @@ function OrgsPage() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Event?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Organizer?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently delete the event and cannot be undone.
+              This will permanently delete the organizer and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
