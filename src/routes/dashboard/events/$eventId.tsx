@@ -885,7 +885,7 @@ function SeatsTab({ data }: { data: EventData }) {
                   if (value === "YES") {
                     setInputMinTeamSize(1);
                     setInputMaxTeamSize(1);
-                    setInputMaxNoOfTeams(1);
+                    setInputMaxNoOfTeams(0);
                   } else {
                     setInputTotalSeats(0);
                   }
