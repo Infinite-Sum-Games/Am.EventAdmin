@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EventCard } from "@/components/events/event-card";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Binoculars, Loader2, Plus, Search } from "lucide-react";
 import { api } from "@/lib/api";
 import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/dashboard/events/")({
 });
 
 function ViewEventsPage() {
-  const { data: events = [] } = useQuery<EventData[]>( {
+  const { data: events = [] } = useQuery<EventData[]>({
     queryKey: ['events'],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_ALL_EVENTS);
@@ -29,14 +29,14 @@ function ViewEventsPage() {
   const queryClient = useQueryClient();
 
   // sort events by updated_at descending
-  const sortedEvents = events.sort((a, b) => {
+  const sortedEvents = (events || []).slice().sort((a, b) => {
     return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   });
 
 
   // search filtering
   const filteredEvents = sortedEvents.filter((event) =>
-    event.name.toLowerCase().includes(searchTerm.toLowerCase()) 
+    event.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // mutation to create a new event
@@ -97,17 +97,24 @@ function ViewEventsPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      
         {filteredEvents && filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredEvents.map((evt) => (
+              <EventCard key={evt.id} event={evt} />
+            ))}
+          </div>
         ) : (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            No events found
+          <div className="flex flex-col w-full items-center justify-center bg-muted/30 border border-muted rounded-lg py-12 mt-4">
+            <div className="bg-background p-4 rounded-full mb-4">
+              <Binoculars className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground">No events found</h3>
+            <p className="text-sm text-muted-foreground mt-1 mb-4 text-center max-w-sm">
+              You haven't created any events yet. Click the button above to get started.
+            </p>
           </div>
         )}
       </div>
-    </div>
   );
 }
