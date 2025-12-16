@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -439,22 +439,15 @@ function GeneralTab({ data }: { data: EventData }) {
 
                 {/* Fee Structure Toggle Group */}
                 <div className="space-y-3">
-                  <Label>Fee Structure</Label>
+                  <Label>Fee Structure {data.is_group ? <Unlock className="h-4 w-4 text-muted-foreground" /> : <Lock className="h-4 w-4 text-muted-foreground" />}</Label>
                   <ToggleGroup
                     type="single"
                     variant="outline"
                     className="justify-start"
+                    disabled={!data.is_group}
                     value={inputIsPerHead ? "PER_HEAD" : "PER_TEAM"}
                     onValueChange={(value) => {
                       if (!value) return; // Prevent unselecting
-                      if (value === "PER_HEAD" && data.is_group) {
-                        toast.error("Per Person pricing is not allowed for Group Events.");
-                        return;
-                      }
-                      if (value === "FIXED" && !data.is_group) {
-                        toast.error("Fixed pricing is not allowed for Individual Events.");
-                        return;
-                      }
                       setInputIsPerHead(value === "PER_HEAD");
                     }}
                   >
@@ -466,9 +459,15 @@ function GeneralTab({ data }: { data: EventData }) {
                     </ToggleGroupItem>
                   </ToggleGroup>
                   <p className="text-[0.8rem] text-muted-foreground">
-                    {inputIsPerHead
-                      ? "Ticket price is calculated per person."
-                      : "Ticket price is fixed per team/group."}
+                      {!data.is_group ? (
+                      <span className="text-xs">
+                        Disabled for individual events
+                      </span>
+                      ) : (
+                      inputIsPerHead
+                        ? "Ticket price is calculated per person."
+                        : "Ticket price is fixed per team/group."
+                      )}
                   </p>
                 </div>
               </div>
