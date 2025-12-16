@@ -34,7 +34,7 @@ export function AppSidebar({
                 <TeamSwitcher
                     teams={[
                         {
-                            name: "Anokha 2025",
+                            name: "Anokha 2026",
                             logo: GalleryVerticalEnd,
                             plan: "Organizing Team",
                         },

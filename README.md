@@ -1,6 +1,6 @@
-# anokha-2025-admin
+# anokha-2026-admin
 
-This is the admin dashboard for the Anokha 2025 event, built with a modern frontend stack including Vite, React, TypeScript, and Tailwind CSS.
+This is the admin dashboard for the Anokha 2026 event, built with a modern frontend stack including Vite, React, TypeScript, and Tailwind CSS.
 
 ## Current Status
 
