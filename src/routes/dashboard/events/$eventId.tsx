@@ -51,10 +51,10 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { 
-            ...oldData, 
+          return {
+            ...oldData,
             is_published: true,
-            is_completed: false 
+            is_completed: false
           };
         }
       });
@@ -76,9 +76,9 @@ export function EventEditorPage() {
     onSuccess: (_, id) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
-          return { 
-             ...oldData, 
-             is_published: false 
+          return {
+            ...oldData,
+            is_published: false
           };
         }
       });
@@ -93,11 +93,11 @@ export function EventEditorPage() {
 
   // one mutation to handle both mark as completed/incomplete
   const { mutate: toggleCompletedStatus, isPending: isTogglingCompleted } = useMutation({
-    mutationFn: async ({id, markAsCompleted}: {id: string, markAsCompleted: boolean}) => {
+    mutationFn: async ({ id, markAsCompleted }: { id: string, markAsCompleted: boolean }) => {
       const response = markAsCompleted ? await axiosClient.post(api.MARK_AS_COMPLETED(id)) : await axiosClient.delete(api.MARK_AS_INCOMPLETE(id));
       return response.data;
     },
-    onSuccess: (_, {id, markAsCompleted}) => {
+    onSuccess: (_, { id, markAsCompleted }) => {
       queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
         if (oldData) {
           return { ...oldData, is_completed: markAsCompleted };
@@ -135,10 +135,10 @@ export function EventEditorPage() {
             <>
               {/* Completion Toggle */}
               {eventData.is_completed ? (
-                <Button 
-                  variant="secondary" 
-                  disabled={isTogglingCompleted} 
-                  onClick={() => toggleCompletedStatus({id: eventId, markAsCompleted: false})}
+                <Button
+                  variant="secondary"
+                  disabled={isTogglingCompleted}
+                  onClick={() => toggleCompletedStatus({ id: eventId, markAsCompleted: false })}
                   className="bg-green-700 hover:bg-green-600 text-white shadow-sm"
                 >
                   {isTogglingCompleted ? (
@@ -149,11 +149,11 @@ export function EventEditorPage() {
                   Mark As Active
                 </Button>
               ) : (
-                <Button 
-                  className="bg-blue-600 hover:bg-blue-700 text-white" 
-                  disabled={isTogglingCompleted} 
-                  onClick={() => toggleCompletedStatus({id: eventId, markAsCompleted: true})}
-                >  
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  disabled={isTogglingCompleted}
+                  onClick={() => toggleCompletedStatus({ id: eventId, markAsCompleted: true })}
+                >
                   {isTogglingCompleted ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -165,9 +165,9 @@ export function EventEditorPage() {
 
               {/* Unpublish Action */}
               {/* variant="outline" reduces visual noise next to the solid completion button */}
-              <Button 
-                variant="destructive" 
-                
+              <Button
+                variant="destructive"
+
                 onClick={() => setIsPublishConfirmOpen(true)}
               >
                 <EyeOff className="h-4 w-4" />
@@ -176,8 +176,8 @@ export function EventEditorPage() {
             </>
           ) : (
             /* Publish Action */
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white shadow-sm" 
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white shadow-sm"
               onClick={() => setIsPublishConfirmOpen(true)}
             >
               <Globe className="h-4 w-4" />
@@ -224,25 +224,25 @@ export function EventEditorPage() {
       </Tabs>
 
       <AlertDialog open={isPublishConfirmOpen} onOpenChange={setIsPublishConfirmOpen}>
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>{eventData.is_published ? "Unpublish Event?" : "Ready to Publish?"}</AlertDialogTitle>
-        <AlertDialogDescription>
-          {eventData.is_published ? "This will remove the event from public listings. Participants will no longer be able to view it." : "This will make the event visible to all participants. Are you sure you are ready to go live?"}
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>Cancel</AlertDialogCancel>
-  
-        <AlertDialogAction 
-            onClick={handlePublishToggle}
-            className={eventData.is_published ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}
-        >
-            {eventData.is_published ? "Unpublish" : "Publish Event"}
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{eventData.is_published ? "Unpublish Event?" : "Ready to Publish?"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {eventData.is_published ? "This will remove the event from public listings. Participants will no longer be able to view it." : "This will make the event visible to all participants. Are you sure you are ready to go live?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+
+            <AlertDialogAction
+              onClick={handlePublishToggle}
+              className={eventData.is_published ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}
+            >
+              {eventData.is_published ? "Unpublish" : "Publish Event"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
 
     </div>
@@ -468,15 +468,15 @@ function GeneralTab({ data }: { data: EventData }) {
                     </ToggleGroupItem>
                   </ToggleGroup>
                   <p className="text-[0.8rem] text-muted-foreground">
-                      {!data.is_group ? (
+                    {!data.is_group ? (
                       <span className="text-xs">
                         Disabled for individual events
                       </span>
-                      ) : (
+                    ) : (
                       inputIsPerHead
                         ? "Ticket price is calculated per person."
                         : "Ticket price is fixed per team/group."
-                      )}
+                    )}
                   </p>
                 </div>
               </div>
@@ -666,13 +666,16 @@ function DescriptionTab({ data }: { data: EventData }) {
             <Suspense fallback={<EditorSkeleton />}>
               <MDXEditorLazy
                 markdown={inputDescription}
-                onChange={(newMarkdown) => setInputDescription(newMarkdown || "")}
+                onChange={(newMarkdown) => setInputDescription((newMarkdown || "").slice(0, 10000))}
               />
             </Suspense>
           </div>
 
           <p className="text-xs text-muted-foreground mt-3 text-right">
             Use headings (#), lists (-), and bold text (**text**) to format your content.
+          </p>
+          <p className="text-[0.8rem] text-muted-foreground text-right mt-2">
+            {inputDescription.length}/10000
           </p>
           <ErrorMessage
             title="Failed to update description"
@@ -869,7 +872,7 @@ function SeatsTab({ data }: { data: EventData }) {
               onClick={handleUpdateSeats || isUpdatingSeats}
               className="flex"
             >
-              <Save className="h-4 w-4" /> 
+              <Save className="h-4 w-4" />
               {isUpdatingSeats ? "Updating Seats..." : "Update Seats"}
             </Button>
           </div>
@@ -985,7 +988,7 @@ function SeatsTab({ data }: { data: EventData }) {
                       </p>
                     </div>
                     <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
-                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Participants</span>
+                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Participants</span>
                       <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                         {inputMaxNoOfTeams * (inputMaxTeamSize || 1)}
                       </p>
@@ -1073,7 +1076,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
         const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
         throw new Error(errorMessages);
       }
-      
+
       const response = await axiosClient.post(api.UPDATE_EVENT_MODES(id), validatedData.data);
       return response.data;
     },
@@ -1120,7 +1123,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
               disabled={!hasModesChanged || isUpdatingModes}
               className="flex"
             >
-              <Save className="h-4 w-4" /> 
+              <Save className="h-4 w-4" />
               {isUpdatingModes ? "Saving..." : "Save Changes"}
             </Button>
           </CardHeader>
