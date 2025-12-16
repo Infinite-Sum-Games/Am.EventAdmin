@@ -151,14 +151,14 @@ export function TagsCard({ data }: { data: EventData }) {
               <CommandList>
                 <CommandEmpty>No tag found.</CommandEmpty>
                 <CommandGroup heading="Available Tags">
-                  {AVAILABLE_TAGS.map((tag) => {
+                    {AVAILABLE_TAGS?.map((tag) => {
                     const selectedTagIds = selectedTags.map((t: tags) => t.id);
                     const isSelected = selectedTagIds.includes(tag.id);
                     return (
                       <CommandItem
-                        key={tag.id}
-                        value={tag.name}
-                        onSelect={() => tag.id && handleSelect(tag.id)}
+                      key={tag.id}
+                      value={tag.name}
+                      onSelect={() => tag.id && handleSelect(tag.id)}
                       >
                         <div className="flex items-center gap-2 flex-1">
                           {/* <Avatar className="h-6 w-6">
