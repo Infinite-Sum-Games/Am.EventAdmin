@@ -155,7 +155,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
               <CommandList>
                 <CommandEmpty>No organizer found.</CommandEmpty>
                 <CommandGroup heading="Available Organizers">
-                  {AVAILABLE_ORGANIZERS.map((org) => {
+                  {AVAILABLE_ORGANIZERS?.map((org) => {
                     const selectedOrgIds = selectedOrganizers.map((o: organizers) => o.id);
                     const isSelected = selectedOrgIds.includes(org.id);
                     return (

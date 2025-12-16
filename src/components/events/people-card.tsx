@@ -154,7 +154,7 @@ export function PeopleCard({ data }: { data: EventData }) {
               <CommandList>
                 <CommandEmpty>No dignitary found.</CommandEmpty>
                 <CommandGroup heading="Available Dignitaries">
-                  {AVAILABLE_PEOPLE.map((person) => {
+                  {AVAILABLE_PEOPLE?.map((person) => {
                     const selectedPersonIds = selectedPeople.map((o: people) => o.id);
                     const isSelected = selectedPersonIds.includes(person.id);
                     return (
