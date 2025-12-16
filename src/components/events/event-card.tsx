@@ -51,7 +51,7 @@ export function EventCard({ event }: EventCardProps) {
       className={cn(
         "group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-muted gap-0 py-0 cursor-pointer",
       )}
-      onClick={(e) => {
+      onClick={() => {
         navigate({ to: "/dashboard/events/$eventId", params: { eventId: event.id } });
       }}
     >
