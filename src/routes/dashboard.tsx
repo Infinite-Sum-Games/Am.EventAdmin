@@ -4,7 +4,7 @@ import { generateNavItems } from "@/lib/nav-manager";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { ModeToggle } from "@/components/ui/theme-toggle"; 
+// import { ModeToggle } from "@/components/ui/theme-toggle"; 
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 
