@@ -201,8 +201,10 @@ function SchedulingTab({ data }: { data: EventData }) {
       setErrorMsg("Please enter a venue.");
       return;
     }
-    
-    // REMOVED THE EXTRA 'return;' AND '}' HERE
+    if (inputStartTime >= inputEndTime) {
+      setErrorMsg("End time must be after start time.");
+      return;
+    }
 
     const eventDateISO = buildTimestamp(inputEventDate, "00:00");
     const startTimeISO = buildTimestamp(inputEventDate, inputStartTime);
