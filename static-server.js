@@ -1,5 +1,4 @@
 import { serve } from "bun";
-import { join } from "path";
 
 const DIST = "dist";
 const BASE = "/admin";
@@ -9,27 +8,24 @@ serve({
   fetch(req) {
     const url = new URL(req.url);
 
-    // Reject anything outside /admin
     if (!url.pathname.startsWith(BASE)) {
       return new Response("Not Found", { status: 404 });
     }
 
-    // Map URL to file
-    let filePath = url.pathname.replace(BASE, "");
+    let filePath = url.pathname.slice(BASE.length);
     if (filePath === "" || filePath === "/") {
       filePath = "/index.html";
     }
 
-    const fullPath = join(DIST, filePath);
-    const file = Bun.file(fullPath);
+    const file = Bun.file(DIST + filePath);
 
+    // SPA fallback
     if (!file.size) {
-      // SPA fallback
-      return new Response(Bun.file(join(DIST, "index.html")));
+      return new Response(Bun.file(DIST + "/index.html"));
     }
 
     return new Response(file);
   },
 });
 
-console.log("Serving at http://localhost:5173/admin/");
+console.log("Admin UI running on port 5173");
