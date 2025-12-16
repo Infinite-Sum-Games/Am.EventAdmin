@@ -248,7 +248,7 @@ function GeneralTab({ data }: { data: EventData }) {
   const [inputUrl, setInputUrl] = useState(data.poster_url || "");
   const [inputPrice, setInputPrice] = useState(data.price || 0);
   const [inputIsPerHead, setInputIsPerHead] = useState(data.is_per_head || false);
-
+  const [isImageError, setIsImageError] = useState(false);
   // Sync state on load
   useEffect(() => {
     setInputUrl(data.poster_url || "");
@@ -256,6 +256,7 @@ function GeneralTab({ data }: { data: EventData }) {
     setInputBlurb(data.blurb || "");
     setInputPrice(data.price || 0);
     setInputIsPerHead(data.is_per_head || false);
+    setIsImageError(false);
   }, [data]);
 
   const hasDetailsChanged = inputName !== data.name || inputBlurb !== (data.blurb || "") || inputPrice !== data.price || inputIsPerHead !== data.is_per_head;
@@ -528,28 +529,24 @@ function GeneralTab({ data }: { data: EventData }) {
           </div>
 
           {/* Image Handling */}
-          {inputUrl ? (
+          {inputUrl && !isImageError ? (
             <img
               src={inputUrl}
               alt="Event Poster Preview"
               className="object-cover w-full h-full animate-in fade-in duration-500"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = "";
-                (e.target as HTMLImageElement).alt = "Invalid Image URL";
-              }}
+              onError={() => setIsImageError(true)}
             />
           ) : (
             <div className="flex flex-col items-center justify-center p-6 text-center text-muted-foreground gap-2">
               <div className="rounded-full bg-muted p-4 mb-2">
                 <ImageIcon className="h-8 w-8 opacity-50" />
               </div>
-              <p className="text-sm font-medium">No Poster Uploaded</p>
+              <p className="text-sm font-medium">{isImageError ? "Invalid Image URL" : "No Poster Uploaded"}</p>
               <p className="text-xs max-w-45">
-                Enter a valid URL to see a preview of your event poster.
+                {isImageError ? "Please check the URL and try again." : "Enter a valid URL to see a preview of your event poster."}
               </p>
             </div>
           )}
-
         </div>
         <Label className="text-muted-foreground pl-1 self-center">Live Preview</Label>
       </div>
