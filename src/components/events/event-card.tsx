@@ -49,7 +49,6 @@ export function EventCard({ event }: EventCardProps) {
     <Card
       className={cn(
         "group flex flex-col overflow-hidden transition-all duration-300 hover:shadow-lg border-muted gap-0 py-0",
-        isClosed && "grayscale opacity-80"
       )}
     >
       {/* Poster Image */}
@@ -74,13 +73,15 @@ export function EventCard({ event }: EventCardProps) {
         </div>
 
         {/* Active Badge */}
-        {(event.event_status === "ACTIVE" || event.event_status === "CLOSED") && (
+        {(event.event_status === "ACTIVE" || event.event_status === "CLOSED" || event.event_status === "COMPLETED") && (
           <div className="absolute top-3 right-3 z-10">
             <Badge className={cn("px-2 py-1 text-xs backdrop-blur-sm rounded-sm shadow-md", {
               "bg-green-600/80 text-white": event.event_status === "ACTIVE",
-              "bg-yellow-800/80 text-white": event.event_status === "CLOSED",
+              "bg-yellow-400/70 text-white": event.event_status === "CLOSED",
+              "bg-blue-600/80 text-white": event.event_status === "COMPLETED",
             })}>
-              {event.event_status == "ACTIVE" ? <Activity className="w-4 h-4 mr-1" /> : <PencilLine className="w-4 h-4 mr-1" />}{event.event_status == "ACTIVE" ? "ACTIVE" : "DRAFT"}
+              {event.event_status === "ACTIVE" ? <Activity className="w-4 h-4 mr-1" /> : event.event_status === "CLOSED" ? <PencilLine className="w-4 h-4 mr-1" /> : <Trophy className="w-4 h-4 mr-1" />}
+              {event.event_status === "ACTIVE" ? "PUBLISHED" : event.event_status === "CLOSED" ? "DRAFT" : "COMPLETED"}
             </Badge>
           </div>
         )}
@@ -92,15 +93,6 @@ export function EventCard({ event }: EventCardProps) {
             {event.is_group ? `${event.min_teamsize ?? 1}-${event.max_teamsize ?? 1} Team` : "Individual"}
           </Badge>
         </div>
-
-        {/* Status Overlay */}
-        {event.event_status == "COMPLETED" && (
-          <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center z-20">
-            <Badge variant="outline" className="text-lg px-4 py-1 uppercase tracking-widest font-bold border-2 border-white/20 shadow-xl">
-              {event.event_status}
-            </Badge>
-          </div>
-        )}
       </div>
 
       <CardHeader className="p-4 pb-2">
