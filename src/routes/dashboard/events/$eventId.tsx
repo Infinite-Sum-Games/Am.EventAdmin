@@ -976,7 +976,7 @@ function SeatsTab({ data }: { data: EventData }) {
                       </p>
                     </div>
                     <div className="text-right bg-background/50 px-4 py-2 rounded-md border border-blue-200 dark:border-blue-800">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total People</span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Total Participants</span>
                       <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                         {inputMaxNoOfTeams * (inputMaxTeamSize || 1)}
                       </p>
