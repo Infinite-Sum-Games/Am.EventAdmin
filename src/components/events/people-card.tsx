@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, X, Users } from "lucide-react";
+import { Check, ChevronsUpDown, Plus, Trash2, Users } from "lucide-react"; // Added Trash2
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -21,8 +21,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"; // Added Table imports
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { type EventData, type people } from "@/stores/useEventEditorStore";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { People } from "@/types/people";
@@ -33,7 +40,7 @@ import { toast } from "sonner";
 
 export function PeopleCard({ data }: { data: EventData }) {
 
-  const { data:AVAILABLE_PEOPLE = [], isLoading} = useQuery<People[]>({
+  const { data: AVAILABLE_PEOPLE = [], isLoading } = useQuery<People[]>({
     queryKey: ["all-people"],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_ALL_PEOPLE);
@@ -58,7 +65,7 @@ export function PeopleCard({ data }: { data: EventData }) {
       const response = await axiosClient.post(api.CONNECT_EVENT_PEOPLE, validatedData.data);
       return response.data;
     },
-    onSuccess: (_, {person_id}) => {
+    onSuccess: (_, { person_id }) => {
       queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
         if (!oldData) return oldData;
         const addedPeople = AVAILABLE_PEOPLE.find(p => p.id === person_id);
@@ -87,7 +94,7 @@ export function PeopleCard({ data }: { data: EventData }) {
       const response = await axiosClient.delete(api.DISCONNECT_EVENT_PEOPLE, { data: validatedData.data });
       return response.data;
     },
-    onSuccess: (_, {person_id}) => {
+    onSuccess: (_, { person_id }) => {
       queryClient.setQueryData(["event", data.id], (oldData: EventData | undefined) => {
         if (!oldData) return oldData;
         const updatedPeople = (oldData.people || []).filter(p => p.id !== person_id);
@@ -111,7 +118,7 @@ export function PeopleCard({ data }: { data: EventData }) {
     removePeople({ person_id: id, id: data.id });
   }
 
-  if(isLoading) {
+  if (isLoading) {
     return <div>Loading People...</div>
   }
 
@@ -136,7 +143,7 @@ export function PeopleCard({ data }: { data: EventData }) {
               className="w-full justify-between"
             >
               <span className="flex items-center gap-2 text-muted-foreground">
-                  <Plus className="h-4 w-4" /> Add Dignitary...
+                <Plus className="h-4 w-4" /> Add Dignitary...
               </span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
@@ -151,28 +158,28 @@ export function PeopleCard({ data }: { data: EventData }) {
                     const selectedPersonIds = selectedPeople.map((o: people) => o.id);
                     const isSelected = selectedPersonIds.includes(person.id);
                     return (
-                        <CommandItem
-                            key={person.id}
-                            value={person.name}
-                            onSelect={() => {
-                              if (!person.id) return;
-                              if (isSelected) {
-                                handleRemove(person.id);
-                              } else {
-                                handleSelect(person.id);
-                              }
-                            }}
-                        >
-                            <div className="flex items-center gap-2 flex-1">
-                                <Avatar className="h-6 w-6">
-                                    <AvatarFallback className="text-[10px]">
-                                        {person.name.slice(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <span>{person.name}</span>
-                            </div>
-                            {isSelected && <Check className="ml-auto h-4 w-4" />}
-                        </CommandItem>
+                      <CommandItem
+                        key={person.id}
+                        value={person.name}
+                        onSelect={() => {
+                          if (!person.id) return;
+                          if (isSelected) {
+                            handleRemove(person.id);
+                          } else {
+                            handleSelect(person.id);
+                          }
+                        }}
+                      >
+                        <div className="flex items-center gap-2 flex-1">
+                          <Avatar className="h-6 w-6">
+                            <AvatarFallback className="text-[10px]">
+                              {person.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span>{person.name}</span>
+                        </div>
+                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                      </CommandItem>
                     );
                   })}
                 </CommandGroup>
@@ -180,36 +187,60 @@ export function PeopleCard({ data }: { data: EventData }) {
             </Command>
           </PopoverContent>
         </Popover>
-        
-        <div className="flex flex-wrap gap-2 min-h-10 items-center">
-            {selectedPeople.length === 0 && (
-                <span className="text-sm text-muted-foreground italic">
-                    No dignitaries added yet.
-                </span>
-            )}
 
-            {selectedPeople.map((person: people) => {
-                if (!person) return null;
-                
-                return (
-                    <Badge key={person.id} variant="secondary" className="pl-1 pr-2 py-1 gap-2 text-sm font-normal">
-                        <Avatar className="h-5 w-5">
-                            {/* <AvatarImage src={person.avatar} /> */}
-                            <AvatarFallback className="text-[10px]">
-                                {person.name.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
+        {/* Table View for Added People */}
+        <div className="rounded-md border">
+          <Table className="h-full overflow-y-scroll">
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Profession</TableHead>
+                <TableHead className="flex justify-end items-center">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {selectedPeople.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={3} className="h-24 text-center text-muted-foreground italic">
+                    
+                    No dignitaries added yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                selectedPeople.map((person: people) => {
+                  if (!person) return null;
+                  return (
+                    <TableRow key={person.id} className="overflow-y-scroll">
+                      <TableCell className="flex items-center gap-3 font-medium">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            {person.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
                         </Avatar>
                         {person.name}
-                        <button 
-                            onClick={() => person.id && handleRemove(person.id)}
-                            className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-muted-foreground/20 p-0.5 transition-colors"
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {person.profession}
+                      </TableCell>
+                      <TableCell className="flex justify-end">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => person.id && handleRemove(person.id)}
+                          className="h-8 w-8 border border-destructive text-muted-foreground hover:text-destructive"
                         >
-                            <X className="h-3 w-3 text-muted-foreground" />
-                        </button>
-                    </Badge>
-                )
-            })}
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove</span>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
+
       </CardContent>
     </Card>
   );

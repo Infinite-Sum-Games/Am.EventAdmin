@@ -36,6 +36,7 @@ export interface organizers {
 export interface people {
   id?: string;
   name: string;
+  profession: string;
 }
 
 export interface tags {
