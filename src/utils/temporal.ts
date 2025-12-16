@@ -67,7 +67,6 @@ export const formatTime = (isoString: string | undefined | null): string => {
     const plainDateTime = Temporal.PlainDateTime.from(isoString);
     return plainDateTime.toPlainTime().toString({ smallestUnit: "minute" });
   } catch (error) {
-    console.error("Error formatting time:", error);
     return "--";
   }
 };

@@ -19,7 +19,6 @@ function ViewEventsPage() {
     queryKey: ['events'],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_ALL_EVENTS);
-      console.log("Fetched Events:", response);
       return response.data.events;
     },
   });
@@ -43,7 +42,6 @@ function ViewEventsPage() {
   const { mutate: handleCreateEvent, isPending: isCreating } = useMutation({
     mutationFn: async () => {
       const response = await axiosClient.get(api.CREATE_EVENT);
-      console.log("Create Event Response:", response.data);
       return response.data;
     },
     onSuccess: (data) => {

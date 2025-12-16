@@ -41,7 +41,6 @@ export function EditPersonForm({ personId, initialData, onSuccess }: EditPersonF
                 const messages = validated.error.issues
                     .map(issue => issue.message)
                     .join("; ");
-                console.log("Validation failed:", messages);
                 throw new Error(messages);
             }
             const response = await axiosClient.put(api.UPDATE_PEOPLE(personId), validated.data);

@@ -40,7 +40,6 @@ export function NewPersonForm({ onSuccess }: NewPersonFormProps) {
                 const messages = validated.error.issues
                     .map(issue => issue.message)
                     .join("; ");
-                console.log("Validation failed:", messages);
                 throw new Error(messages);
             }
             const response = await axiosClient.post(api.CREATE_PEOPLE, validated.data);
