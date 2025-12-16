@@ -385,6 +385,7 @@ function GeneralTab({ data }: { data: EventData }) {
                   id="event-name"
                   placeholder="e.g. Annual Tech Symposium 2024"
                   value={inputName}
+                  maxLength={100}
                   onChange={(e) => setInputName(e.target.value)}
                   className="font-medium"
                 />
