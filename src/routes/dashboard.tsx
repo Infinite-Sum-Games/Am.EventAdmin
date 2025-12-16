@@ -63,9 +63,9 @@ function DashboardLayout() {
                             </BreadcrumbList>
                         </Breadcrumb>
                     </div>
-                    <div className="ml-auto">
+                    {/* <div className="ml-auto">
                         <ModeToggle />
-                    </div>
+                    </div> */}
                 </header>
                 <main className="p-4">
                     <Outlet />

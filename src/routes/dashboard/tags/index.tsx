@@ -12,6 +12,8 @@ import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // --- Data Fetching ---
 const tagsQueryOptions = queryOptions({
@@ -36,7 +38,7 @@ function TagsPage() {
   const [tagToEdit, setTagToEdit] = useState<Tags | null>(null);
   const [tagToDeleteId, setTagToDeleteId] = useState<string | null>(null);
 
-  const filteredTags = tags.filter(tag =>
+  const filteredTags = tags == null ? [] : tags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -87,7 +89,7 @@ function TagsPage() {
       </div>
 
       {(!filteredTags || filteredTags.length === 0) ? (
-        <div className="flex flex-col items-center justify-center bg-muted/30 border-2 border-dashed border-muted rounded-lg py-12 mt-4">
+        <div className="flex flex-col items-center justify-center bg-muted/30 border border-muted rounded-lg py-12 mt-4">
           <div className="bg-background p-4 rounded-full mb-4">
             <Binoculars className="w-10 h-10 text-muted-foreground" />
           </div>
@@ -102,22 +104,40 @@ function TagsPage() {
           {filteredTags.map((tag) => (
             <Card
               key={tag.id}
-              className="flex flex-row items-center justify-between p-4 transition-colors hover:bg-muted/40 hover:shadow-sm"
+              className="flex flex-row items-center justify-between p-4 transition-colors hover:bg-muted/40 hover:shadow-sm gap-0"
             >
-              {/* Icon & Info */}
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div className="flex flex-col overflow-hidden">
-                  <span className="text-sm  truncate">
-                    {tag.abbreviation.toLowerCase()}
-                  </span>
-                  <span className="truncate font-medium text-lg text-foreground" title={tag.name}>
-                    {tag.name}
-                  </span>
+
+              <div className="flex flex-row w-full justify-between items-center ">
+                {/* Icon & Info */}
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <div className="flex flex-col overflow-hidden">
+                    <span className="text-sm  truncate">
+                      {tag.abbreviation.toLowerCase()}
+                    </span>
+                    <span className="truncate font-medium text-lg text-foreground" title={tag.name}>
+                      {tag.name}
+                    </span>
+                  </div>
                 </div>
+
+                <TooltipProvider>
+                  <Tooltip >
+                    <TooltipTrigger asChild className="bg-accent/90">
+                      <div className="text-lg w-10 h-10 items-center flex justify-center text-foreground font-semibold bg-accent/70 px-3 py-1 rounded-md">
+                        {tag.events.length}
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-accent/90 text-foreground">
+                      <p>No of events associated with this tag</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
+              <Separator orientation="vertical" className="h-8 mx-4" />
+
               {/* Right Side: Actions */}
-              <div className="flex items-center gap-2 pl-2">
+              <div className="flex items-center gap-2">
                 <Button
                   variant="default"
                   onClick={() => setTagToEdit(tag)}

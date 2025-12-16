@@ -155,10 +155,13 @@ function OrgsPage() {
 
       {/* Organizers */}
       {!filteredOrgs || filteredOrgs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center bg-muted/50 rounded-md shadow-xs py-8 mt-4">
-          <Binoculars className="w-24 h-24 my-2 text-muted-foreground" />
-          <p className="text-lg font-semibold mt-4">
-            No organizers found for this filter.
+        <div className="flex flex-col items-center justify-center bg-muted/30 border border-muted rounded-lg py-12 mt-4">
+          <div className="bg-background p-4 rounded-full mb-4">
+            <Binoculars className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold text-foreground">No organizers found</h3>
+          <p className="text-sm text-muted-foreground mt-1 mb-4 text-center max-w-sm">
+            You haven't created any organizers yet. Click the button above to get started.
           </p>
         </div>
       ) : (
