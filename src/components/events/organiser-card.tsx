@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, ChevronsUpDown, Plus, X, Users } from "lucide-react";
+import { ChevronsUpDown, Plus, X, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -172,7 +172,7 @@ export function OrganizersCard({ data }: { data: EventData }) {
                           </Avatar>
                           <span>{org.name}</span>
                         </div>
-                        {isSelected && <Check className="ml-auto h-4 w-4" />}
+                        {isSelected && <X className="ml-auto h-4 w-4" />}
                       </CommandItem>
                     );
                   })}
