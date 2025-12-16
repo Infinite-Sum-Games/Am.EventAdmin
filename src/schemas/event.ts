@@ -25,6 +25,9 @@ export const eventSizeSchema = z.object({
   max_teamsize: z.number("Maximum team size must be a number").min(1, "Maximum team size must be at least 1").default(1),
   total_seats: z.number("Total seats must be a number").min(0, "Total seats must be at least 0"),
   is_per_head: z.boolean("Is Per Head must be given"),
+}).refine((data) => data.min_teamsize <= data.max_teamsize, {
+  message: "Minimum team size must be less than or equal to maximum team size",
+  path: ["min_teamsize"],
 });
 
 export type EventSize = z.infer<typeof eventSizeSchema>;
