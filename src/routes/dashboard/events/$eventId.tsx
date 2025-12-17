@@ -31,6 +31,8 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { BaseSkeleton } from '@/components/Skeleton/base-skeleton';
+import { dashboardSkeletonLayout } from '@/components/Skeleton/layouts';
 
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
@@ -126,7 +128,7 @@ export function EventEditorPage() {
     setIsPublishConfirmOpen(false);
   };
 
-  if (isLoading || !eventData) return <div>Loading Event...</div>
+  if (isLoading || !eventData)  return <BaseSkeleton layout={dashboardSkeletonLayout} />;
 
   return (
     <div className="container mx-auto py-10">
