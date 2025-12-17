@@ -10,7 +10,7 @@ import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 import type { EventData } from "@/stores/useEventEditorStore";
 import { BaseSkeleton } from "@/components/Skeleton/base-skeleton";
-import { cardGridSkeletonLayout, EventSkeletonLayout } from "@/components/Skeleton/layouts";
+import { cardGridSkeletonLayout} from "@/components/Skeleton/layouts";
 
 export const Route = createFileRoute("/dashboard/events/")({
   component: ViewEventsPage,
