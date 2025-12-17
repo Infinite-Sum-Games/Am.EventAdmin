@@ -36,10 +36,15 @@ export function EventEditorPage() {
   const { eventId } = Route.useParams();
   const queryClient = useQueryClient();
   const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false);
+  const sleep = (ms: number) =>
+    new Promise((resolve) => setTimeout(resolve, ms));
 
   const { data: eventData, isLoading } = useQuery({
     queryKey: ['event', eventId],
-    queryFn: () => axiosClient.get(api.FETCH_EVENT_BY_ID(eventId)).then(r => r.data),
+      queryFn: async () => {
+    await new Promise(resolve => setTimeout(resolve, 800));
+    return axiosClient.get(api.FETCH_EVENT_BY_ID(eventId)).then(r => r.data);
+  },
   })
 
   // mutations for publish/unpublish
