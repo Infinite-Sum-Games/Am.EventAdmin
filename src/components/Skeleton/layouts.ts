@@ -60,48 +60,61 @@ export const cardGridSkeletonLayout: SkeletonBlock[] = [
 
 
 
-export const dashboardSkeletonLayout: SkeletonBlock[] = [
+export const EventSkeletonLayout: SkeletonBlock[] = [
   {
     type: "group",
-    className:
-      "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6",
-    children: [
-      { type: "box", className: "h-6 w-40" },
-      {
-        type: "group",
-        className: "flex gap-2",
-        children: [
-          { type: "box", className: "h-8 w-24 rounded-md" },
-          { type: "box", className: "h-8 w-24 rounded-md" },
-        ],
-      },
-    ],
-  },
-  {
-    type: "box",
-    className: "h-10 w-full rounded-lg mb-6",
-  },
-  {
-    type: "group",
-    className: "grid grid-cols-1 lg:grid-cols-4 gap-4 min-h-[60vh]",
+    className: "pt-6 md:pt-10 px-4 md:px-6",
     children: [
       {
         type: "group",
-        className: "lg:col-span-3",
+        className:
+          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between py-3 border-b mb-6",
         children: [
+          { type: "box", className: "h-6 w-44" },
+
           {
-            type: "box",
-            className: "w-full rounded-xl min-h-[24rem] lg:min-h-[32rem]",
+            type: "group",
+            className: "flex gap-3",
+            children: [
+              { type: "box", className: "h-9 w-28 rounded-md" },
+              { type: "box", className: "h-9 w-28 rounded-md" },
+            ],
           },
         ],
       },
       {
         type: "group",
-        className: "lg:col-span-1",
+        className: "mb-6",
         children: [
           {
             type: "box",
-            className: "h-full min-h-[20rem] lg:min-h-full rounded-xl",
+            className: "h-11 w-full rounded-xl",
+          },
+        ],
+      },
+      {
+        type: "group",
+        className: "grid grid-cols-1 lg:grid-cols-4 gap-6 pb-6 min-h-[70vh]",
+        children: [
+          {
+            type: "group",
+            className: "lg:col-span-3",
+            children: [
+              {
+                type: "box",
+                className: "w-full rounded-2xl min-h-[28rem] lg:min-h-[38rem]",
+              },
+            ],
+          },
+          {
+            type: "group",
+            className: "lg:col-span-1",
+            children: [
+              {
+                type: "box",
+                className: "w-full rounded-2xl min-h-[24rem] lg:min-h-[38rem]",
+              },
+            ],
           },
         ],
       },
