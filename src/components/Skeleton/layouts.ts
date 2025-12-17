@@ -25,55 +25,60 @@ export const listSkeletonLayout: SkeletonBlock[] = [
 
 
 export const cardGridSkeletonLayout: SkeletonBlock[] = [
-  /* ================= Root Wrapper ================= */
   {
     type: "group",
     className: "pt-8 md:pt-12",
     children: [
-      /* ================= Header ================= */
       {
         type: "group",
-        className:
-          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 px-6 lg:px-10",
-        children: [
-          { type: "box", className: "h-6 w-40" },
-
-          {
-            type: "group",
-            className: "flex gap-3",
-            children: [
-              { type: "box", className: "h-9 w-28 rounded-md" },
-              { type: "box", className: "h-9 w-28 rounded-md" },
-            ],
-          },
-        ],
-      },
-
-      /* ================= Separator ================= */
-      {
-        type: "group",
-        className: "px-6 lg:px-10",
-        children: [
-          {
-            type: "box",
-            className: "h-px w-full bg-muted mb-6",
-          },
-        ],
-      },
-
-      /* ================= Cards Grid ================= */
-      {
-        type: "group",
-        className: "px-6 lg:px-10",
+        className: "mx-auto max-w-6xl px-6 lg:px-10",
         children: [
           {
             type: "group",
             className:
-              "mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[70vh]",
+              "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-8",
+            children: [
+              { type: "box", className: "h-6 w-40" },
+
+              {
+                type: "group",
+                className: "flex gap-3",
+                children: [
+                  { type: "box", className: "h-9 w-28 rounded-md" },
+                  { type: "box", className: "h-9 w-28 rounded-md" },
+                ],
+              },
+            ],
+          },
+          {
+            type: "box",
+            className: "h-px w-full bg-muted mb-10",
+          },
+          {
+            type: "group",
+            className:
+              "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-10",
             children: [
               {
                 type: "repeat",
-                count: 6,
+                count: 3,
+                children: [
+                  {
+                    type: "box",
+                    className:
+                      "w-full max-w-[22rem] mx-auto rounded-2xl min-h-[18rem] sm:min-h-[20rem] lg:min-h-[24rem]",
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: "group",
+            className: "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8",
+            children: [
+              {
+                type: "repeat",
+                count: 3,
                 children: [
                   {
                     type: "box",
@@ -89,7 +94,6 @@ export const cardGridSkeletonLayout: SkeletonBlock[] = [
     ],
   },
 ];
-
 
 
 
