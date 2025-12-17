@@ -9,15 +9,18 @@ import { api } from "@/lib/api";
 import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 import type { EventData } from "@/stores/useEventEditorStore";
+import { BaseSkeleton } from "@/components/Skeleton/base-skeleton";
+import { cardGridSkeletonLayout, EventSkeletonLayout } from "@/components/Skeleton/layouts";
 
 export const Route = createFileRoute("/dashboard/events/")({
   component: ViewEventsPage,
 });
 
 function ViewEventsPage() {
-  const { data: events = [] } = useQuery<EventData[]>({
+  const { data: events = [], isLoading } = useQuery<EventData[]>({
     queryKey: ['events'],
     queryFn: async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800));
       const response = await axiosClient.get(api.FETCH_ALL_EVENTS);
       return response.data.events;
     },
@@ -52,6 +55,7 @@ function ViewEventsPage() {
       toast.error("Failed to initialize event");
     },
   });
+    if (isLoading)  return <BaseSkeleton layout={cardGridSkeletonLayout} />;
 
   return (
     <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
@@ -61,7 +65,6 @@ function ViewEventsPage() {
           <p className="text-muted-foreground">Manage your events effectively.</p>
         </div>
         <div className="flex flex-row items-center justify-between">
-
           {/* Search Bar */}
           <div className="relative mr-4">
             <Input
@@ -95,7 +98,6 @@ function ViewEventsPage() {
         </div>
       </div>
 
-      
         {filteredEvents && filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredEvents.map((evt) => (
@@ -113,6 +115,6 @@ function ViewEventsPage() {
             </p>
           </div>
         )}
-      </div>
+    </div>
   );
 }

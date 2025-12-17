@@ -23,40 +23,74 @@ export const listSkeletonLayout: SkeletonBlock[] = [
   },
 ];
 
+
 export const cardGridSkeletonLayout: SkeletonBlock[] = [
-  {
-    type: "box",
-    className: "h-6 w-1/4 mb-4",
-  },
+  /* ================= Root Wrapper ================= */
   {
     type: "group",
-    className: "flex gap-3 mb-6",
+    className: "pt-8 md:pt-12",
     children: [
-      { type: "box", className: "h-8 w-20 rounded-md" },
-      { type: "box", className: "h-8 w-20 rounded-md" },
-      { type: "box", className: "h-8 w-20 rounded-md" },
-    ],
-  },
-  {
-    type: "group",
-    className: "flex gap-4",
-    children: [
+      /* ================= Header ================= */
       {
         type: "group",
-        className: "w-3/4 space-y-4",
+        className:
+          "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4 px-6 lg:px-10",
         children: [
-          { type: "box", className: "h-40 w-full rounded-xl" },
-          { type: "box", className: "h-40 w-full rounded-xl" },
+          { type: "box", className: "h-6 w-40" },
+
+          {
+            type: "group",
+            className: "flex gap-3",
+            children: [
+              { type: "box", className: "h-9 w-28 rounded-md" },
+              { type: "box", className: "h-9 w-28 rounded-md" },
+            ],
+          },
         ],
       },
+
+      /* ================= Separator ================= */
       {
         type: "group",
-        className: "w-1/4",
-        children: [{ type: "box", className: "h-[336px] w-full rounded-xl" }],
+        className: "px-6 lg:px-10",
+        children: [
+          {
+            type: "box",
+            className: "h-px w-full bg-muted mb-6",
+          },
+        ],
+      },
+
+      /* ================= Cards Grid ================= */
+      {
+        type: "group",
+        className: "px-6 lg:px-10",
+        children: [
+          {
+            type: "group",
+            className:
+              "mx-auto max-w-6xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[70vh]",
+            children: [
+              {
+                type: "repeat",
+                count: 6,
+                children: [
+                  {
+                    type: "box",
+                    className:
+                      "w-full max-w-[22rem] mx-auto rounded-2xl min-h-[18rem] sm:min-h-[20rem] lg:min-h-[24rem]",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
       },
     ],
   },
 ];
+
+
 
 
 

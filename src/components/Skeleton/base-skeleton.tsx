@@ -14,7 +14,6 @@ export function BaseSkeleton({ layout }: BaseSkeletonProps) {
     </div>
   );
 }
-
 function RenderBlock({ block }: { block: SkeletonBlock }) {
   switch (block.type) {
     case "box":
@@ -31,15 +30,13 @@ function RenderBlock({ block }: { block: SkeletonBlock }) {
 
     case "repeat":
       return (
-        <div className={block.gap ?? "space-y-4"}>
-          {Array.from({ length: block.count }).map((_, i) => (
-            <div key={i}>
-              {block.children.map((child, j) => (
-                <RenderBlock key={j} block={child} />
-              ))}
-            </div>
-          ))}
-        </div>
+        <>
+          {Array.from({ length: block.count }).map((_, i) =>
+            block.children.map((child, j) => (
+              <RenderBlock key={`${i}-${j}`} block={child} />
+            ))
+          )}
+        </>
       );
   }
 }
