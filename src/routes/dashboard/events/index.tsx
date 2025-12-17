@@ -20,7 +20,6 @@ function ViewEventsPage() {
   const { data: events = [], isLoading } = useQuery<EventData[]>({
     queryKey: ['events'],
     queryFn: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 800));
       const response = await axiosClient.get(api.FETCH_ALL_EVENTS);
       return response.data.events;
     },
