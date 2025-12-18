@@ -31,13 +31,12 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
   const queryClient = useQueryClient();
   const [isPublishConfirmOpen, setIsPublishConfirmOpen] = useState(false);
 
-  const { data: eventData, isLoading } = useQuery({
+  const { data: eventData, isLoading } = useQuery<EventData>({
     queryKey: ['event', eventId],
     queryFn: () => axiosClient.get(api.FETCH_EVENT_BY_ID(eventId)).then(r => r.data),
   })
@@ -113,9 +112,16 @@ export function EventEditorPage() {
 
 
   const handlePublishToggle = () => {
+    if (!eventData) return;
+    
     if (eventData.is_published) {
       unpublishEvent(eventId);
     } else {
+      if (eventData.schedules?.length === 0) {
+        toast.error("Cannot publish event without a schedule. Please add at least one schedule before publishing.");
+        setIsPublishConfirmOpen(false);
+        return;
+      }
       publishEvent(eventId);
     }
     setIsPublishConfirmOpen(false);
