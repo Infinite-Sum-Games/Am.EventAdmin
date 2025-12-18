@@ -13,6 +13,8 @@ import {
   BoldItalicUnderlineToggles,
   ListsToggle,
   BlockTypeSelect,
+  // tablePlugin,
+  // InsertTable,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
 import { forwardRef } from "react";
@@ -33,6 +35,7 @@ const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
           quotePlugin(), 
           thematicBreakPlugin(),
           markdownShortcutPlugin(),
+          // tablePlugin(),
           toolbarPlugin({
             // 3. Toolbar: Styled to look like a proper header
             toolbarContents: () => (
@@ -48,6 +51,8 @@ const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
                 </div>
                 <div className="h-6 w-px bg-border mx-2" /> {/* Divider */}
                 <ListsToggle />
+                <div className="h-6 w-px bg-border mx-2" /> {/* Divider */}
+                {/* <InsertTable /> */}
               </div>
             )
           })
