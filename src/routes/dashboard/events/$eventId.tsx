@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle, InfoIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -1113,7 +1113,7 @@ function ModesTagsOrgsTab({ data }: { data: EventData }) {
         <Card className="border-none">
           <CardHeader className='flex flex-row justify-between'>
             <div className="space-y-1">
-              <CardTitle className='mb-2'>Event Configuration</CardTitle>
+              <CardTitle className='mb-2'>Event Configuration {hasModesChanged && <div className='flex items-center align-middle mt-2'><InfoIcon className='h-4 w-4 text-destructive mr-1' /><p className="text-sm text-destructive">You have unsaved changes</p></div>}</CardTitle>
               <CardDescription>
                 Set the fundamental modes and settings for your event.
               </CardDescription>
