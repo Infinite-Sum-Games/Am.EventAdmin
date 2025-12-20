@@ -3,12 +3,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api'
 import { axiosClient } from '@/lib/axios'
-import type { GetAllTransactionsResponse, Transaction } from '@/types/transactions'
+import type { Transaction } from '@/types/transactions'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { TransactionCard } from '@/components/transaction-card'
 import { ChevronLeft, ChevronRight, Loader2, FilterX } from 'lucide-react'
 import { toast } from 'sonner'
+import { Input } from '@/components/ui/input'
 
 export const Route = createFileRoute('/dashboard/transactions/')({
   component: RouteComponent,
@@ -18,10 +19,11 @@ const ITEMS_PER_PAGE = 20;
 
 function RouteComponent() {
   const [statusFilter, setStatusFilter] = useState<string>("PENDING");
+  const [emailSearch, setEmailSearch] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
 
   // Query to fetch all transactions
-  const { data: transactions = [], isLoading, isError, refetch } = useQuery<GetAllTransactionsResponse>({
+  const { data: transactions = [], isLoading, isError, refetch } = useQuery<Transaction[]>({
     queryKey: ['transactions', statusFilter],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_ALL_TRANSACTIONS, {
@@ -54,12 +56,20 @@ function RouteComponent() {
     verifyTransaction(id);
   };
 
-  const totalPages = Math.ceil(transactions.length / ITEMS_PER_PAGE);
+  // filter email search
+  const filteredTransactions = useMemo(() => {
+    if (!emailSearch) return transactions;
+    return transactions.filter((txn: Transaction) => 
+      txn.email.toLowerCase().includes(emailSearch.toLowerCase())
+    );
+  }, [transactions, emailSearch]);
+
+  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
   
   const currentData = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return transactions.slice(start, start + ITEMS_PER_PAGE);
-  }, [transactions, currentPage]);
+    return filteredTransactions.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredTransactions, currentPage]);
 
   const handleFilterChange = (val: string) => {
     setStatusFilter(val);
@@ -87,8 +97,16 @@ function RouteComponent() {
           </p>
         </div>
         
+
         <div className="flex items-center gap-3">
-            <Select value={statusFilter} onValueChange={handleFilterChange}>
+          {/* Search bar for email */}
+          <Input
+            type="text"
+            placeholder="Search by email"
+            value={emailSearch}
+            onChange={(e) => setEmailSearch(e.target.value)}
+          />
+          <Select value={statusFilter} onValueChange={handleFilterChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by Status" />
             </SelectTrigger>
