@@ -152,7 +152,7 @@ export function EventEditorPage() {
                   ) : (
                     <Activity className="h-4 w-4" />
                   )}
-                  Mark As Active
+                  Re-enable Booking
                 </Button>
               ) : (
                 <Button
@@ -163,9 +163,9 @@ export function EventEditorPage() {
                   {isTogglingCompleted ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <CheckCircle2 className="h-4 w-4" />
+                    <MouseOff className="h-4 w-4" />
                   )}
-                  Mark as Completed
+                  Disable Booking
                 </Button>
               )}
 
