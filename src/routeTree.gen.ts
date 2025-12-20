@@ -13,6 +13,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardWipIndexRouteImport } from './routes/dashboard/wip/index'
+import { Route as DashboardTransactionsIndexRouteImport } from './routes/dashboard/transactions/index'
 import { Route as DashboardTagsIndexRouteImport } from './routes/dashboard/tags/index'
 import { Route as DashboardStudentsIndexRouteImport } from './routes/dashboard/students/index'
 import { Route as DashboardRevenueIndexRouteImport } from './routes/dashboard/revenue/index'
@@ -44,6 +45,12 @@ const DashboardWipIndexRoute = DashboardWipIndexRouteImport.update({
   path: '/wip/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardTransactionsIndexRoute =
+  DashboardTransactionsIndexRouteImport.update({
+    id: '/transactions/',
+    path: '/transactions/',
+    getParentRoute: () => DashboardRoute,
+  } as any)
 const DashboardTagsIndexRoute = DashboardTagsIndexRouteImport.update({
   id: '/tags/',
   path: '/tags/',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/students': typeof DashboardStudentsIndexRoute
   '/dashboard/tags': typeof DashboardTagsIndexRoute
+  '/dashboard/transactions': typeof DashboardTransactionsIndexRoute
   '/dashboard/wip': typeof DashboardWipIndexRoute
 }
 export interface FileRoutesByTo {
@@ -127,6 +135,7 @@ export interface FileRoutesByTo {
   '/dashboard/revenue': typeof DashboardRevenueIndexRoute
   '/dashboard/students': typeof DashboardStudentsIndexRoute
   '/dashboard/tags': typeof DashboardTagsIndexRoute
+  '/dashboard/transactions': typeof DashboardTransactionsIndexRoute
   '/dashboard/wip': typeof DashboardWipIndexRoute
 }
 export interface FileRoutesById {
@@ -144,6 +153,7 @@ export interface FileRoutesById {
   '/dashboard/revenue/': typeof DashboardRevenueIndexRoute
   '/dashboard/students/': typeof DashboardStudentsIndexRoute
   '/dashboard/tags/': typeof DashboardTagsIndexRoute
+  '/dashboard/transactions/': typeof DashboardTransactionsIndexRoute
   '/dashboard/wip/': typeof DashboardWipIndexRoute
 }
 export interface FileRouteTypes {
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/students'
     | '/dashboard/tags'
+    | '/dashboard/transactions'
     | '/dashboard/wip'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue'
     | '/dashboard/students'
     | '/dashboard/tags'
+    | '/dashboard/transactions'
     | '/dashboard/wip'
   id:
     | '__root__'
@@ -193,6 +205,7 @@ export interface FileRouteTypes {
     | '/dashboard/revenue/'
     | '/dashboard/students/'
     | '/dashboard/tags/'
+    | '/dashboard/transactions/'
     | '/dashboard/wip/'
   fileRoutesById: FileRoutesById
 }
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       path: '/wip'
       fullPath: '/dashboard/wip'
       preLoaderRoute: typeof DashboardWipIndexRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/transactions/': {
+      id: '/dashboard/transactions/'
+      path: '/transactions'
+      fullPath: '/dashboard/transactions'
+      preLoaderRoute: typeof DashboardTransactionsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
     '/dashboard/tags/': {
@@ -316,6 +336,7 @@ interface DashboardRouteChildren {
   DashboardRevenueIndexRoute: typeof DashboardRevenueIndexRoute
   DashboardStudentsIndexRoute: typeof DashboardStudentsIndexRoute
   DashboardTagsIndexRoute: typeof DashboardTagsIndexRoute
+  DashboardTransactionsIndexRoute: typeof DashboardTransactionsIndexRoute
   DashboardWipIndexRoute: typeof DashboardWipIndexRoute
 }
 
@@ -331,6 +352,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardRevenueIndexRoute: DashboardRevenueIndexRoute,
   DashboardStudentsIndexRoute: DashboardStudentsIndexRoute,
   DashboardTagsIndexRoute: DashboardTagsIndexRoute,
+  DashboardTransactionsIndexRoute: DashboardTransactionsIndexRoute,
   DashboardWipIndexRoute: DashboardWipIndexRoute,
 }
 
