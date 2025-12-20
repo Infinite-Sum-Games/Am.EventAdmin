@@ -27,7 +27,7 @@ To get the development server running:
     ```
 2.  **Run the Development Server:**
     ```bash
-    bun dev
+    bun run dev
     ```
 The application will be available at `http://localhost:5173` (or the next available port).
 
