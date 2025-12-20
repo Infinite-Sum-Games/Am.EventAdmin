@@ -42,6 +42,11 @@ export const managementNavItems: NavItem[] = [
         url: "/dashboard/people",
         icon: Contact,
     },
+    {
+        title: "Transactions",
+        url: "/dashboard/transactions",
+        icon: IndianRupee,
+    }
 ];
 
 export const analyticsNavItems: NavItem[] = [
