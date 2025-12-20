@@ -60,7 +60,7 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
 
     return (
         <Card className="hover:shadow-md transition-shadow duration-200 border-muted p-0">
-            <CardContent className="py-2 px-4 flex flex-row gap-2 items-center justify-between">
+            <CardContent className="py-2 px-6 flex flex-row gap-2 items-center justify-between">
 
                 {/* Left: Event Name, ID & PRICE */}
                 <div className="flex flex-col space-y-1 w-[350px]">
