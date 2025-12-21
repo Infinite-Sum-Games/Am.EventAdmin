@@ -63,10 +63,6 @@ export const analyticsNavItems: NavItem[] = [
         title: "Participants",
         url: "/dashboard/participants",
         icon: Users,
-        items: [
-            { title: "By Event", url: "/dashboard/participants" },
-            { title: "Search All", url: "/dashboard/participants/search" },
-        ],
     },
     {
         title: "Students",
