@@ -31,7 +31,7 @@ function RouteComponent() {
           status: statusFilter
         }
       })
-      return response.data.transactions;
+      return response.data.transactions || [];
     }
   });
 
@@ -58,8 +58,9 @@ function RouteComponent() {
 
   // filter email search
   const filteredTransactions = useMemo(() => {
-    if (!emailSearch) return transactions;
-    return transactions.filter((txn: Transaction) => 
+    const safeTransactions = transactions || [];
+    if (!emailSearch) return safeTransactions;
+    return safeTransactions.filter((txn: Transaction) => 
       txn.email.toLowerCase().includes(emailSearch.toLowerCase())
     );
   }, [transactions, emailSearch]);
@@ -68,7 +69,7 @@ function RouteComponent() {
   
   const currentData = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredTransactions.slice(start, start + ITEMS_PER_PAGE);
+    return (filteredTransactions || []).slice(start, start + ITEMS_PER_PAGE);
   }, [filteredTransactions, currentPage]);
 
   const handleFilterChange = (val: string) => {
@@ -138,11 +139,20 @@ function RouteComponent() {
         )}
 
         {/* Empty State */}
-        {!isLoading && !isError && currentData.length === 0 && (
+        {!isLoading && !isError && transactions.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/30">
+            <FilterX className="w-12 h-12 mb-4 opacity-50" />
+            <h3 className="text-lg font-semibold">No transactions yet</h3>
+            <p className="text-sm">As soon as the first transaction is made, it will appear here.</p>
+          </div>
+        )}
+
+        {/* Filtered Empty State */}
+        {!isLoading && !isError && transactions.length > 0 && currentData.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/30">
             <FilterX className="w-12 h-12 mb-4 opacity-50" />
             <h3 className="text-lg font-semibold">No transactions found</h3>
-            <p className="text-sm">Try adjusting your status filter.</p>
+            <p className="text-sm">Try adjusting your email or status filter.</p>
           </div>
         )}
 
@@ -156,11 +166,11 @@ function RouteComponent() {
           />
         ))}
 
-        {/* --- Pagination Controls --- */}
+        {/* Pagination Controls*/}
         {!isLoading && currentData.length > 0 && (
           <div className="flex items-center justify-between py-4 border-t mt-4">
             <p className="text-sm text-muted-foreground">
-              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, transactions.length)} of {transactions.length} entries
+              Showing {((currentPage - 1) * ITEMS_PER_PAGE) + 1} to {Math.min(currentPage * ITEMS_PER_PAGE, filteredTransactions.length)} of {filteredTransactions.length} entries
             </p>
             
             <div className="flex items-center gap-2">
