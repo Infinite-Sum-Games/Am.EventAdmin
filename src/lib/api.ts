@@ -57,4 +57,8 @@ export const api = {
   ADD_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
   UPDATE_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
   DELETE_EVENT_SCHEDULE: (id: string) => `${CURRENT_BASE_URL}/events/admin/schedule/${id}`,
+
+  // Transactions
+  FETCH_ALL_TRANSACTIONS: `${CURRENT_BASE_URL}/events/transactions`,
+  VERIFY_TRANSACTION: `${CURRENT_BASE_URL}/events/verify`,
 };

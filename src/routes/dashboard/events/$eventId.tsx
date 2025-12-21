@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, CheckCircle2, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle, InfoIcon } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, MouseOff, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle, CheckCircle2, InfoIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
