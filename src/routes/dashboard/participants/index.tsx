@@ -96,6 +96,8 @@ function ParticipantsOverviewPage() {
     setCurrentPage(1);
   };
 
+  const { user: sessionUser } = Route.useRouteContext();
+
   return (
     <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto">
       <div className="flex justify-between items-center border-b pb-4">
@@ -105,94 +107,98 @@ function ParticipantsOverviewPage() {
             Manage and view all registered participants for this event.
           </p>
         </div>
-        {selectedEventId && filteredParticipants.length > 0 && (
+        {selectedEventId && filteredParticipants.length > 0 ? (
           <span className="text-muted-foreground text-lg font-medium">
             {filteredParticipants.length} participants
           </span>
+        ) : (
+          (sessionUser?.email == "tcw@amrita.edu" || sessionUser?.email == "kiran@amrita.edu") && (
+            <span className="">Shaun is a pookie (˶˃ ᵕ ˂˶)!!!</span>
+          )
         )}
       </div>
 
       {/* Unified Toolbar Component */}
       <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-        
+
         {/* Left Side: Event Selector */}
         <div className="w-full lg:w-auto flex flex-col sm:flex-row gap-3 items-center">
-            <div className="w-full sm:w-80">
-                <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                    <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between bg-background"
-                    >
-                    {selectedEvent ? (
-                        <span className="truncate font-medium text-foreground">
-                        {selectedEvent.name}
-                        </span>
-                    ) : (
-                        <span className="flex items-center gap-2 text-muted-foreground">
-                        Choose Event...
-                        </span>
-                    )}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0" align="start">
-                    <Command>
-                    <CommandInput placeholder="Search events..." />
-                    <CommandList>
-                        <CommandEmpty>No event found.</CommandEmpty>
-                        <CommandGroup heading="Available Events">
-                        {events?.map((event) => {
-                            const isSelected = selectedEventId === event.id;
-                            return (
-                            <CommandItem
-                                key={event.id}
-                                value={event.name}
-                                onSelect={() => event.id && handleSelect(event.id)}
-                            >
-                                <div className="flex items-center gap-2 flex-1">
-                                <span>{event.name}</span>
-                                </div>
-                                {isSelected && <Check className="ml-auto h-4 w-4" />}
-                            </CommandItem>
-                            );
-                        })}
-                        </CommandGroup>
-                    </CommandList>
-                    </Command>
-                </PopoverContent>
-                </Popover>
-            </div>
+          <div className="w-full sm:w-80">
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={open}
+                  className="w-full justify-between bg-background"
+                >
+                  {selectedEvent ? (
+                    <span className="truncate font-medium text-foreground">
+                      {selectedEvent.name}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2 text-muted-foreground">
+                      Choose Event...
+                    </span>
+                  )}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search events..." />
+                  <CommandList>
+                    <CommandEmpty>No event found.</CommandEmpty>
+                    <CommandGroup heading="Available Events">
+                      {events?.map((event) => {
+                        const isSelected = selectedEventId === event.id;
+                        return (
+                          <CommandItem
+                            key={event.id}
+                            value={event.name}
+                            onSelect={() => event.id && handleSelect(event.id)}
+                          >
+                            <div className="flex items-center gap-2 flex-1">
+                              <span>{event.name}</span>
+                            </div>
+                            {isSelected && <Check className="ml-auto h-4 w-4" />}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
 
         {/* Right Side: Search Controls */}
         <div className="w-full lg:w-auto flex gap-2">
-            <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder={`Search by ${searchFields.find(f => f.value === searchField)?.label || 'Name'}...`}
-                    value={searchQuery}
-                    onChange={handleSearchChange}
-                    className="pl-9 bg-background"
-                    disabled={!selectedEventId} 
-                />
-            </div>
-            
-            <Select value={searchField} onValueChange={setSearchField} disabled={!selectedEventId}>
-              <SelectTrigger className="w-[140px] bg-background">
-                <div className="flex items-center gap-2">
-                    <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-                    <SelectValue placeholder="Field" />
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {searchFields.map(field => (
-                  <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder={`Search by ${searchFields.find(f => f.value === searchField)?.label || 'Name'}...`}
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="pl-9 bg-background"
+              disabled={!selectedEventId}
+            />
+          </div>
+
+          <Select value={searchField} onValueChange={setSearchField} disabled={!selectedEventId}>
+            <SelectTrigger className="w-[140px] bg-background">
+              <div className="flex items-center gap-2">
+                <Filter className="w-3.5 h-3.5 text-muted-foreground" />
+                <SelectValue placeholder="Field" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              {searchFields.map(field => (
+                <SelectItem key={field.value} value={field.value}>{field.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -285,7 +291,7 @@ function ParticipantsOverviewPage() {
                 </Card>
               ))}
             </div>
-            
+
             {/* Pagination Controls*/}
             {!isLoading && currentData.length > 0 && (
               <div className="flex items-center justify-between py-4 border-t mt-4">
@@ -325,7 +331,7 @@ function ParticipantsOverviewPage() {
             </div>
             <h3 className="text-lg font-semibold text-foreground">No participants found</h3>
             <p className="text-sm text-muted-foreground mt-1 mb-4 text-center max-w-sm">
-                {searchQuery ? `No results for "${searchQuery}"` : `There are no participants registered for ${selectedEvent?.name} yet.`}
+              {searchQuery ? `No results for "${searchQuery}"` : `There are no participants registered for ${selectedEvent?.name} yet.`}
             </p>
           </div>
         )}
