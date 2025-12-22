@@ -1,4 +1,7 @@
 export interface Participant {
+  // only for team participants
+  team_name?: string;
+  
   student_name: string;
   college: string;
   city: string;
