@@ -16,9 +16,33 @@ import {
 } from "@/components/ui/sidebar";
 import { Link } from "@tanstack/react-router";
 import type { NavItem } from "@/lib/nav-manager";
+import React from "react";
+
+const newFeatureItems = ["Transactions", "Participants"];
 
 // This component now intelligently renders either a direct link or a collapsible menu
 function NavItemGroup({ items }: { items: NavItem[] }) {
+    const [showNew, setShowNew] = React.useState<string[]>([]);
+
+    React.useEffect(() => {
+        // No date check, always show new features if not seen
+        const seenFeatures = JSON.parse(localStorage.getItem("seenFeatures") || "[]");
+        const featuresToShow = newFeatureItems.filter(
+            (item) => !seenFeatures.includes(item)
+        );
+        setShowNew(featuresToShow);
+    }, []);
+
+    const handleItemClick = (itemTitle: string) => {
+        if (newFeatureItems.includes(itemTitle)) {
+            const seenFeatures = JSON.parse(localStorage.getItem("seenFeatures") || "[]");
+            if (!seenFeatures.includes(itemTitle)) {
+                const newSeenFeatures = [...seenFeatures, itemTitle];
+                localStorage.setItem("seenFeatures", JSON.stringify(newSeenFeatures));
+                setShowNew(showNew.filter((item) => item !== itemTitle));
+            }
+        }
+    };
     return (
         <SidebarMenu>
             {items.map((item) => {
@@ -26,10 +50,11 @@ function NavItemGroup({ items }: { items: NavItem[] }) {
                 if (!item.items || item.items.length === 0) {
                     return (
                         <SidebarMenuItem key={item.title}>
-                            <Link to={item.url} className="w-full" search={{}} params={{}}>
+                            <Link to={item.url} className="w-full" search={{}} params={{}} onClick={() => handleItemClick(item.title)}>
                                 <SidebarMenuButton isActive={item.isActive} tooltip={item.title}>
                                     {item.icon && <item.icon />}
-                                    <span>{item.title}</span>
+                                    <span className="flex-grow">{item.title}</span>
+                                    {showNew.includes(item.title) && <span className="ping ml-auto" />}
                                 </SidebarMenuButton>
                             </Link>
                         </SidebarMenuItem>
