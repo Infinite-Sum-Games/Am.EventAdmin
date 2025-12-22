@@ -97,8 +97,6 @@ function ParticipantsOverviewPage() {
     setCurrentPage(1);
   };
 
-  const { user: sessionUser } = Route.useRouteContext();
-
   return (
     <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto">
       <div className="flex justify-between items-center border-b pb-4">
