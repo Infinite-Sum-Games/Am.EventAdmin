@@ -112,11 +112,7 @@ function ParticipantsOverviewPage() {
           <span className="text-muted-foreground text-lg font-medium">
             {filteredParticipants.length} participants
           </span>
-        ) : (
-          (sessionUser?.email == "tcw@amrita.edu" || sessionUser?.email == "kiran@amrita.edu") && (
-            <span className="">Shaun is a pookie (˶˃ ᵕ ˂˶)!!!</span>
-          )
-        )}
+        ) : null}
       </div>
 
       <TooltipProvider>
