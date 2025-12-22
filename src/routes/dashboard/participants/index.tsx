@@ -33,6 +33,7 @@ const searchFields = [
 ];
 
 function ParticipantsOverviewPage() {
+  const { user: sessionUser } = Route.useRouteContext();
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,7 +111,13 @@ function ParticipantsOverviewPage() {
           <span className="text-muted-foreground text-lg font-medium">
             {filteredParticipants.length} participants
           </span>
-        ) : null}
+        ) : (
+          (sessionUser.email == "tcw@amrita.edu" || sessionUser.email == "kiran@amrita.edu") && (
+            <span className="text-muted-foreground text-lg font-medium">
+              Shawn is a pookie (˶˃ ᵕ ˂˶)!!!
+            </span>
+          )
+        )}
       </div>
 
       <TooltipProvider>
