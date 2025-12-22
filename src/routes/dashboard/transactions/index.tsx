@@ -42,12 +42,13 @@ function RouteComponent() {
         const response = await axiosClient.post(api.VERIFY_TRANSACTION, { txn_id: txnId });
         return response.data;
       },
-      onSuccess: () => {
-        toast.success("Transaction verified successfully");
+      // it will return message and status
+      onSuccess: (data) => {
+        toast.success("Transaction status updated to " + data.status);
         refetch();
       },
       onError: () => {
-        toast.error("Failed to verify transaction");
+        toast.error("Failed to update transaction status. Please try again.");
       },
     });
   
@@ -142,8 +143,8 @@ function RouteComponent() {
         {!isLoading && !isError && transactions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-lg bg-muted/30">
             <FilterX className="w-12 h-12 mb-4 opacity-50" />
-            <h3 className="text-lg font-semibold">No transactions yet</h3>
-            <p className="text-sm">As soon as the first transaction is made, it will appear here.</p>
+            <h3 className="text-lg font-semibold">No pending transactions left</h3>
+            <p className="text-sm">No more pending transactions to display</p>
           </div>
         )}
 
