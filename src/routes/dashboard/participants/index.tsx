@@ -204,7 +204,7 @@ function ParticipantsOverviewPage() {
             <p className="text-sm font-medium">Loading participants...</p>
           </div>
         ) : !selectedEventId ? (
-          <div className="flex flex-col items-center justify-center bg-muted/10 border-2 border-dashed border-muted rounded-xl py-16 mt-4">
+          <div className="flex flex-col items-center justify-center bg-muted/10 border-2 border-dashed border-muted rounded-xl py-16">
             <div className="bg-muted p-4 rounded-full mb-4">
               <Binoculars className="w-8 h-8 text-muted-foreground" />
             </div>
