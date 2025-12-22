@@ -63,5 +63,5 @@ export const api = {
   VERIFY_TRANSACTION: `${CURRENT_BASE_URL}/events/verify`,
 
   // Participants
-  FETCH_ALL_PARTICIPANTS_BY_EVENT: (eventId: string) => `${CURRENT_BASE_URL}}/organizers/dashboard/${eventId}`,
+  FETCH_ALL_PARTICIPANTS_BY_EVENT: (eventId: string) => `${CURRENT_BASE_URL}/organizers/dashboard/${eventId}`,
 };
