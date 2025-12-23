@@ -54,10 +54,6 @@ export const analyticsNavItems: NavItem[] = [
         title: "Revenue",
         url: "/dashboard/revenue",
         icon: IndianRupee,
-        items: [
-            { title: "Overview", url: "/dashboard/revenue" },
-            { title: "Transactions", url: "/dashboard/revenue/transactions" },
-        ],
     },
     {
         title: "Participants",
