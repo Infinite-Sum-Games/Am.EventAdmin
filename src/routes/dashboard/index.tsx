@@ -49,7 +49,7 @@ function DashboardOverviewPage() {
   const [groupFilter, setGroupFilter] = useState<"ALL" | "INDIVIDUAL" | "TEAM">("ALL");
   const [sortBy, setSortBy] = useState<SortOption>("revenue-desc");
 
-  const { data: leaderboardData = [], isLoading, isError } = useQuery<Leaderboard[]>({
+  const { data: leaderboardData = [], isLoading } = useQuery<Leaderboard[]>({
     queryKey: ['leaderboard'],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_LEADERBOARD);
