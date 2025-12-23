@@ -6,6 +6,9 @@ export const api = {
   LOGOUT: `${CURRENT_BASE_URL}/auth/admin/logout`,
   SESSION: `${CURRENT_BASE_URL}/auth/admin/session`,
 
+  // leaderboard
+  FETCH_LEADERBOARD: `${CURRENT_BASE_URL}/analytics/quick`,
+
   // Organizers
   FETCH_ALL_ORGANIZERS: `${CURRENT_BASE_URL}/organizers`,
   CREATE_ORGANIZER: `${CURRENT_BASE_URL}/organizers`,
