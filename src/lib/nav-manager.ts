@@ -1,6 +1,7 @@
 import {
     LayoutDashboard, CalendarDays, Users, Shield, Tags, Contact,
-    IndianRupee, GraduationCap, type LucideIcon
+    IndianRupee, GraduationCap, type LucideIcon,
+    ArrowRightLeft
 } from "lucide-react";
 
 export type NavItem = {
@@ -45,7 +46,7 @@ export const managementNavItems: NavItem[] = [
     {
         title: "Transactions",
         url: "/dashboard/transactions",
-        icon: IndianRupee,
+        icon: ArrowRightLeft,
     }
 ];
 
