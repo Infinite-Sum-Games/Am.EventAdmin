@@ -16,7 +16,7 @@ export type NavItem = {
 };
 
 export const dashboardNavItem: NavItem = {
-    title: "Dashboard",
+    title: "Overview",
     url: "/dashboard",
     icon: LayoutDashboard,
 };

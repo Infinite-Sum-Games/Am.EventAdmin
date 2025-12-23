@@ -54,7 +54,7 @@ export function LoginForm({
       };
       secureLocalStorage.setItem("u", JSON.stringify(userInfo));
 
-      router.navigate({ to: "/dashboard/events", replace: true });
+      router.navigate({ to: "/dashboard", replace: true });
 
     } catch (err: any) {
       setErrorMsg(err.response?.data?.message || "Login failed. Please try again.");
