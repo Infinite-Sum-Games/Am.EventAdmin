@@ -53,3 +53,21 @@ export type GetRegistrationSummaryResponse = {
     message: string;
     registration_summary: RegistrationSummary;
 };
+
+// people 
+
+export type WebsiteRegistrationSplit = {
+    internal: number;
+    external: number;
+};
+
+export type PeopleRegistrationSummary = {
+    id: number;
+    website_registration_split: WebsiteRegistrationSplit;
+    total_website_registrations: number;
+};
+
+export type GetPeopleRegistrationSummaryResponse = {
+    message: string;
+    people_registration_summary: PeopleRegistrationSummary;
+};
