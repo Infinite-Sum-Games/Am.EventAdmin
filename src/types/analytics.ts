@@ -76,17 +76,19 @@ export type GetPeopleRegistrationSummaryResponse = {
 
 // transactions
 
-export type TransactionSummary = {
+export type TransactionStatus = {
     total: number;
     success: number;
     failed: number;
     pending: number;
 };
 
+export type TransactionSummary = {
+    id: number;
+    transaction_summary: TransactionStatus;
+};
+
 export type GetTransactionSummaryResponse = {
     message: string;
-    transaction_summary: {
-        id: number;
-        transaction_summary: TransactionSummary;
-    }
+    transaction_summary: TransactionSummary;
 };
