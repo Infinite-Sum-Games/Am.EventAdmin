@@ -85,5 +85,8 @@ export type TransactionSummary = {
 
 export type GetTransactionSummaryResponse = {
     message: string;
-    transaction_summary: TransactionSummary;
+    transaction_summary: {
+        id: number;
+        transaction_summary: TransactionSummary;
+    }
 };
