@@ -68,4 +68,7 @@ export const api = {
   // analytics
   // revenue
   REVENUE_SUMMARY: `${CURRENT_BASE_URL}/analytics/revenue`,
+  // registrations
+  REGISTRATIONS_SUMMARY: `${CURRENT_BASE_URL}/analytics/registrations`
+  
 };
