@@ -5,7 +5,7 @@ import { StatCard } from "@/components/dashboard/stat-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/lib/api";
 import { axiosClient } from "@/lib/axios";
-import type { RevenueSummary } from "@/types/revenue";
+import type { RevenueSummary } from "@/types/analytics";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { DollarSign, PartyPopper, Users } from "lucide-react";
