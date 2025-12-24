@@ -81,11 +81,9 @@ function NavItemGroup({ items }: { items: NavItem[] }) {
 export function NavMain({
     dashboardItem,
     managementItems,
-    analyticsItems,
 }: {
     dashboardItem: NavItem;
     managementItems: NavItem[];
-    analyticsItems: NavItem[];
 }) {
     return (
         <>
@@ -106,11 +104,6 @@ export function NavMain({
             <SidebarGroup>
                 <SidebarGroupLabel>Management</SidebarGroupLabel>
                 <NavItemGroup items={managementItems} />
-            </SidebarGroup>
-
-            <SidebarGroup>
-                <SidebarGroupLabel>Analytics</SidebarGroupLabel>
-                <NavItemGroup items={analyticsItems} />
             </SidebarGroup>
         </>
     );

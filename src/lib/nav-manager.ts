@@ -47,29 +47,15 @@ export const managementNavItems: NavItem[] = [
         title: "Transactions",
         url: "/dashboard/transactions",
         icon: ArrowRightLeft,
+    },
+    {
+        title: "Analytics",
+        url: "/dashboard/revenue",
+        icon: IndianRupee,
     }
 ];
 
-export const analyticsNavItems: NavItem[] = [
-    {
-        title: "Revenue",
-        url: "/dashboard/revenue",
-        icon: IndianRupee,
-    },
-    {
-        title: "Participants",
-        url: "/dashboard/participants",
-        icon: Users,
-    },
-    {
-        title: "Students",
-        url: "/dashboard/students",
-        icon: GraduationCap,
-        items: [
-            { title: "Overview", url: "/dashboard/students" },
-        ],
-    },
-];
+export const analyticsNavItems: NavItem[] = [];
 
 export function generateNavItems(pathname: string) {
     const applyActiveState = (items: NavItem[]) => {
