@@ -71,6 +71,8 @@ export const api = {
   // registrations
   REGISTRATIONS_SUMMARY: `${CURRENT_BASE_URL}/analytics/registrations`,
   // people
-  PEOPLE_REGISTRATION_SUMMARY: `${CURRENT_BASE_URL}/analytics/people`
+  PEOPLE_REGISTRATION_SUMMARY: `${CURRENT_BASE_URL}/analytics/people`,
+  // transactions
+  TRANSACTION_SUMMARY: `${CURRENT_BASE_URL}/analytics/transactions`
 
 };
