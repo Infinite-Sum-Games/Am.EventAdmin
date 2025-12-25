@@ -31,6 +31,14 @@ import { api } from '@/lib/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ErrorMessage } from '@/components/events/error-message';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
+function unescapeMarkdown(markdown: string) {
+  if (!markdown) return "";
+  return markdown
+    .replace(/\\_/g, "_")
+    .replace(/\\\*/g, "*");
+}
+
 export function EventEditorPage() {
   const { eventId } = Route.useParams();
   const queryClient = useQueryClient();
@@ -671,7 +679,7 @@ function DescriptionTab({ data }: { data: EventData }) {
           <div className="min-h-125">
             <Suspense fallback={<EditorSkeleton />}>
               <MDXEditorLazy
-                markdown={inputDescription}
+                markdown={unescapeMarkdown(inputDescription)}
                 onChange={(newMarkdown) => setInputDescription((newMarkdown || "").slice(0, 10000))}
               />
             </Suspense>
@@ -778,7 +786,7 @@ function RulesTab({ data }: { data: EventData }) {
           <div className="min-h-125">
             <Suspense fallback={<EditorSkeleton />}>
               <MDXEditorLazy
-                markdown={inputRules}
+                markdown={unescapeMarkdown(inputRules)}
                 onChange={(newMarkdown) => setInputRules(newMarkdown || "")}
               />
             </Suspense>
