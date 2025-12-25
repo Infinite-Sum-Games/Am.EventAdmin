@@ -91,6 +91,24 @@ function AnalyticsPage() {
         isPeopleError ||
         isTransactionError
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto h-full items-center justify-center">
+                <h1 className="text-3xl font-bold tracking-tight">Loading Analytics...</h1>
+                <p className="text-muted-foreground">Please wait while we fetch the data.</p>
+            </div>
+        )
+    }
+
+    if (isError) {
+        return (
+            <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto h-full items-center justify-center text-destructive">
+                <h1 className="text-3xl font-bold tracking-tight">Error Loading Analytics</h1>
+                <p className="text-muted-foreground">There was an error fetching the analytics data. Please try again later.</p>
+            </div>
+        )
+    }
+
     return (
         <div className="flex flex-col gap-4 p-4 max-w-7xl mx-auto">
             <div className="flex flex-row gap-4 items-center justify-between border-b pb-4">
