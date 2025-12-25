@@ -50,7 +50,7 @@ export const managementNavItems: NavItem[] = [
     },
     {
         title: "Analytics",
-        url: "/dashboard/revenue",
+        url: "/dashboard/analytics",
         icon: IndianRupee,
     }
 ];
