@@ -260,6 +260,11 @@ function DashboardOverviewPage() {
                           </TableCell>
                           <TableCell className="font-bold text-lg">
                               {processedData.reduce((sum, event) => sum + event.seats_filled, 0)} / {processedData.reduce((sum, event) => sum + event.total_seats, 0)} Seats
+                              {processedData.some(event => event.is_group) && (
+                                <div className="text-muted-foreground text-sm">
+                                  ({processedData.reduce((sum, event) => sum + event.actual_participant_count, 0)} Total Participants)
+                                </div>
+                              )}
                           </TableCell>
                           <TableCell className="text-right font-bold text-lg tabular-nums pr-6">
                               <div className="flex items-center justify-end">
