@@ -1,6 +1,6 @@
 import {
-    LayoutDashboard, CalendarDays, Users, Shield, Tags, Contact,
-    IndianRupee, GraduationCap, type LucideIcon,
+    LayoutDashboard, CalendarDays, Shield, Tags, Contact,
+    IndianRupee, type LucideIcon,
     ArrowRightLeft
 } from "lucide-react";
 
