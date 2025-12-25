@@ -24,7 +24,7 @@ export const Route = createFileRoute("/dashboard/analytics/")({
 })
 
 function AnalyticsPage() {
-    const showWarning = true; // Set to true to show the warning, false to hide it
+    const showWarning = false; // Set to true to show the warning, false to hide it
 
     const {
         data: revenueSummary,
