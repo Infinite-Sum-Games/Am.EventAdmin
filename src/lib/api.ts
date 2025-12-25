@@ -67,4 +67,15 @@ export const api = {
 
   // Participants
   FETCH_ALL_PARTICIPANTS_BY_EVENT: (eventId: string) => `${CURRENT_BASE_URL}/organizers/dashboard/${eventId}`,
+
+  // analytics
+  // revenue
+  REVENUE_SUMMARY: `${CURRENT_BASE_URL}/analytics/revenue`,
+  // registrations
+  REGISTRATIONS_SUMMARY: `${CURRENT_BASE_URL}/analytics/registrations`,
+  // people
+  PEOPLE_REGISTRATION_SUMMARY: `${CURRENT_BASE_URL}/analytics/people`,
+  // transactions
+  TRANSACTION_SUMMARY: `${CURRENT_BASE_URL}/analytics/transactions`
+
 };

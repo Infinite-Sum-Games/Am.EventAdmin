@@ -25,7 +25,6 @@ export function AppSidebar({
     navItems: {
         dashboard: NavItem;
         management: NavItem[];
-        analytics: NavItem[];
     };
 } & React.ComponentProps<typeof Sidebar>) {
     return (
@@ -45,7 +44,6 @@ export function AppSidebar({
                 <NavMain 
                     dashboardItem={navItems.dashboard} 
                     managementItems={navItems.management}
-                    analyticsItems={navItems.analytics}
                 />
             </SidebarContent>
             <SidebarFooter>

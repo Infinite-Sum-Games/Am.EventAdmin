@@ -113,9 +113,16 @@ function ParticipantsOverviewPage() {
           </span>
         ) : (
           (sessionUser.email == "tcw@amrita.edu" || sessionUser.email == "kiran@amrita.edu") && (
-            <span className="text-muted-foreground text-lg font-medium">
-              Shawn is a pookie (˶˃ ᵕ ˂˶)!!!
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-muted-foreground text-lg font-medium cursor-pointer">
+                  Shaun ☀️
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Got your spelling right!</p>
+              </TooltipContent>
+            </Tooltip>
           )
         )}
       </div>

@@ -1,6 +1,7 @@
 import {
-    LayoutDashboard, CalendarDays, Users, Shield, Tags, Contact,
-    IndianRupee, GraduationCap, type LucideIcon
+    LayoutDashboard, CalendarDays, Shield, Tags, Contact,
+    IndianRupee, type LucideIcon,
+    ArrowRightLeft
 } from "lucide-react";
 
 export type NavItem = {
@@ -45,34 +46,16 @@ export const managementNavItems: NavItem[] = [
     {
         title: "Transactions",
         url: "/dashboard/transactions",
+        icon: ArrowRightLeft,
+    },
+    {
+        title: "Analytics",
+        url: "/dashboard/analytics",
         icon: IndianRupee,
     }
 ];
 
-export const analyticsNavItems: NavItem[] = [
-    {
-        title: "Revenue",
-        url: "/dashboard/revenue",
-        icon: IndianRupee,
-        items: [
-            { title: "Overview", url: "/dashboard/revenue" },
-            { title: "Transactions", url: "/dashboard/revenue/transactions" },
-        ],
-    },
-    {
-        title: "Participants",
-        url: "/dashboard/participants",
-        icon: Users,
-    },
-    {
-        title: "Students",
-        url: "/dashboard/students",
-        icon: GraduationCap,
-        items: [
-            { title: "Overview", url: "/dashboard/students" },
-        ],
-    },
-];
+export const analyticsNavItems: NavItem[] = [];
 
 export function generateNavItems(pathname: string) {
     const applyActiveState = (items: NavItem[]) => {
