@@ -4,6 +4,7 @@ import {
   headingsPlugin, 
   listsPlugin, 
   quotePlugin, 
+  linkPlugin,
   thematicBreakPlugin,
   markdownShortcutPlugin,
   type MDXEditorMethods, 
@@ -13,6 +14,7 @@ import {
   BoldItalicUnderlineToggles,
   ListsToggle,
   BlockTypeSelect,
+  linkDialogPlugin,
   // tablePlugin,
   // InsertTable,
 } from "@mdxeditor/editor";
@@ -33,6 +35,8 @@ const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
           headingsPlugin(), 
           listsPlugin(), 
           quotePlugin(), 
+          linkPlugin(),
+          linkDialogPlugin(),
           thematicBreakPlugin(),
           markdownShortcutPlugin(),
           // tablePlugin(),
@@ -52,7 +56,6 @@ const Editor = forwardRef<MDXEditorMethods, MDXEditorProps>((props, ref) => {
                 <div className="h-6 w-px bg-border mx-2" /> {/* Divider */}
                 <ListsToggle />
                 <div className="h-6 w-px bg-border mx-2" /> {/* Divider */}
-                {/* <InsertTable /> */}
               </div>
             )
           })

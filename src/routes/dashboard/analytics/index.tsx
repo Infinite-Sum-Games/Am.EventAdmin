@@ -12,12 +12,20 @@ import { RevenueChart } from "@/components/dashboard/analytics/revenue-chart"
 import { OrganizerRevenueChart } from "@/components/dashboard/analytics/organizer-revenue-chart"
 import { SummaryStats } from "@/components/dashboard/analytics/summary-stats"
 import { ParticipantSplitChart } from "@/components/dashboard/analytics/participant-split-chart"
+import {
+    Alert,
+    AlertDescription,
+    AlertTitle,
+} from "@/components/ui/alert"
+import { TriangleAlert } from "lucide-react"
 
 export const Route = createFileRoute("/dashboard/analytics/")({
     component: AnalyticsPage,
 })
 
 function AnalyticsPage() {
+    const showWarning = true; // Set to true to show the warning, false to hide it
+
     const {
         data: revenueSummary,
         isLoading: isRevenueLoading,
@@ -119,6 +127,16 @@ function AnalyticsPage() {
                     </p>
                 </div>
             </div>
+
+            {showWarning && (
+                <Alert variant="destructive">
+                    <TriangleAlert className="h-4 w-4" />
+                    <AlertTitle>Analytics is broken</AlertTitle>
+                    <AlertDescription>
+                        The analytics page is currently broken and will be fixed as soon as possible.
+                    </AlertDescription>
+                </Alert>
+            )}
 
             <SummaryStats
                 revenueSummary={revenueSummary}
