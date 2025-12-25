@@ -36,7 +36,7 @@ function RouteComponent() {
   });
 
   // Mutation to verify a transaction
-    const { mutate: verifyTransaction, isPending: isVerifying } = useMutation({
+    const { mutate: verifyTransaction, isPending: isVerifying, variables: verifyingTxnId } = useMutation({
       mutationKey: ['verify-transaction'],
       mutationFn: async (txnId: string) => {
         const response = await axiosClient.post(api.VERIFY_TRANSACTION, { txn_id: txnId });
@@ -163,7 +163,7 @@ function RouteComponent() {
             key={txn.transaction_id} 
             transaction={txn} 
             onVerify={handleVerifyTransaction}
-            isVerifying={isVerifying}
+            isVerifying={isVerifying && verifyingTxnId === txn.transaction_id}
           />
         ))}
 
