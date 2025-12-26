@@ -46,11 +46,13 @@ export function RevenueChart({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="max-h-96 w-full">
+        <ChartContainer config={chartConfig} className="max-h-108 w-full">
           <AreaChart
             accessibilityLayer
             data={formattedData}
             margin={{
+              top: 12,
+              bottom: 12,
               left: 12,
               right: 12,
             }}
