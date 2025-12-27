@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Card,
     CardContent
@@ -11,9 +12,11 @@ import {
     CheckCircle2,
     XCircle,
     MapPin,
-    Loader2
+    Loader2,
+    MessageSquareWarning
 } from "lucide-react";
 import type { Transaction } from "@/types/transactions";
+import { DisputeDialog } from "@/components/dispute-dialog";
 
 interface TransactionCardProps {
     transaction: Transaction;
@@ -22,6 +25,14 @@ interface TransactionCardProps {
 }
 
 export function TransactionCard({ transaction, onVerify, isVerifying }: TransactionCardProps) {
+
+    const [isHovered, setIsHovered] = useState(false);
+    const [isDisputeDialogOpen, setIsDisputeDialogOpen] = useState(false);
+
+    const handleCreateDispute = (_transactionId: string) => {
+        // TODO: Implement dispute creation logic
+    };
+
     // Logic to render the Right-Side Action or Status Label
     const renderStatusAction = () => {
         switch (transaction.txn_status) {
@@ -59,73 +70,97 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
     };
 
     return (
-        <Card className="hover:shadow-md transition-shadow duration-200 border-muted p-0">
-            <CardContent className="py-2 px-6 flex flex-row gap-2 items-center justify-between">
+        <>
+            <Card
+                className="hover:shadow-md transition-shadow duration-200 border-muted p-0 relative"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <CardContent className="py-2 px-6 flex flex-row gap-2 items-center justify-between">
 
-                {/* Left: Event Name, ID & PRICE */}
-                <div className="flex flex-col space-y-1 w-[350px]">
-                    
-                    {/* Transaction ID with Copy */}
-                    <span className="font-mono text-muted-foreground text-xs">
-                        {transaction.transaction_id}
-                    </span>
+                    {/* Left: Event Name, ID & PRICE */}
+                    <div className="flex flex-col space-y-1 w-[350px]">
 
-                    {/* Event Name */}
-                    <h3 className="font-bold text-lg text-foreground line-clamp-1">
-                        {transaction.event_name}
-                    </h3>
+                        {/* Transaction ID with Copy */}
+                        <span className="font-mono text-muted-foreground text-xs">
+                            {transaction.transaction_id}
+                        </span>
 
-                    {/* Price */}
-                    <div className="flex items-center gap-1 font-semibold">
-                        <span>₹{transaction.registration_fee}</span>
+                        {/* Event Name */}
+                        <h3 className="font-bold text-lg text-foreground line-clamp-1">
+                            {transaction.event_name}
+                        </h3>
+
+                        {/* Price */}
+                        <div className="flex items-center gap-1 font-semibold">
+                            <span>₹{transaction.registration_fee}</span>
+                        </div>
+
+
                     </div>
 
-
-                </div>
-
-                {/* Middle: Student Details */}
-                <div className="flex-1 flex-col gap-2 border-l px-6 py-2 border-r font-medium">
-                    {/* Student Name */}
-                    <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        {transaction.student_name}
-                    </div>
-
-                    <div className="flex flex-row items-center gap-2 text-sm mt-1">
+                    {/* Middle: Student Details */}
+                    <div className="flex-1 flex-col gap-2 border-l px-6 py-2 border-r font-medium">
+                        {/* Student Name */}
                         <div className="flex items-center gap-2">
-                            {/* Email */}
-                            <span className="flex items-center gap-1">
-                                <Mail className="w-4 h-4" /> {transaction.email}
-                            </span>
-                            {/* Phone */}
-                            <span className="flex items-center gap-1">
-                                <Phone className="w-4 h-4" /> {transaction.student_phone_number}
-                            </span>
+                            <User className="w-4 h-4" />
+                            {transaction.student_name}
                         </div>
+
+                        <div className="flex flex-row items-center gap-2 text-sm mt-1">
+                            <div className="flex items-center gap-2">
+                                {/* Email */}
+                                <span className="flex items-center gap-1">
+                                    <Mail className="w-4 h-4" /> {transaction.email}
+                                </span>
+                                {/* Phone */}
+                                <span className="flex items-center gap-1">
+                                    <Phone className="w-4 h-4" /> {transaction.student_phone_number}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-sm mt-1">
+                            {/* College Name */}
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                                <School className="w-4 h-4" />
+                                <span className="truncate max-w-[180px]" title={transaction.college_name}>
+                                    {transaction.college_name}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-1 text-muted-foreground">
+                                <MapPin className="w-4 h-4" />
+                                <span>{transaction.college_city}</span>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div className="flex items-center gap-2 text-sm mt-1">
-                        {/* College Name */}
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                            <School className="w-4 h-4" />
-                            <span className="truncate max-w-[180px]" title={transaction.college_name}>
-                                {transaction.college_name}
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                            <MapPin className="w-4 h-4" />
-                            <span>{transaction.college_city}</span>
-                        </div>
+                    {/* Right: Action/Status Area */}
+                    <div className="pl-2 flex-[0.2] items-center justify-center w-full">
+                        {renderStatusAction()}
                     </div>
 
-                </div>
+                </CardContent>
 
-                {/* Right: Action/Status Area */}
-                <div className="pl-2 flex-[0.2] items-center justify-center w-full">
-                    {renderStatusAction()}
-                </div>
-
-            </CardContent>
-        </Card>
+                {isHovered && transaction.txn_status === "FAILED" && (
+                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+                        <Button
+                            variant="destructive"
+                            onClick={() => setIsDisputeDialogOpen(true)}
+                        >
+                            <MessageSquareWarning className="w-4 h-4 mr-2" />
+                            Add Dispute
+                        </Button>
+                    </div>
+                )}
+            </Card>
+            <DisputeDialog
+                isOpen={isDisputeDialogOpen}
+                onClose={() => setIsDisputeDialogOpen(false)}
+                transactionId={transaction.transaction_id}
+                onCreateDispute={handleCreateDispute}
+            />
+        </>
     );
 }
