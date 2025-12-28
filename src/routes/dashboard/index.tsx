@@ -72,8 +72,8 @@ function DashboardOverviewPage() {
 
     result.sort((a, b) => {
       switch (sortBy) {
-        case "revenue-desc": return b.revenue - a.revenue;
-        case "revenue-asc": return a.revenue - b.revenue;
+        case "revenue-desc": return b.revenue_without_gst - a.revenue_without_gst;
+        case "revenue-asc": return a.revenue_without_gst - b.revenue_without_gst;
         case "seats-desc": return b.seats_filled - a.seats_filled;
         case "seats-asc": return a.seats_filled - b.seats_filled;
         case "participants-desc": return b.actual_participant_count - a.actual_participant_count;
@@ -88,10 +88,11 @@ function DashboardOverviewPage() {
   const totalStats = useMemo(() => {
     return processedData.reduce((acc, curr) => ({
       revenue: acc.revenue + curr.revenue,
+      revenue_without_gst: acc.revenue_without_gst + curr.revenue_without_gst,
       seats_filled: acc.seats_filled + curr.seats_filled,
       total_seats: acc.total_seats + curr.total_seats,
       participants: acc.participants + curr.actual_participant_count
-    }), { revenue: 0, seats_filled: 0, total_seats: 0, participants: 0 });
+    }), { revenue: 0, revenue_without_gst: 0, seats_filled: 0, total_seats: 0, participants: 0 });
   }, [processedData]);
 
   return (
@@ -245,9 +246,14 @@ function DashboardOverviewPage() {
                         </div>
                       )}
                     </TableCell>
-                    <TableCell className="text-right font-bold tabular-nums pr-6 flex items-center justify-end">
-                      <IndianRupee className="w-3 h-3 mr-0.5 text-muted-foreground" />
-                      {event.revenue.toLocaleString('en-IN')}
+                    <TableCell className="text-right font-bold tabular-nums pr-6 flex flex-col items-end justify-center">
+                      <div className="flex items-center">
+                        <IndianRupee className="w-3 h-3 mr-0.5" />
+                        {event.revenue_without_gst.toLocaleString('en-IN')}
+                      </div>
+                      <div className="text-xs text-muted-foreground font-normal">
+                        (w/GST: {event.revenue.toLocaleString('en-IN')})
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
@@ -285,9 +291,14 @@ function DashboardOverviewPage() {
                 </div>
 
                 {/* Revenue Column */}
-                <div className="text-right font-bold text-lg tabular-nums pr-4 flex items-center justify-end text-primary">
-                  <IndianRupee className="w-4 h-4 mr-1" />
-                  {totalStats.revenue.toLocaleString('en-IN')}
+                <div className="text-right font-bold text-lg tabular-nums pr-4 flex flex-col items-end justify-center text-primary">
+                  <div className="flex items-center">
+                    <IndianRupee className="w-4 h-4 mr-1" />
+                    {totalStats.revenue_without_gst.toLocaleString('en-IN')}
+                  </div>
+                  <div className="text-xs text-muted-foreground font-normal">
+                    (w/GST: {totalStats.revenue.toLocaleString('en-IN')})
+                  </div>
                 </div>
 
               </div>
