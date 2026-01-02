@@ -76,6 +76,9 @@ export const api = {
   // people
   PEOPLE_REGISTRATION_SUMMARY: `${CURRENT_BASE_URL}/analytics/people`,
   // transactions
-  TRANSACTION_SUMMARY: `${CURRENT_BASE_URL}/analytics/transactions`
+  TRANSACTION_SUMMARY: `${CURRENT_BASE_URL}/analytics/transactions`,
+
+  // disputes
+  CREATE_DISPUTE: (txnId: string) => `${CURRENT_BASE_URL}/disputes/${txnId}`,
 
 };
