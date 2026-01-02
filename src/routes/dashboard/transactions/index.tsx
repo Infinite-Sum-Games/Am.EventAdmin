@@ -69,6 +69,69 @@ function RouteComponent() {
   const [emailSearch, setEmailSearch] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  const { data: transactions = [], isLoading, isError, refetch } = useQuery<Transaction[]>({
+    queryKey: ['transactions', statusFilter],
+    queryFn: async () => {
+      const response = await axiosClient.get(api.FETCH_ALL_TRANSACTIONS, {
+        params: {
+          status: statusFilter
+        }
+      })
+      return response.data.transactions || [];
+    }
+  });
+
+  // Mutation to verify a transaction
+    const { mutate: verifyTransaction, isPending: isVerifying, variables: verifyingTxnId } = useMutation({
+      mutationKey: ['verify-transaction'],
+      mutationFn: async (txnId: string) => {
+        const response = await axiosClient.post(api.VERIFY_TRANSACTION, { txn_id: txnId });
+        return response.data;
+      },
+      // it will return message and status
+      onSuccess: (data) => {
+        toast.success("Transaction status updated to " + data.status);
+        refetch();
+      },
+      onError: () => {
+        toast.error("Failed to update transaction status. Please try again.");
+      },
+    });
+  
+  // verify transaction handler
+  const handleVerifyTransaction = async (id: string) => {
+    verifyTransaction(id);
+  };
+
+  // filter email search
+  const filteredTransactions = useMemo(() => {
+    const safeTransactions = transactions || [];
+    if (!emailSearch) return safeTransactions;
+    return safeTransactions.filter((txn: Transaction) => 
+      txn.email.toLowerCase().includes(emailSearch.toLowerCase())
+    );
+  }, [transactions, emailSearch]);
+
+  const totalPages = Math.ceil(filteredTransactions.length / ITEMS_PER_PAGE);
+  
+  const currentData = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return (filteredTransactions || []).slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredTransactions, currentPage]);
+
+  const handleFilterChange = (val: string) => {
+    setStatusFilter(val);
+    setCurrentPage(1);
+  };
+
+  const goToNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(p => p + 1);
+  };
+
+  const goToPrevPage = () => {
+    if (currentPage > 1) setCurrentPage(p => p - 1);
+  };
+
   return (
     <div className="flex flex-col gap-6 p-4 max-w-7xl mx-auto min-h-screen">
       
