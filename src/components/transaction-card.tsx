@@ -17,6 +17,10 @@ import {
 } from "lucide-react";
 import type { Transaction } from "@/types/transactions";
 import { DisputeDialog } from "@/components/dispute-dialog";
+import { useMutation } from "@tanstack/react-query";
+import { axiosClient } from "@/lib/axios";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 interface TransactionCardProps {
     transaction: Transaction;
@@ -29,9 +33,26 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
     const [isHovered, setIsHovered] = useState(false);
     const [isDisputeDialogOpen, setIsDisputeDialogOpen] = useState(false);
 
-    const handleCreateDispute = (_transactionId: string) => {
-        // TODO: Implement dispute creation logic
+    const handleCreateDispute = (transactionId: string) => {
+        console.log("Creating dispute for transaction ID:", transactionId);
+        createDispute(transactionId);
     };
+
+    // mutation to create dispute
+    const { mutate: createDispute, isPending: isCreatingDispute } = useMutation({
+        mutationKey: ['create-dispute'],
+        mutationFn: async (txnId: string) => {
+            const response = await axiosClient.post(api.CREATE_DISPUTE(txnId));
+            return response.data;
+        },
+        onSuccess: () => {
+            setIsDisputeDialogOpen(false);
+            toast.success("Dispute created successfully");
+        },
+        onError: () => {
+            toast.error("Failed to create dispute. Please try again.");
+        }
+    });
 
     // Logic to render the Right-Side Action or Status Label
     const renderStatusAction = () => {
@@ -76,7 +97,7 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
             >
-                <CardContent className="py-2 px-6 flex flex-row gap-2 items-center justify-between">
+                <CardContent className={`py-2 px-6 flex flex-row gap-2 items-center justify-between ${isDisputeDialogOpen ? "blur-sm" : ""}`}>
 
                     {/* Left: Event Name, ID & PRICE */}
                     <div className="flex flex-col space-y-1 w-[350px]">
@@ -148,9 +169,14 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
                         <Button
                             variant="destructive"
                             onClick={() => setIsDisputeDialogOpen(true)}
+                            disabled={isCreatingDispute}
                         >
-                            <MessageSquareWarning className="w-4 h-4 mr-2" />
-                            Add Dispute
+                            {isCreatingDispute ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            ) : (
+                                <MessageSquareWarning className="w-4 h-4 mr-2" />
+                            )}
+                            {isCreatingDispute ? "Creating..." : "Add Dispute"}
                         </Button>
                     </div>
                 )}

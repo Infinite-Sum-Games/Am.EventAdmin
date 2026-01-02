@@ -30,7 +30,7 @@ export function DisputeDialog({
     const handleCreateDispute = () => {
         if (inputValue === transactionId.slice(-4)) {
             onCreateDispute(transactionId);
-            toast.success("Dispute created successfully!");
+            setInputValue("");
             onClose();
         } else {
             toast.error("The last 4 characters of the transaction ID do not match.");
