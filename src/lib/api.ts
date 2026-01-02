@@ -80,5 +80,6 @@ export const api = {
 
   // disputes
   CREATE_DISPUTE: (txnId: string) => `${CURRENT_BASE_URL}/disputes/${txnId}`,
+  GET_DISPUTES: `${CURRENT_BASE_URL}/disputes`,
 
 };
