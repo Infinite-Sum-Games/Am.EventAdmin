@@ -31,8 +31,8 @@ export function AppSidebar({
     const { user: sessionUser } = Route.useRouteContext(); // Get session user
 
     const filteredManagementItems = React.useMemo(() => {
-        if (sessionUser.email === "finance@amrita.edu") {
-            // If finance user, show only the dashboard item, so management items are empty
+        const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+        if (restrictedEmails.includes(sessionUser.email)) {
             return [];
         }
         return navItems.management;
