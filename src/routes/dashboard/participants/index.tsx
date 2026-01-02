@@ -18,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; // Added Tooltip imports
 
+import { RestrictedAccess } from "@/components/restricted-access";
+
 export const Route = createFileRoute("/dashboard/participants/")({
   component: ParticipantsOverviewPage,
 });
@@ -34,6 +36,11 @@ const searchFields = [
 
 function ParticipantsOverviewPage() {
   const { user: sessionUser } = Route.useRouteContext();
+  
+  if (sessionUser.email === "finance@amrita.edu") {
+    return <RestrictedAccess />;
+  }
+
   const [open, setOpen] = useState(false);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);

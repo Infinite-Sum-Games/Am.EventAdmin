@@ -1,9 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { RestrictedAccess } from '@/components/restricted-access'
+
 export const Route = createFileRoute('/dashboard/events/$eventId')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
+  const { user: sessionUser } = Route.useRouteContext();
+
+  if (sessionUser.email === "finance@amrita.edu") {
+      return <RestrictedAccess />;
+  }
+
   return EventEditorPage();
 }
 

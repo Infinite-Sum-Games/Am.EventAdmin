@@ -10,11 +10,19 @@ import { axiosClient } from "@/lib/axios";
 import { toast } from "sonner";
 import type { EventData } from "@/stores/useEventEditorStore";
 
+import { RestrictedAccess } from "@/components/restricted-access";
+
 export const Route = createFileRoute("/dashboard/events/")({
   component: ViewEventsPage,
 });
 
 function ViewEventsPage() {
+  const { user: sessionUser } = Route.useRouteContext();
+
+  if (sessionUser.email === "finance@amrita.edu") {
+    return <RestrictedAccess />;
+  }
+
   const { data: events = [] } = useQuery<EventData[]>({
     queryKey: ['events'],
     queryFn: async () => {

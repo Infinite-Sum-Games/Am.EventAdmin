@@ -4,12 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Construction, ArrowLeft } from "lucide-react";
+import { RestrictedAccess } from "@/components/restricted-access";
 
 export const Route = createFileRoute("/dashboard/wip/")({
   component: WorkInProgressPage,
 });
 
 function WorkInProgressPage() {
+    const { user: sessionUser } = Route.useRouteContext();
+
+    if (sessionUser.email === "finance@amrita.edu") {
+        return <RestrictedAccess />;
+    }
   const navigate = useNavigate();
 
   return (
