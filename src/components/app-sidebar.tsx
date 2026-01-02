@@ -11,6 +11,7 @@ import {
     SidebarRail,
 } from "@/components/ui/sidebar";
 import type { NavItem } from "@/lib/nav-manager";
+import { Route } from "@/routes/dashboard"; // Import Route from the dashboard route to access context
 
 export function AppSidebar({
     user,
@@ -27,6 +28,17 @@ export function AppSidebar({
         management: NavItem[];
     };
 } & React.ComponentProps<typeof Sidebar>) {
+    const { user: sessionUser } = Route.useRouteContext(); // Get session user
+
+    const filteredManagementItems = React.useMemo(() => {
+        const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+        if (restrictedEmails.includes(sessionUser.email)) {
+            return [];
+        }
+        return navItems.management;
+    }, [sessionUser.email, navItems.management]);
+
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -43,7 +55,7 @@ export function AppSidebar({
             <SidebarContent>
                 <NavMain 
                     dashboardItem={navItems.dashboard} 
-                    managementItems={navItems.management}
+                    managementItems={filteredManagementItems} // Pass filtered items
                 />
             </SidebarContent>
             <SidebarFooter>

@@ -25,6 +25,8 @@ import type { People } from '@/types/people';
 import { toast } from 'sonner';
 import { Separator } from "@/components/ui/separator";
 
+import { RestrictedAccess } from '@/components/restricted-access';
+
 // --- Data Fetching ---
 const peopleQueryOptions = queryOptions({
     queryKey: ['people'],
@@ -44,6 +46,14 @@ export const Route = createFileRoute('/dashboard/people/')({
 const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
 function PeoplePage() {
+    const { user: sessionUser } = Route.useRouteContext();
+
+    const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+    if (restrictedEmails.includes(sessionUser.email)) {
+        return <RestrictedAccess />;
+    }
+
     const queryClient = useQueryClient();
     const { data: people } = useSuspenseQuery(peopleQueryOptions);
 

@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { RestrictedAccess } from "@/components/restricted-access";
+
 // --- Data Fetching ---
 const tagsQueryOptions = queryOptions({
   queryKey: ["tags"],
@@ -31,6 +33,14 @@ export const Route = createFileRoute("/dashboard/tags/")({
 });
 
 function TagsPage() {
+  const { user: sessionUser } = Route.useRouteContext();
+
+  const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+  if (restrictedEmails.includes(sessionUser.email)) {
+      return <RestrictedAccess />;
+  }
+
   const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
   const { data: tags } = useSuspenseQuery(tagsQueryOptions);

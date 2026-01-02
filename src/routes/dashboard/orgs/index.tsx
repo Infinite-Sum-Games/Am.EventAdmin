@@ -49,6 +49,8 @@ import { Input } from "@/components/ui/input";
 import { hashPassword } from "@/lib/hash";
 import { ErrorMessage } from "@/components/events/error-message";
 
+import { RestrictedAccess } from "@/components/restricted-access";
+
 const orgsQueryOptions = queryOptions({
   queryKey: ["orgs"],
   queryFn: async () => {
@@ -74,6 +76,14 @@ const getInitials = (name: string) =>
     .toUpperCase();
 
 function OrgsPage() {
+  const { user: sessionUser } = Route.useRouteContext();
+
+  const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+  if (restrictedEmails.includes(sessionUser.email)) {
+    return <RestrictedAccess />;
+  }
+
   const queryClient = useQueryClient();
   const { data: orgs } = useSuspenseQuery(orgsQueryOptions);
 

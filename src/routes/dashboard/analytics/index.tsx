@@ -19,11 +19,21 @@ import {
 } from "@/components/ui/alert"
 import { TriangleAlert } from "lucide-react"
 
+import { RestrictedAccess } from "@/components/restricted-access"
+
 export const Route = createFileRoute("/dashboard/analytics/")({
     component: AnalyticsPage,
 })
 
 function AnalyticsPage() {
+    const { user: sessionUser } = Route.useRouteContext();
+
+    const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+    if (restrictedEmails.includes(sessionUser.email)) {
+        return <RestrictedAccess />;
+    }
+
     const showWarning = false; // Set to true to show the warning, false to hide it
 
     const {
