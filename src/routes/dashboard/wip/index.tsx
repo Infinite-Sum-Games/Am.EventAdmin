@@ -13,7 +13,9 @@ export const Route = createFileRoute("/dashboard/wip/")({
 function WorkInProgressPage() {
     const { user: sessionUser } = Route.useRouteContext();
 
-    if (sessionUser.email === "finance@amrita.edu") {
+    const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+    if (restrictedEmails.includes(sessionUser.email)) {
         return <RestrictedAccess />;
     }
   const navigate = useNavigate();

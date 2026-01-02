@@ -9,7 +9,9 @@ export const Route = createFileRoute("/dashboard/students/")({
 function StudentsOverviewPage() {
     const { user: sessionUser } = Route.useRouteContext();
 
-    if (sessionUser.email === "finance@amrita.edu") {
+    const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+    if (restrictedEmails.includes(sessionUser.email)) {
         return <RestrictedAccess />;
     }
   return WorkInProgressPage();

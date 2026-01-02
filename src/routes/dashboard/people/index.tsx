@@ -48,7 +48,9 @@ const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('').su
 function PeoplePage() {
     const { user: sessionUser } = Route.useRouteContext();
 
-    if (sessionUser.email === "finance@amrita.edu") {
+    const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
+
+    if (restrictedEmails.includes(sessionUser.email)) {
         return <RestrictedAccess />;
     }
 
