@@ -30,7 +30,7 @@ function NavItemGroup({ items }: { items: NavItem[] }) {
                             <Link to={item.url} className="w-full" search={{}} params={{}}>
                                 <SidebarMenuButton isActive={item.isActive} tooltip={item.title}>
                                     {item.icon && <item.icon />}
-                                    <span className="flex-grow">{item.title}</span>
+                                    <span className="grow">{item.title}</span>
                                     {/* {showNew.includes(item.title) && <span className="ping ml-auto" />} */}
                                 </SidebarMenuButton>
                             </Link>
