@@ -81,5 +81,7 @@ export const api = {
   // disputes
   CREATE_DISPUTE: (txnId: string) => `${CURRENT_BASE_URL}/disputes/${txnId}`,
   GET_DISPUTES: `${CURRENT_BASE_URL}/disputes`,
+  UPDATE_DISPUTE: (disputeId: string) => `${CURRENT_BASE_URL}/disputes/${disputeId}`,
+  RESOLVE_DISPUTE: `${CURRENT_BASE_URL}/events/reverify`,
 
 };
