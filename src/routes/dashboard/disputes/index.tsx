@@ -48,7 +48,7 @@ function RouteComponent() {
 
   const { mutate: updateDispute, isPending: isUpdating } = useMutation({
     mutationFn: async ({ id, values }: { id: string; values: UpdateDisputeForm }) => {
-      const response = await axiosClient.post(api.UPDATE_DISPUTE(id), values);
+      const response = await axiosClient.put(api.UPDATE_DISPUTE(id), values);
       return response.data;
     },
     onSuccess: () => {
@@ -63,7 +63,7 @@ function RouteComponent() {
 
   const handleEditSubmit = (values: UpdateDisputeForm) => {
     if (editingDispute) {
-      updateDispute({ id: editingDispute.txn_id, values });
+      updateDispute({ id: editingDispute.id, values });
     }
   };
 
