@@ -16,11 +16,11 @@ import {
     MessageSquareWarning
 } from "lucide-react";
 import type { Transaction } from "@/types/transactions";
-import { DisputeDialog } from "@/components/dispute-dialog";
 import { useMutation } from "@tanstack/react-query";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { CreateDisputeDialog } from "./confirm-dispute-dialog";
 
 interface TransactionCardProps {
     transaction: Transaction;
@@ -181,7 +181,7 @@ export function TransactionCard({ transaction, onVerify, isVerifying }: Transact
                     </div>
                 )}
             </Card>
-            <DisputeDialog
+            <CreateDisputeDialog
                 isOpen={isDisputeDialogOpen}
                 onClose={() => setIsDisputeDialogOpen(false)}
                 transactionId={transaction.transaction_id}
