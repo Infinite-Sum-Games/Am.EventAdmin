@@ -163,8 +163,8 @@ function DashboardOverviewPage() {
               <SelectItem value="revenue-asc">Revenue: Low to High</SelectItem>
               <SelectItem value="seats-desc">Registrations: High to Low</SelectItem>
               <SelectItem value="seats-asc">Registrations: Low to High</SelectItem>
-              <SelectItem value="participants-desc">Headcount: High to Low</SelectItem>
-              <SelectItem value="participants-asc">Headcount: Low to High</SelectItem>
+              <SelectItem value="participants-desc">Tickets Sold: High to Low</SelectItem>
+              <SelectItem value="participants-asc">Tickets Sold: Low to High</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -286,7 +286,7 @@ function DashboardOverviewPage() {
                     {totalStats.seats_filled} / {totalStats.total_seats} Seats
                   </span>
                   <span className="text-xs text-muted-foreground font-normal">
-                    ({totalStats.participants} Total Headcount)
+                    ({totalStats.participants} Tickets Sold)
                   </span>
                 </div>
 
