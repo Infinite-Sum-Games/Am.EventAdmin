@@ -27,13 +27,11 @@ export function DisputeCard({ dispute, onResolve, isResolving, onEdit }: Dispute
           <div className="flex flex-col gap-1.5 mt-1">
             {/* TXN ID */}
             <div
-              className="flex items-center gap-2 text-xs text-muted-foreground group cursor-pointer w-fit hover:text-foreground transition-colors"
-              title="Click to copy Transaction ID"
+              className="flex items-center gap-2 text-xs group cursor-pointer w-fit text-foreground"
             >
               <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border">
                 {dispute.txn_id}
               </span>
-              <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
             {/* Event ID (muted) */}
             <div className="text-xs text-muted-foreground font-mono pl-1">
@@ -49,7 +47,7 @@ export function DisputeCard({ dispute, onResolve, isResolving, onEdit }: Dispute
           <div className="flex gap-2">
             <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
             <div className="flex flex-col gap-1 min-w-0">
-              <p className="text-sm text-foreground/90 leading-snug max-h-12 max-w-sm overflow-hidden text-ellipsis">
+              <p className="text-sm text-foreground/90 leading-snug max-h-24 overflow-y-auto pr-2">
                 {dispute.description || <span className="text-muted-foreground italic">No description provided </span>}
               </p>
             </div>
