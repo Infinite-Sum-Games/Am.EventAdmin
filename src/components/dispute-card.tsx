@@ -63,16 +63,16 @@ export function DisputeCard({
             </Button>
           </div>
         );
-      case "RESOLVED":
+      case "CLOSED_AS_TRUE":
         return (
-          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-green-100 border-2 border-dashed border-green-500/80 bg-green-500/10 font-medium text-sm">
+          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-green-100 border border-green-500/80 bg-green-500/10 font-medium text-sm">
             <CheckCircle2 className="w-4 h-4 mr-2" />
             RESOLVED
           </div>
         );
-      case "REJECTED":
+      case "CLOSED_AS_FALSE":
         return (
-          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-red-100 border-2 border-dashed border-red-500/80 bg-red-500/10 font-medium text-sm">
+          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-red-100 border border-red-500/80 bg-red-500/10 font-medium text-sm">
             <XCircle className="w-4 h-4 mr-2" />
             REJECTED
           </div>
@@ -90,9 +90,10 @@ export function DisputeCard({
           <div className="flex-1 max-w-full lg:max-w-[400px] space-y-2">
             <div className="flex items-center gap-3">
               <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <Gavel className="w-4 h-4 text-muted-foreground" />
-                Dispute
-              </h3>
+                  <Gavel className="w-4 h-4 text-muted-foreground" />
+                  {status === "OPEN" ? "Open " : status === "CLOSED_AS_TRUE" ? "Resolved " : status === "CLOSED_AS_FALSE" ? "Rejected " : ""}
+                   Dispute
+                </h3>
             </div>
             <div className="flex flex-col gap-1.5 mt-1">
               <div className="flex items-center gap-2 text-xs group w-fit text-foreground">
