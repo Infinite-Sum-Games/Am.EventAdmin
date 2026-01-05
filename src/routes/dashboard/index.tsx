@@ -175,7 +175,7 @@ function DashboardOverviewPage() {
         <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-muted/50">
-              <TableRow className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr]">
+              <TableRow className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr]">
                 <TableHead className="text-center flex items-center justify-center">#</TableHead>
                 <TableHead className="flex items-center">Event Name</TableHead>
                 <TableHead className="flex items-center">Type</TableHead>
@@ -201,7 +201,7 @@ function DashboardOverviewPage() {
                 </TableRow>
               ) : (
                 processedData.map((event, index) => (
-                  <TableRow key={event.event_id} className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
+                  <TableRow key={event.event_id} className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
                     <TableCell className="text-center font-medium text-muted-foreground flex items-center justify-center">
                       {index + 1}
                     </TableCell>
@@ -273,7 +273,7 @@ function DashboardOverviewPage() {
             {/* The Floating 'Row' Div */}
             <div className="bg-muted/90 backdrop-blur-md border border-border shadow-2xl rounded-lg overflow-hidden">
               {/* Grid Layout Matches Table exactly */}
-              <div className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr] h-16 items-center px-4">
+              <div className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] h-16 items-center px-4">
 
                 {/* "Total" Label spans first 4 columns */}
                 <div className="col-span-4 pl-4 text-lg font-bold flex items-center">
