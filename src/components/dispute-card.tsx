@@ -1,8 +1,18 @@
-import { Copy, Gavel, Loader2, Mail, MessageSquare } from "lucide-react";
+import { useState } from "react";
+import {
+  Gavel,
+  Loader2,
+  Mail,
+  MessageSquare,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { Button } from "./ui/button";
 import { Card, CardContent } from "./ui/card";
 import type { Dispute } from "@/types/disputes";
+import { DisputeDescriptionDialog } from "./dispute-description-dialog";
 
+// ... (interface definition remains the same)
 interface DisputeCardProps {
   dispute: Dispute;
   onResolve: (id: string) => void;
@@ -10,82 +20,36 @@ interface DisputeCardProps {
   onEdit: (dispute: Dispute) => void;
 }
 
-export function DisputeCard({ dispute, onResolve, isResolving, onEdit }: DisputeCardProps) {
-  const status = dispute.dispute_status.dispute_status_enum; 
-  return (
-    <Card className="hover:shadow-md transition-shadow duration-200 border-muted p-0">
-      <CardContent className="py-4 px-5 flex flex-col lg:flex-row gap-2 items-start lg:items-center justify-between">
 
-        {/* Left: Identifiers */}
-        <div className="flex-1 max-w-[400px] space-y-2">
-          <div className="flex items-center gap-3">
-            <h3 className="font-semibold text-foreground flex items-center gap-2">
-              <Gavel className="w-4 h-4 text-muted-foreground" /> {status === "OPEN" ? 'Open Dispute' : status === "RESOLVED" ? 'Resolved Dispute' : 'Rejected Dispute'}
-            </h3>
-          </div>
+export function DisputeCard({
+  dispute,
+  onResolve,
+  isResolving,
+  onEdit,
+}: DisputeCardProps) {
+  const status = dispute.dispute_status.dispute_status_enum;
+  const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
-          <div className="flex flex-col gap-1.5 mt-1">
-            {/* TXN ID */}
-            <div
-              className="flex items-center gap-2 text-xs group cursor-pointer w-fit text-foreground"
-            >
-              <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border">
-                {dispute.txn_id}
-              </span>
-            </div>
-            {/* Event ID (muted) */}
-            <div className="text-xs text-muted-foreground font-mono pl-1">
-              Event: {dispute.event_id}
-            </div>
-          </div>
-        </div>
-
-        {/* Middle: Description & Contact */}
-        <div className="flex-1 flex flex-col gap-3 border-l-0 lg:border-l pl-0 lg:pl-6 min-w-0">
-
-          {/* Description */}
-          <div className="flex gap-2">
-            <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-            <div className="flex flex-col gap-1 min-w-0">
-              <p className="text-sm text-foreground/90 leading-snug max-h-24 overflow-y-auto pr-2">
-                {dispute.description || <span className="text-muted-foreground italic">No description provided </span>}
-              </p>
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="flex items-center gap-2 text-sm">
-            <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
-            {dispute.student_email ? (
-              <a href={`mailto:${dispute.student_email}`} className="hover:text-primary transition-colors hover:underline">
-                {dispute.student_email}
-              </a>
-            ) : (
-              <span className="text-muted-foreground italic">No email linked</span>
-            )}
-          </div>
-        </div>
+  const description = dispute.description || "";
+  const isLongDescription = description.length > 120;
 
 
-        {/* Right: Actions */}
-        <div className="w-full lg:w-auto flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-4 pl-0 lg:pl-6 min-w-[140px]">
-          {/* Button to edit */}
-          {status === "OPEN" && (
+  const renderStatusAction = () => {
+    switch (status) {
+      case "OPEN":
+        return (
+          <div className="flex flex-row lg:flex-col gap-2 w-full">
             <Button
               size="sm"
               variant="secondary"
-              className="w-full lg:w-full shadow-sm"
+              className="w-full shadow-sm"
               onClick={() => onEdit(dispute)}
             >
-              Edit Dispute
+              Edit
             </Button>
-          )}
-
-          {/* Resolve Button (Only if OPEN) */}
-          {status === "OPEN" && (
             <Button
               size="sm"
-              className="w-full lg:w-full shadow-sm"
+              className="w-full shadow-sm"
               onClick={() => onResolve(dispute.id)}
               disabled={isResolving}
             >
@@ -94,13 +58,112 @@ export function DisputeCard({ dispute, onResolve, isResolving, onEdit }: Dispute
                   <Loader2 className="w-3 h-3 mr-2 animate-spin" /> Resolving...
                 </>
               ) : (
-                "Resolve Dispute"
+                "Resolve"
               )}
             </Button>
-          )}
-        </div>
+          </div>
+        );
+      case "RESOLVED":
+        return (
+          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-green-100 border-2 border-dashed border-green-500/80 bg-green-500/10 font-medium text-sm">
+            <CheckCircle2 className="w-4 h-4 mr-2" />
+            RESOLVED
+          </div>
+        );
+      case "REJECTED":
+        return (
+          <div className="flex items-center justify-center w-full px-4 h-9 rounded-md text-red-100 border-2 border-dashed border-red-500/80 bg-red-500/10 font-medium text-sm">
+            <XCircle className="w-4 h-4 mr-2" />
+            REJECTED
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
 
-      </CardContent>
-    </Card>
+  return (
+    <>
+      <Card className="hover:shadow-md transition-shadow duration-200 border-muted p-0">
+        <CardContent className="py-3 px-4 flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+          {/* Left: Identifiers */}
+          <div className="flex-1 max-w-full lg:max-w-[400px] space-y-2">
+            <div className="flex items-center gap-3">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Gavel className="w-4 h-4 text-muted-foreground" />
+                Dispute
+              </h3>
+            </div>
+            <div className="flex flex-col gap-1.5 mt-1">
+              <div className="flex items-center gap-2 text-xs group w-fit text-foreground">
+                <span className="font-mono bg-muted/50 px-1.5 py-0.5 rounded border">
+                  {dispute.txn_id}
+                </span>
+              </div>
+              <div className="text-xs text-muted-foreground font-mono pl-1">
+                Event: {dispute.event_id}
+              </div>
+            </div>
+          </div>
+
+          {/* Middle: Description & Contact */}
+          <div className="w-full lg:flex-1 flex flex-col gap-3 border-t lg:border-t-0 lg:border-l lg:border-r pt-3 lg:pt-0 lg:px-6 min-w-0">
+            <div className="flex gap-2">
+              <MessageSquare className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div className="flex flex-col gap-1 min-w-0">
+                <p className="text-sm text-foreground/90 leading-snug">
+                  {description ? (
+                    <>
+                      {isLongDescription
+                        ? `${description.substring(0, 70)}... `
+                        : description}
+                      {isLongDescription && (
+                        <button
+                          onClick={() => setIsDescriptionOpen(true)}
+                          className="text-primary hover:underline font-medium text-xs"
+                        >
+                          Read more
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <span className="text-muted-foreground italic">
+                      No description provided
+                    </span>
+                  )}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-sm">
+              <Mail className="w-4 h-4 text-muted-foreground shrink-0" />
+              {dispute.student_email ? (
+                <a
+                  href={`mailto:${dispute.student_email}`}
+                  className="hover:text-primary transition-colors hover:underline"
+                >
+                  {dispute.student_email}
+                </a>
+              ) : (
+                <span className="text-muted-foreground italic">
+                  No email linked
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="w-full lg:flex-[0.3] flex items-center justify-center lg:pl-4">
+            {renderStatusAction()}
+          </div>
+        </CardContent>
+      </Card>
+      {isLongDescription && (
+        <DisputeDescriptionDialog
+          isOpen={isDescriptionOpen}
+          onClose={() => setIsDescriptionOpen(false)}
+          description={description}
+        />
+      )}
+    </>
   );
 }
