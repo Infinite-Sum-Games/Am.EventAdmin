@@ -1,4 +1,4 @@
-export type DisputeStatusEnum = 'OPEN' | 'RESOLVED' | 'REJECTED';
+export type DisputeStatusEnum = 'OPEN' | 'CLOSED_AS_TRUE' | 'CLOSED_AS_FALSE';
 
 export interface DisputeStatus {
   dispute_status_enum: DisputeStatusEnum;
