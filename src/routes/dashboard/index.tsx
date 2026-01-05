@@ -163,8 +163,8 @@ function DashboardOverviewPage() {
               <SelectItem value="revenue-asc">Revenue: Low to High</SelectItem>
               <SelectItem value="seats-desc">Registrations: High to Low</SelectItem>
               <SelectItem value="seats-asc">Registrations: Low to High</SelectItem>
-              <SelectItem value="participants-desc">Headcount: High to Low</SelectItem>
-              <SelectItem value="participants-asc">Headcount: Low to High</SelectItem>
+              <SelectItem value="participants-desc">Tickets Sold: High to Low</SelectItem>
+              <SelectItem value="participants-asc">Tickets Sold: Low to High</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -210,11 +210,11 @@ function DashboardOverviewPage() {
                     </TableCell>
                     <TableCell className="flex items-center">
                       {event.event_type === "WORKSHOP" ? (
-                        <Badge variant="secondary" className="w-24 flex justify-center text-yellow-600 bg-yellow-50 border-yellow-200">
+                        <Badge variant="secondary" className="w-24 flex justify-center text-green-600 bg-green-200 border-green-200">
                           <Wrench className="w-3 h-3 mr-1" /> Workshop
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="w-24 flex justify-center text-green-600 bg-green-50 border-green-200">
+                        <Badge variant="secondary" className="w-24 flex justify-center text-blue-600 bg-blue-200 border-blue-200">
                           <Trophy className="w-3 h-3 mr-1" /> Event
                         </Badge>
                       )}
@@ -237,7 +237,7 @@ function DashboardOverviewPage() {
                             {event.seats_filled} / {event.total_seats} Teams
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            ({event.actual_participant_count} Participants)
+                            ({event.actual_participant_count} Tickets Sold)
                           </span>
                         </div>
                       ) : (
@@ -286,7 +286,7 @@ function DashboardOverviewPage() {
                     {totalStats.seats_filled} / {totalStats.total_seats} Seats
                   </span>
                   <span className="text-xs text-muted-foreground font-normal">
-                    ({totalStats.participants} Total Headcount)
+                    ({totalStats.participants} Total Tickets Sold)
                   </span>
                 </div>
 
