@@ -3,7 +3,7 @@ import {
     CircleUserRound,
     ChartNoAxesCombined,
     IndianRupee,
-    ClipboardX
+    // ClipboardX
 } from "lucide-react";
 
 export type NavItem = {
@@ -60,11 +60,11 @@ export const managementNavItems: NavItem[] = [
         url: "/dashboard/analytics",
         icon: ChartNoAxesCombined,
     },
-    {
-        title: "Disputes",
-        url: "/dashboard/disputes",
-        icon: ClipboardX,
-    }
+    // {
+    //     title: "Disputes",
+    //     url: "/dashboard/disputes",
+    //     icon: ClipboardX,
+    // }
 ];
 
 export const analyticsNavItems: NavItem[] = [];

@@ -8,11 +8,14 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardDisputesIndexRouteImport } from './routes/dashboard/disputes/_index'
 import { Route as DashboardWipIndexRouteImport } from './routes/dashboard/wip/index'
 import { Route as DashboardTransactionsIndexRouteImport } from './routes/dashboard/transactions/index'
 import { Route as DashboardTagsIndexRouteImport } from './routes/dashboard/tags/index'
@@ -21,9 +24,10 @@ import { Route as DashboardPeopleIndexRouteImport } from './routes/dashboard/peo
 import { Route as DashboardParticipantsIndexRouteImport } from './routes/dashboard/participants/index'
 import { Route as DashboardOrgsIndexRouteImport } from './routes/dashboard/orgs/index'
 import { Route as DashboardEventsIndexRouteImport } from './routes/dashboard/events/index'
-import { Route as DashboardDisputesIndexRouteImport } from './routes/dashboard/disputes/index'
 import { Route as DashboardAnalyticsIndexRouteImport } from './routes/dashboard/analytics/index'
 import { Route as DashboardEventsEventIdRouteImport } from './routes/dashboard/events/$eventId'
+
+const DashboardDisputesRouteImport = createFileRoute('/dashboard/disputes')()
 
 const MaintenanceRoute = MaintenanceRouteImport.update({
   id: '/maintenance',
@@ -40,10 +44,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardDisputesRoute = DashboardDisputesRouteImport.update({
+  id: '/disputes',
+  path: '/disputes',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardDisputesIndexRoute = DashboardDisputesIndexRouteImport.update({
+  id: '/_index',
+  getParentRoute: () => DashboardDisputesRoute,
 } as any)
 const DashboardWipIndexRoute = DashboardWipIndexRouteImport.update({
   id: '/wip/',
@@ -87,11 +100,6 @@ const DashboardEventsIndexRoute = DashboardEventsIndexRouteImport.update({
   path: '/events/',
   getParentRoute: () => DashboardRoute,
 } as any)
-const DashboardDisputesIndexRoute = DashboardDisputesIndexRouteImport.update({
-  id: '/disputes/',
-  path: '/disputes/',
-  getParentRoute: () => DashboardRoute,
-} as any)
 const DashboardAnalyticsIndexRoute = DashboardAnalyticsIndexRouteImport.update({
   id: '/analytics/',
   path: '/analytics/',
@@ -108,9 +116,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRouteWithChildren
   '/maintenance': typeof MaintenanceRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/analytics': typeof DashboardAnalyticsIndexRoute
-  '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events': typeof DashboardEventsIndexRoute
   '/dashboard/orgs': typeof DashboardOrgsIndexRoute
   '/dashboard/participants': typeof DashboardParticipantsIndexRoute
@@ -124,9 +132,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/maintenance': typeof MaintenanceRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/analytics': typeof DashboardAnalyticsIndexRoute
-  '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events': typeof DashboardEventsIndexRoute
   '/dashboard/orgs': typeof DashboardOrgsIndexRoute
   '/dashboard/participants': typeof DashboardParticipantsIndexRoute
@@ -142,9 +150,10 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRouteWithChildren
   '/maintenance': typeof MaintenanceRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/disputes': typeof DashboardDisputesRouteWithChildren
+  '/dashboard/disputes/_index': typeof DashboardDisputesIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
   '/dashboard/analytics/': typeof DashboardAnalyticsIndexRoute
-  '/dashboard/disputes/': typeof DashboardDisputesIndexRoute
   '/dashboard/events/': typeof DashboardEventsIndexRoute
   '/dashboard/orgs/': typeof DashboardOrgsIndexRoute
   '/dashboard/participants/': typeof DashboardParticipantsIndexRoute
@@ -161,9 +170,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/maintenance'
     | '/dashboard/'
+    | '/dashboard/disputes'
     | '/dashboard/events/$eventId'
     | '/dashboard/analytics'
-    | '/dashboard/disputes'
     | '/dashboard/events'
     | '/dashboard/orgs'
     | '/dashboard/participants'
@@ -177,9 +186,9 @@ export interface FileRouteTypes {
     | '/'
     | '/maintenance'
     | '/dashboard'
+    | '/dashboard/disputes'
     | '/dashboard/events/$eventId'
     | '/dashboard/analytics'
-    | '/dashboard/disputes'
     | '/dashboard/events'
     | '/dashboard/orgs'
     | '/dashboard/participants'
@@ -194,9 +203,10 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/maintenance'
     | '/dashboard/'
+    | '/dashboard/disputes'
+    | '/dashboard/disputes/_index'
     | '/dashboard/events/$eventId'
     | '/dashboard/analytics/'
-    | '/dashboard/disputes/'
     | '/dashboard/events/'
     | '/dashboard/orgs/'
     | '/dashboard/participants/'
@@ -236,12 +246,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/disputes': {
+      id: '/dashboard/disputes'
+      path: '/disputes'
+      fullPath: '/dashboard/disputes'
+      preLoaderRoute: typeof DashboardDisputesRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/': {
       id: '/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/disputes/_index': {
+      id: '/dashboard/disputes/_index'
+      path: '/disputes'
+      fullPath: '/dashboard/disputes'
+      preLoaderRoute: typeof DashboardDisputesIndexRouteImport
+      parentRoute: typeof DashboardDisputesRoute
     }
     '/dashboard/wip/': {
       id: '/dashboard/wip/'
@@ -299,13 +323,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardEventsIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
-    '/dashboard/disputes/': {
-      id: '/dashboard/disputes/'
-      path: '/disputes'
-      fullPath: '/dashboard/disputes'
-      preLoaderRoute: typeof DashboardDisputesIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/dashboard/analytics/': {
       id: '/dashboard/analytics/'
       path: '/analytics'
@@ -323,11 +340,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface DashboardDisputesRouteChildren {
+  DashboardDisputesIndexRoute: typeof DashboardDisputesIndexRoute
+}
+
+const DashboardDisputesRouteChildren: DashboardDisputesRouteChildren = {
+  DashboardDisputesIndexRoute: DashboardDisputesIndexRoute,
+}
+
+const DashboardDisputesRouteWithChildren =
+  DashboardDisputesRoute._addFileChildren(DashboardDisputesRouteChildren)
+
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardDisputesRoute: typeof DashboardDisputesRouteWithChildren
   DashboardEventsEventIdRoute: typeof DashboardEventsEventIdRoute
   DashboardAnalyticsIndexRoute: typeof DashboardAnalyticsIndexRoute
-  DashboardDisputesIndexRoute: typeof DashboardDisputesIndexRoute
   DashboardEventsIndexRoute: typeof DashboardEventsIndexRoute
   DashboardOrgsIndexRoute: typeof DashboardOrgsIndexRoute
   DashboardParticipantsIndexRoute: typeof DashboardParticipantsIndexRoute
@@ -340,9 +368,9 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardDisputesRoute: DashboardDisputesRouteWithChildren,
   DashboardEventsEventIdRoute: DashboardEventsEventIdRoute,
   DashboardAnalyticsIndexRoute: DashboardAnalyticsIndexRoute,
-  DashboardDisputesIndexRoute: DashboardDisputesIndexRoute,
   DashboardEventsIndexRoute: DashboardEventsIndexRoute,
   DashboardOrgsIndexRoute: DashboardOrgsIndexRoute,
   DashboardParticipantsIndexRoute: DashboardParticipantsIndexRoute,

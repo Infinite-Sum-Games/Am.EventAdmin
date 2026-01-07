@@ -14,7 +14,7 @@ import { DisputeDialog } from '@/components/dispute-dialog';
 import type { UpdateDisputeForm } from '@/schemas/disputes';
 
 
-export const Route = createFileRoute('/dashboard/disputes/')({
+export const Route = createFileRoute('/dashboard/disputes/_index')({
   component: RouteComponent,
 });
 
@@ -23,7 +23,7 @@ function RouteComponent() {
   const queryClient = useQueryClient();
   const [editingDispute, setEditingDispute] = useState<Dispute | null>(null);
 
-  const { data: disputes = [], isLoading, isError } = useQuery<Dispute[]>({
+  const { data: disputes = [], isLoading, isError } = useQuery<Dispute[] | null>({
     queryKey: ['disputes'],
     queryFn: async () => {
       const response = await axiosClient.get<GetDisputesResponse>(api.GET_DISPUTES);
@@ -99,7 +99,7 @@ function RouteComponent() {
         )}
 
         {/* Empty State */}
-        {!isLoading && !isError && disputes.length === 0 && (
+        {!isLoading && !isError && disputes?.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-muted-foreground border-2 border-dashed rounded-xl bg-muted/10">
                 <div className="bg-muted p-4 rounded-full mb-4">
                     <FilterX className="w-8 h-8 opacity-50" />
@@ -112,7 +112,7 @@ function RouteComponent() {
         )}
 
         {/* Disputes List */}
-        {!isLoading && disputes.map((dispute) => (
+        {!isLoading && disputes?.map((dispute) => (
             <DisputeCard 
                 key={dispute.id} 
                 dispute={dispute} 
