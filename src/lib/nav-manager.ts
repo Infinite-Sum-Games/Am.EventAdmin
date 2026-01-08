@@ -1,8 +1,9 @@
 import {
     LayoutDashboard, CalendarDays, Shield, Tags, Contact, type LucideIcon,
     CircleUserRound,
-    // ChartNoAxesCombined,
-    IndianRupee
+    ChartNoAxesCombined,
+    IndianRupee,
+    // ClipboardX
 } from "lucide-react";
 
 export type NavItem = {
@@ -54,10 +55,15 @@ export const managementNavItems: NavItem[] = [
         url: "/dashboard/transactions",
         icon: IndianRupee,
     },
+    {
+        title: "Analytics",
+        url: "/dashboard/analytics",
+        icon: ChartNoAxesCombined,
+    },
     // {
-    //     title: "Analytics",
-    //     url: "/dashboard/analytics",
-    //     icon: ChartNoAxesCombined,
+    //     title: "Disputes",
+    //     url: "/dashboard/disputes",
+    //     icon: ClipboardX,
     // }
 ];
 

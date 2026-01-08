@@ -175,7 +175,7 @@ function DashboardOverviewPage() {
         <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-muted/50">
-              <TableRow className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr]">
+              <TableRow className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr]">
                 <TableHead className="text-center flex items-center justify-center">#</TableHead>
                 <TableHead className="flex items-center">Event Name</TableHead>
                 <TableHead className="flex items-center">Type</TableHead>
@@ -201,7 +201,7 @@ function DashboardOverviewPage() {
                 </TableRow>
               ) : (
                 processedData.map((event, index) => (
-                  <TableRow key={event.event_id} className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
+                  <TableRow key={event.event_id} className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
                     <TableCell className="text-center font-medium text-muted-foreground flex items-center justify-center">
                       {index + 1}
                     </TableCell>
@@ -210,11 +210,11 @@ function DashboardOverviewPage() {
                     </TableCell>
                     <TableCell className="flex items-center">
                       {event.event_type === "WORKSHOP" ? (
-                        <Badge variant="secondary" className="w-24 flex justify-center text-yellow-600 bg-yellow-50 border-yellow-200">
+                        <Badge variant="secondary" className="w-24 flex justify-center text-green-600 bg-green-200 border-green-200">
                           <Wrench className="w-3 h-3 mr-1" /> Workshop
                         </Badge>
                       ) : (
-                        <Badge variant="secondary" className="w-24 flex justify-center text-green-600 bg-green-50 border-green-200">
+                        <Badge variant="secondary" className="w-24 flex justify-center text-blue-600 bg-blue-200 border-blue-200">
                           <Trophy className="w-3 h-3 mr-1" /> Event
                         </Badge>
                       )}
@@ -237,7 +237,7 @@ function DashboardOverviewPage() {
                             {event.seats_filled} / {event.total_seats} Teams
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            ({event.actual_participant_count} Participants)
+                            ({event.actual_participant_count} Tickets Sold)
                           </span>
                         </div>
                       ) : (
@@ -273,7 +273,7 @@ function DashboardOverviewPage() {
             {/* The Floating 'Row' Div */}
             <div className="bg-muted/90 backdrop-blur-md border border-border shadow-2xl rounded-lg overflow-hidden">
               {/* Grid Layout Matches Table exactly */}
-              <div className="grid grid-cols-[50px_300px_1fr_1fr_1fr_1fr] h-16 items-center px-4">
+              <div className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] h-16 items-center px-4">
 
                 {/* "Total" Label spans first 4 columns */}
                 <div className="col-span-4 pl-4 text-lg font-bold flex items-center">
@@ -286,7 +286,7 @@ function DashboardOverviewPage() {
                     {totalStats.seats_filled} / {totalStats.total_seats} Seats
                   </span>
                   <span className="text-xs text-muted-foreground font-normal">
-                    ({totalStats.participants} Tickets Sold)
+                    ({totalStats.participants} Total Tickets Sold)
                   </span>
                 </div>
 

@@ -1,66 +1,138 @@
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
-import { toast } from "sonner";
+import { Textarea } from "@/components/ui/textarea";
+import type { Dispute } from "@/types/disputes";
+import { updateDisputeSchema, type UpdateDisputeForm } from "@/schemas/disputes";
+import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 
 interface DisputeDialogProps {
-    transactionId: string;
-    isOpen: boolean;
-    onClose: () => void;
-    onCreateDispute: (transactionId: string) => void;
+  dispute: Dispute;
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit?: (values: UpdateDisputeForm) => void;
+  isUpdating?: boolean;
+  readOnly?: boolean;
 }
 
 export function DisputeDialog({
-    transactionId,
-    isOpen,
-    onClose,
-    onCreateDispute,
+  dispute,
+  isOpen,
+  onClose,
+  onSubmit,
+  isUpdating,
+  readOnly = false,
 }: DisputeDialogProps) {
-    const [inputValue, setInputValue] = useState("");
+  const form = useForm<UpdateDisputeForm>({
+    resolver: zodResolver(updateDisputeSchema),
+    defaultValues: {
+      student_email: dispute.student_email || "",
+      description: dispute.description || "",
+    },
+  });
 
-    const handleCreateDispute = () => {
-        if (inputValue === transactionId.slice(-4)) {
-            onCreateDispute(transactionId);
-            toast.success("Dispute created successfully!");
-            onClose();
-        } else {
-            toast.error("The last 4 characters of the transaction ID do not match.");
-        }
-    };
+  useEffect(() => {
+    form.reset({
+      student_email: dispute.student_email || "",
+      description: dispute.description || "",
+    });
+  }, [dispute, form]);
 
-    return (
-        <AlertDialog open={isOpen} onOpenChange={onClose}>
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Create Dispute</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Please enter the last 4 characters of the transaction ID to confirm.
-                        <br />
-                        (Get the last <span className="font-semibold text-white">4 characters</span> from the <span className="font-semibold text-white">PayU confirmation email</span>)
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <Input
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    maxLength={4}
-                    placeholder="Last 4 characters"
-                />
-                <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleCreateDispute}>
-                        Create Dispute
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
-    );
+  const handleFormSubmit = (values: UpdateDisputeForm) => {
+    onSubmit?.(values);
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {readOnly ? "Dispute Details" : "Edit Dispute"}
+          </DialogTitle>
+          {!readOnly && (
+            <DialogDescription>
+              Update the student's email or the description of the dispute.
+            </DialogDescription>
+          )}
+        </DialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleFormSubmit)}
+            className="space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="student_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Student Email</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="student@email.com"
+                      {...field}
+                      disabled={readOnly}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Describe the issue..."
+                      {...field}
+                      disabled={readOnly}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={onClose}
+                disabled={isUpdating}
+              >
+                {readOnly ? "Close" : "Cancel"}
+              </Button>
+              {!readOnly && (
+                <Button type="submit" disabled={isUpdating}>
+                  {isUpdating ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : null}
+                  Save Changes
+                </Button>
+              )}
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
 }
