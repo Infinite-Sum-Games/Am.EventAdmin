@@ -1,6 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { FileQuestion, Home } from "lucide-react";
+
+export const Route = createFileRoute("/not-found")({
+  component: NotFound,
+});
 
 export function NotFound() {
   return (

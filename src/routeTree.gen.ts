@@ -11,6 +11,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as NotFoundRouteImport } from './routes/not-found'
 import { Route as MaintenanceRouteImport } from './routes/maintenance'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
@@ -29,6 +30,11 @@ import { Route as DashboardEventsEventIdRouteImport } from './routes/dashboard/e
 
 const DashboardDisputesRouteImport = createFileRoute('/dashboard/disputes')()
 
+const NotFoundRoute = NotFoundRouteImport.update({
+  id: '/not-found',
+  path: '/not-found',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MaintenanceRoute = MaintenanceRouteImport.update({
   id: '/maintenance',
   path: '/maintenance',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/maintenance': typeof MaintenanceRoute
+  '/not-found': typeof NotFoundRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/maintenance': typeof MaintenanceRoute
+  '/not-found': typeof NotFoundRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/disputes': typeof DashboardDisputesIndexRoute
   '/dashboard/events/$eventId': typeof DashboardEventsEventIdRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/maintenance': typeof MaintenanceRoute
+  '/not-found': typeof NotFoundRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/dashboard/disputes': typeof DashboardDisputesRouteWithChildren
   '/dashboard/disputes/_index': typeof DashboardDisputesIndexRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/maintenance'
+    | '/not-found'
     | '/dashboard/'
     | '/dashboard/disputes'
     | '/dashboard/events/$eventId'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/maintenance'
+    | '/not-found'
     | '/dashboard'
     | '/dashboard/disputes'
     | '/dashboard/events/$eventId'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/'
     | '/dashboard'
     | '/maintenance'
+    | '/not-found'
     | '/dashboard/'
     | '/dashboard/disputes'
     | '/dashboard/disputes/_index'
@@ -221,10 +233,18 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
   MaintenanceRoute: typeof MaintenanceRoute
+  NotFoundRoute: typeof NotFoundRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/not-found': {
+      id: '/not-found'
+      path: '/not-found'
+      fullPath: '/not-found'
+      preLoaderRoute: typeof NotFoundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/maintenance': {
       id: '/maintenance'
       path: '/maintenance'
@@ -389,6 +409,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
   MaintenanceRoute: MaintenanceRoute,
+  NotFoundRoute: NotFoundRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
