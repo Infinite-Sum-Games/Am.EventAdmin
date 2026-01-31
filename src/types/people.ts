@@ -5,8 +5,3 @@ export interface People {
     email?: string;
     profession: string;
 }
-
-export type GetAllPeopleResponse = {
-  message: string;
-  people: People[];
-};
