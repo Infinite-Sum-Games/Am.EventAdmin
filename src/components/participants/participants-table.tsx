@@ -48,6 +48,7 @@ const searchFields = [
   { value: "email", label: "Email" },
   { value: "college", label: "College" },
   { value: "city", label: "City" },
+  { value: "phone_number", label: "Phone" },
   { value: "team_name", label: "Team" },
 ];
 
