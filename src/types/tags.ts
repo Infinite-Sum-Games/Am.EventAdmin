@@ -7,8 +7,3 @@ export type Tags = {
     name: string;
   }[];
 };
-
-export type GetAllTagsResponse = {
-  message: string;
-  tags: Tags[];
-};
