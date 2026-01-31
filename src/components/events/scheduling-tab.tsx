@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { EVENT_DAYS } from "@/lib/config/config";
 import {
   Plus,
   Calendar as CalendarIcon,
@@ -40,12 +41,8 @@ import {
 } from "../ui/alert-dialog";
 
 
-// Map specific dates to Day Labels for easy lookup
-const EVENT_DAYS: Record<string, { label: string; shortDate: string }> = {
-  "2026-01-07": { label: "1", shortDate: "Jan 7" },
-  "2026-01-08": { label: "2", shortDate: "Jan 8" },
-  "2026-01-09": { label: "3", shortDate: "Jan 9" },
-};
+// EVENT_DAYS is now imported from @/lib/config/config
+// It's dynamically generated from environment configuration
 
 function SchedulingTab({ data }: { data: EventData }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
