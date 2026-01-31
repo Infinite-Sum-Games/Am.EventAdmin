@@ -34,7 +34,7 @@ export const Route = createFileRoute("/")({
       return redirect({
         to: "/dashboard",
       });
-    } catch (err) {
+    } catch (_err) {
       return null;
     }
   },
