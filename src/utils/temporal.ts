@@ -65,8 +65,9 @@ export const formatTime = (isoString: string | undefined | null): string => {
 
   try {
     const plainDateTime = Temporal.PlainDateTime.from(isoString);
+    // if the damm thing breaks, remove the below line
     return plainDateTime.toPlainTime().toString({ smallestUnit: "minute" });
-  } catch (error) {
+  } catch (_error) {
     return "--";
   }
 };
@@ -82,7 +83,7 @@ export const formatTimeWithAMPM = (isoString: string | undefined | null): string
       minute: "2-digit",
       hour12: true,
     });
-  } catch (error) {
+  } catch (_error) {
     return "--";
   }
 };
