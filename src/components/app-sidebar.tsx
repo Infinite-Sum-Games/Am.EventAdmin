@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import type { NavItem } from "@/lib/nav-manager";
 import { Route } from "@/routes/dashboard"; // Import Route from the dashboard route to access context
+import { EVENT_FULL_NAME } from "@/lib/config/config";
 
 export function AppSidebar({
     user,
@@ -45,7 +46,7 @@ export function AppSidebar({
                 <TeamSwitcher
                     teams={[
                         {
-                            name: "Anokha 2026",
+                            name: EVENT_FULL_NAME,
                             logo: GalleryVerticalEnd,
                             plan: "Organizing Team",
                         },
