@@ -14,9 +14,7 @@ export const posterSchema = z.object({
   poster_url: z.url("Poster URL must be a valid URL").optional(),
 });
 
-export const isPublishSchema = z.object({
-  is_published: z.boolean().default(false),
-});
+
 
 export const eventSizeSchema = z.object({
   is_group: z.boolean(),
