@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, MouseOff, Presentation, Save, ScrollText, Unlock, User, Users, Wifi, XCircle, CheckCircle2, InfoIcon } from 'lucide-react';
+import { Armchair, Activity, ArrowRight, ArrowRightLeft, Calendar, Check, EyeOff, FileText, Globe, ImageIcon, IndianRupee, Info, Lock, Loader2, LogIn, MapPin, MouseOff, Presentation, Save, Unlock, User, Users, Wifi, XCircle, CheckCircle2, InfoIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
@@ -213,10 +213,9 @@ export function EventEditorPage() {
       <Separator className='my-4' />
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList className="w-full mb-4 grid grid-cols-6 rounded-sm bg-popover h-10">
+        <TabsList className="w-full mb-4 grid grid-cols-5 rounded-sm bg-popover h-10">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="description">Description</TabsTrigger>
-          <TabsTrigger value="rules">Rules</TabsTrigger>
           <TabsTrigger value="seats">Seats</TabsTrigger>
           <TabsTrigger value="modes">Metadata</TabsTrigger>
           <TabsTrigger value="scheduling">Scheduling</TabsTrigger>
@@ -228,10 +227,6 @@ export function EventEditorPage() {
 
         <TabsContent value="description">
           <DescriptionTab data={eventData} />
-        </TabsContent>
-
-        <TabsContent value="rules">
-          <RulesTab data={eventData} />
         </TabsContent>
 
         <TabsContent value="seats">
@@ -383,7 +378,6 @@ function GeneralTab({ data }: { data: EventData }) {
         price: inputPrice,
         is_per_head: inputIsPerHead,
         description: data.description as string,
-        rules: data.rules as string,
       }
     });
   }
@@ -652,7 +646,6 @@ function DescriptionTab({ data }: { data: EventData }) {
         price: data.price,
         is_per_head: data.is_per_head,
         description: inputDescription,
-        rules: data.rules as string,
       }
     });
   }
@@ -709,110 +702,6 @@ function DescriptionTab({ data }: { data: EventData }) {
       </Card>
     </div>
   );
-}
-
-// rules
-function RulesTab({ data }: { data: EventData }) {
-  const [inputRules, setInputRules] = useState(data.rules || "");
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    // Sync external changes only if input is empty (first load)
-    if (!inputRules && data.rules) {
-      setInputRules(data.rules);
-    }
-  }, [data.rules]);
-
-  const hasRulesChanged = inputRules !== (data.rules || "");
-
-  const { mutate: updateRules, isPending: isUpdatingRules, error: updateRulesError } = useMutation({
-    mutationFn: async ({ id, payload }: { id: string, payload: EventDetails }) => {
-      // Zod validation
-      const validatedData = eventDetailsSchema.safeParse(payload);
-      if (!validatedData.success) {
-        const errorMessages = validatedData.error.issues.map(err => err.message).join("\n");
-        throw new Error(errorMessages);
-      }
-
-      const response = await axiosClient.post(api.UPDATE_BASIC_EVENT_DETAILS(id), validatedData.data);
-      return response.data;
-    },
-    onSuccess: (_, { id, payload }) => {
-      queryClient.setQueryData(['event', id], (oldData: EventData | undefined) => {
-        if (!oldData) return oldData;
-        return { ...oldData, ...payload };
-      });
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-
-      toast.success("Updated event rules successfully!");
-    },
-    onError: () => {
-      toast.error("Failed to update event rules.");
-    }
-  });
-
-  const handleUpdateRules = () => {
-    updateRules({
-      id: data.id,
-      payload: {
-        name: data.name,
-        blurb: data.blurb,
-        price: data.price,
-        is_per_head: data.is_per_head,
-        description: data.description as string,
-        rules: inputRules,
-      }
-    });
-  }
-
-  return (
-    <div className="h-full mx-auto">
-      <Card className="h-full flex flex-col border-none shadow-none md:border md:shadow-sm">
-
-        <CardHeader className="px-0 md:px-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2 mb-2">
-                <ScrollText className="h-5 w-5" /> Event Rules & Guidelines
-              </CardTitle>
-              <CardDescription>
-                Define the rules, judging criteria, and regulations for participants.
-              </CardDescription>
-            </div>
-
-            {/* Action Button */}
-            <Button
-              onClick={handleUpdateRules}
-              disabled={!hasRulesChanged || isUpdatingRules}
-              className="flex"
-            >
-              <Save className="h-4 w-4" />
-              {isUpdatingRules ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
-        </CardHeader>
-
-        <CardContent className="flex-1 px-0 md:px-6 pb-6">
-          <div className="min-h-125">
-            <Suspense fallback={<EditorSkeleton />}>
-              <MDXEditorLazy
-                markdown={unescapeMarkdown(inputRules)}
-                onChange={(newMarkdown) => setInputRules(newMarkdown || "")}
-              />
-            </Suspense>
-          </div>
-
-          <p className="text-xs text-muted-foreground mt-3 text-right">
-            Tip: Use bullet points (-) to make rules easy to scan.
-          </p>
-          <ErrorMessage
-            title='Failed to update rules'
-            message={updateRulesError?.message}
-          />
-        </CardContent>
-      </Card>
-    </div>
-  )
 }
 
 // is group, team sizes, seats
