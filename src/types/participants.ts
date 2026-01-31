@@ -7,6 +7,7 @@ export interface Participant {
   city: string;
   email: string;
   is_amrita_student: boolean;
+  phone_number: string;
 }
 
 export interface GetAllParticipantsByEventResponse {
