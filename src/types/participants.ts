@@ -9,8 +9,3 @@ export interface Participant {
   is_amrita_student: boolean;
   phone_number: string;
 }
-
-export interface GetAllParticipantsByEventResponse {
-  message: string;
-  participants: Participant[];
-}
