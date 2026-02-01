@@ -9,8 +9,3 @@ export interface Leaderboard {
     actual_participant_count: number;
     event_type: "WORKSHOP" | "EVENT";
 }
-
-export interface GetLeaderboardResponse {
-    message: string;
-    leaderboard: Leaderboard[];
-}

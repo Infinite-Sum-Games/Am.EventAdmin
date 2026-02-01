@@ -4,6 +4,7 @@ import { LoginForm } from "@/components/login-form";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 import { axiosClient } from "@/lib/axios";
 import { api } from "@/lib/api";
+import { EVENT_FULL_NAME } from "@/lib/config/config";
 
 function LoginPage() {
   return (
@@ -17,7 +18,7 @@ function LoginPage() {
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEnd className="size-4" />
           </div>
-          Anokha 2026
+          {EVENT_FULL_NAME}
         </a>
 
         <LoginForm />
@@ -33,7 +34,7 @@ export const Route = createFileRoute("/")({
       return redirect({
         to: "/dashboard",
       });
-    } catch (err) {
+    } catch (_err) {
       return null;
     }
   },

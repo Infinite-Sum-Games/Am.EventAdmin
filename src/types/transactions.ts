@@ -12,8 +12,3 @@ export type Transaction = {
   txn_status: 'PENDING' | 'SUCCESS' | 'FAILED';
   registration_fee: number;
 };
-
-export type GetAllTransactionsResponse = {
-  message: string;
-  transactions: Transaction[];
-};

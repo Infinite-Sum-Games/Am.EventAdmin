@@ -13,7 +13,7 @@ export const Route = createFileRoute("/dashboard")({
             return {
                 user: response.data
             };
-        } catch (error) {
+        } catch (_error) {
             throw redirect({
                 to: "/",
             });

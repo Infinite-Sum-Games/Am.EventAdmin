@@ -1,6 +1,6 @@
-# anokha-2026-admin
+# Event Admin Dashboard
 
-This is the admin dashboard for the Anokha 2026 event, built with a modern frontend stack including Vite, React, TypeScript, and Tailwind CSS.
+This is a reusable admin dashboard for managing events/fests, built with a modern frontend stack including Vite, React, TypeScript, and Tailwind CSS. The dashboard is configured to work with different events/fests through environment variables.
 
 ## Current Status
 
@@ -17,19 +17,47 @@ This project is currently in the **frontend development phase**. The core applic
 - **UI Components:** `shadcn/ui`
 - **Styling:** Tailwind CSS v4
 
-## Getting Started
+## Panel Configuration
 
-To get the development server running:
+This dashboard supports multiple events/fests through environment-based configuration:
 
-1.  **Install Dependencies:**
+1.  **Copy the configuration template:**
+    ```bash
+    cp .env.example .env
+    ```
+2.  **Configure your event/fest:**
+    Edit `.env` with your event/fest details:
+    ```bash
+    # Panel configuration
+    VITE_EVENT_NAME=YourEvent
+    VITE_EVENT_YEAR=2026
+    VITE_EVENT_DATES=["2026-01-07","2026-01-08","2026-01-09"]
+    VITE_EVENT_MAIN_WEBSITE=https://yourevent.example.com
+    ```
+3.  **Install Dependencies:**
     ```bash
     bun install
     ```
-2.  **Run the Development Server:**
+4.  **Run Development Server:**
     ```bash
     bun run dev
     ```
-The application will be available at `http://localhost:5173` (or the next available port).
+The application will be available at `http://localhost:5173`
+
+### Switching Between Events/Fests
+
+To switch between different events:
+
+1. Update the `.env` file with the new event details
+2. Restart the development server (`bun run dev`)
+3. All event-specific branding, dates, and links will update automatically
+
+### Supported Configuration
+
+- **Event Name**: Name displayed in headers and navigation
+- **Event Year**: Combined with name for full branding
+- **Event Dates**: Array of ISO date strings for scheduling (supports non-consecutive dates)
+- **Main Website URL**: Footer link and event reference URL
 
 ## Features & Implemented Pages
 

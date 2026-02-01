@@ -14,7 +14,8 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { axiosClient } from "@/lib/axios"; 
 import secureLocalStorage from "react-secure-storage";
-import { hashPassword } from "@/lib/hash"; 
+import { hashPassword } from "@/lib/hash";
+import { EVENT_CONFIG } from "@/lib/config/config"; 
 
 export function LoginForm({
   className,
@@ -120,9 +121,9 @@ export function LoginForm({
                 </Button>
               </div>
               <div className="text-center text-sm">
-                Visit Amrita 2026?{" "}
+                Visit {EVENT_CONFIG.name} {EVENT_CONFIG.year}?{" "}
                 <a
-                  href="https://anokha.amrita.edu/"
+                  href={EVENT_CONFIG.mainWebsite}
                   className="underline underline-offset-4"
                 >
                   Click here
