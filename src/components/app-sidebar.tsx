@@ -33,11 +33,11 @@ export function AppSidebar({
 
     const filteredManagementItems = React.useMemo(() => {
         const restrictedEmails = ["finance@amrita.edu", "pnr@amrita.edu"];
-        if (restrictedEmails.includes(sessionUser.email)) {
+        if (sessionUser?.email && restrictedEmails.includes(sessionUser.email)) {
             return [];
         }
-        return navItems.management;
-    }, [sessionUser.email, navItems.management]);
+        return navItems.management || [];
+    }, [sessionUser?.email, navItems.management]);
 
 
     return (

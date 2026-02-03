@@ -53,31 +53,37 @@ function DashboardOverviewPage() {
     queryKey: ['leaderboard'],
     queryFn: async () => {
       const response = await axiosClient.get(api.FETCH_LEADERBOARD);
-      return response.data.events;
-    }
+      return response.data?.events || [];
+    },
+    retry: 1,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const processedData = useMemo(() => {
-    let result = [...leaderboardData];
+    // Defensive check: ensure leaderboardData is a valid array
+    const sourceData = Array.isArray(leaderboardData) ? leaderboardData : [];
+    let result = [...sourceData];
 
     if (typeFilter !== "ALL") {
-      result = result.filter(item => item.event_type === typeFilter);
+      result = result.filter(item => item && item.event_type === typeFilter);
     }
 
     if (groupFilter === "TEAM") {
-      result = result.filter(item => item.is_group);
+      result = result.filter(item => item && item.is_group);
     } else if (groupFilter === "INDIVIDUAL") {
-      result = result.filter(item => !item.is_group);
+      result = result.filter(item => item && !item.is_group);
     }
 
     result.sort((a, b) => {
+      // Additional defensive checks for sorting
+      if (!a || !b) return 0;
       switch (sortBy) {
-        case "revenue-desc": return b.revenue_without_gst - a.revenue_without_gst;
-        case "revenue-asc": return a.revenue_without_gst - b.revenue_without_gst;
-        case "seats-desc": return b.seats_filled - a.seats_filled;
-        case "seats-asc": return a.seats_filled - b.seats_filled;
-        case "participants-desc": return b.actual_participant_count - a.actual_participant_count;
-        case "participants-asc": return a.actual_participant_count - b.actual_participant_count;
+        case "revenue-desc": return (b.revenue_without_gst || 0) - (a.revenue_without_gst || 0);
+        case "revenue-asc": return (a.revenue_without_gst || 0) - (b.revenue_without_gst || 0);
+        case "seats-desc": return (b.seats_filled || 0) - (a.seats_filled || 0);
+        case "seats-asc": return (a.seats_filled || 0) - (b.seats_filled || 0);
+        case "participants-desc": return (b.actual_participant_count || 0) - (a.actual_participant_count || 0);
+        case "participants-asc": return (a.actual_participant_count || 0) - (b.actual_participant_count || 0);
         default: return 0;
       }
     });
@@ -86,13 +92,18 @@ function DashboardOverviewPage() {
   }, [leaderboardData, typeFilter, groupFilter, sortBy]);
 
   const totalStats = useMemo(() => {
-    return processedData.reduce((acc, curr) => ({
-      revenue: acc.revenue + curr.revenue,
-      revenue_without_gst: acc.revenue_without_gst + curr.revenue_without_gst,
-      seats_filled: acc.seats_filled + curr.seats_filled,
-      total_seats: acc.total_seats + curr.total_seats,
-      participants: acc.participants + curr.actual_participant_count
-    }), { revenue: 0, revenue_without_gst: 0, seats_filled: 0, total_seats: 0, participants: 0 });
+    return processedData.reduce((acc, curr) => {
+      // Defensive check: ensure curr exists and has required properties
+      if (!curr) return acc;
+      
+      return {
+        revenue: acc.revenue + (curr.revenue || 0),
+        revenue_without_gst: acc.revenue_without_gst + (curr.revenue_without_gst || 0),
+        seats_filled: acc.seats_filled + (curr.seats_filled || 0),
+        total_seats: acc.total_seats + (curr.total_seats || 0),
+        participants: acc.participants + (curr.actual_participant_count || 0)
+      };
+    }, { revenue: 0, revenue_without_gst: 0, seats_filled: 0, total_seats: 0, participants: 0 });
   }, [processedData]);
 
   return (
@@ -193,7 +204,7 @@ function DashboardOverviewPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ) : processedData.length === 0 ? (
+              ) : !processedData || processedData.length === 0 ? (
                 <TableRow className="grid grid-cols-1">
                   <TableCell className="h-24 flex items-center justify-center text-muted-foreground">
                     No events found matching your filters.
@@ -201,15 +212,15 @@ function DashboardOverviewPage() {
                 </TableRow>
               ) : (
                 processedData.map((event, index) => (
-                  <TableRow key={event.event_id} className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
+                  <TableRow key={event?.event_id || index} className="grid grid-cols-[50px_3fr_1fr_1fr_1fr_1fr] group hover:bg-muted/30 h-14">
                     <TableCell className="text-center font-medium text-muted-foreground flex items-center justify-center">
                       {index + 1}
                     </TableCell>
                     <TableCell className="font-medium text-foreground flex items-center truncate">
-                      {event.event_name}
+                      {event?.event_name || 'Unknown Event'}
                     </TableCell>
                     <TableCell className="flex items-center">
-                      {event.event_type === "WORKSHOP" ? (
+                      {event?.event_type === "WORKSHOP" ? (
                         <Badge variant="secondary" className="w-24 flex justify-center text-green-600 bg-green-200 border-green-200">
                           <Wrench className="w-3 h-3 mr-1" /> Workshop
                         </Badge>
@@ -220,7 +231,7 @@ function DashboardOverviewPage() {
                       )}
                     </TableCell>
                     <TableCell className="flex items-center">
-                      {event.is_group ? (
+                      {event?.is_group ? (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Users className="w-4 h-4" /> Team
                         </div>
@@ -231,28 +242,28 @@ function DashboardOverviewPage() {
                       )}
                     </TableCell>
                     <TableCell className="flex items-center">
-                      {event.is_group ? (
+                      {event?.is_group ? (
                         <div className="flex flex-col justify-center">
                           <span className="font-semibold text-sm">
-                            {event.seats_filled} / {event.total_seats} Teams
+                            {event.seats_filled || 0} / {event.total_seats || 0} Teams
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            ({event.actual_participant_count} Tickets Sold)
+                            ({event.actual_participant_count || 0} Tickets Sold)
                           </span>
                         </div>
                       ) : (
                         <div className="font-medium">
-                          {event.seats_filled} / {event.total_seats} Seats
+                          {event.seats_filled || 0} / {event.total_seats || 0} Seats
                         </div>
                       )}
                     </TableCell>
                     <TableCell className="text-right font-bold tabular-nums pr-6 flex flex-col items-end justify-center">
                       <div className="flex items-center">
                         <IndianRupee className="w-3 h-3 mr-0.5" />
-                        {event.revenue_without_gst.toLocaleString('en-IN')}
+                        {(event.revenue_without_gst || 0).toLocaleString('en-IN')}
                       </div>
                       <div className="text-xs text-muted-foreground font-normal">
-                        (w/GST: {event.revenue.toLocaleString('en-IN')})
+                        (w/GST: {(event.revenue || 0).toLocaleString('en-IN')})
                       </div>
                     </TableCell>
                   </TableRow>
