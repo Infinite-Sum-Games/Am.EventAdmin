@@ -547,7 +547,7 @@ function GeneralTab({ data }: { data: EventData }) {
       {/* Live Preview */}
       <div className="w-full lg:w-80 xl:w-96 shrink-0 space-y-2 flex flex-col justify-center">
 
-        <div className="relative aspect-2/3 w-full rounded-lg border-2 border-dashed bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all border-muted-foreground/50">
+        <div className="relative aspect-square w-full rounded-lg border-2 border-dashed bg-muted/10 overflow-hidden shadow-sm flex flex-col items-center justify-center transition-all border-muted-foreground/50">
 
           {/* Preview Badge */}
           <div className="absolute top-3 left-3 z-10">
