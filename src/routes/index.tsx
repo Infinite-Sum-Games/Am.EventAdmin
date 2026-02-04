@@ -1,5 +1,4 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { GalleryVerticalEnd } from "lucide-react";
 import { LoginForm } from "@/components/login-form";
 import { ModeToggle } from "@/components/ui/theme-toggle";
 import { axiosClient } from "@/lib/axios";
@@ -14,10 +13,10 @@ function LoginPage() {
       </div>
 
       <div className="flex w-full max-w-sm flex-col gap-6">
-        <a href="#" className="flex items-center gap-2 self-center font-medium">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
+        <a href="#" className="flex items-center gap-2 self-center text-2xl font-semibold">
+          {/* <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <GalleryVerticalEnd className="size-4" />
-          </div>
+          </div> */}
           {EVENT_FULL_NAME}
         </a>
 
