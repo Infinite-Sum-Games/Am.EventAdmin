@@ -1,5 +1,3 @@
-"use client";
-
 import { Mail, MapPin, GraduationCap, Phone } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Participant } from "@/types/participants";
