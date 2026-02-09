@@ -1,6 +1,6 @@
-import { Mail, MapPin, GraduationCap, Phone } from "lucide-react";
+import { Mail, GraduationCap, Phone } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import type { Participant } from "@/types/participants";
+import type { Registration } from "@/types/registrations";
 
 // Helper function to generate initials from name
 function getInitials(name: string): string {
@@ -37,36 +37,31 @@ function getAvatarColor(name: string): string {
 
 // Column definitions for the table
 export interface TableColumn {
-  key: keyof Participant;
+  key: keyof Registration;
   label: string;
   width?: string;
   sortable?: boolean;
   hideOnMobile?: boolean;
   align?: 'left' | 'center' | 'right';
-  render: (participant: Participant, index: number) => React.ReactNode;
+  render: (registration: Registration, index: number) => React.ReactNode;
 }
 
-export const participantsColumns: TableColumn[] = [
+export const registrationsColumns: TableColumn[] = [
   {
     key: "student_name",
     label: "Name",
     width: "250px",
     sortable: true,
     align: 'left',
-    render: (participant) => (
+    render: (registration) => (
       <div className="flex items-center gap-3 px-1">
         <Avatar className="h-8 w-8">
-          <AvatarFallback className={`${getAvatarColor(participant.student_name)} text-white text-xs font-semibold`}>
-            {getInitials(participant.student_name)}
+          <AvatarFallback className={`${getAvatarColor(registration.student_name)} text-white text-xs font-semibold`}>
+            {getInitials(registration.student_name)}
           </AvatarFallback>
         </Avatar>
         <div className="flex flex-col">
-          <span className="font-medium min-w-[250px] truncate">{participant.student_name}</span>
-          {participant.team_name && (
-            <span className="text-xs text-muted-foreground">
-              Team: {participant.team_name}
-            </span>
-          )}
+          <span className="font-medium min-w-[250px] truncate">{registration.student_name}</span>
         </div>
       </div>
     ),
@@ -77,26 +72,11 @@ export const participantsColumns: TableColumn[] = [
     width: "250px",
     sortable: true,
     align: 'center',
-    render: (participant) => (
+    render: (registration) => (
       <div className="flex items-center justify-center gap-2">
         <GraduationCap className="h-4 w-4 text-muted-foreground" />
-        <span className="max-w-[250px] truncate" title={participant.college}>
-          {participant.college}
-        </span>
-      </div>
-    ),
-  },
-  {
-    key: "city",
-    label: "City", 
-    width: "250px",
-    sortable: true,
-    align: 'center',
-    render: (participant) => (
-      <div className="flex items-center justify-center gap-2">
-        <MapPin className="h-4 w-4 text-muted-foreground" />
-        <span className="max-w-[250px] truncate" title={participant.city}>
-          {participant.city}
+        <span className="max-w-[250px] truncate" title={registration.college}>
+          {registration.college}
         </span>
       </div>
     ),
@@ -107,11 +87,11 @@ export const participantsColumns: TableColumn[] = [
     width: "150px",
     sortable: true,
     align: "center",  
-    render: (participant) => (
+    render: (registration) => (
       <div className="flex items-center justify-center gap-2">
         <Phone className="h-4 w-4 text-muted-foreground" />
-        <a href={`tel:${participant.phone_number}`} className="hover:underline">
-          {participant.phone_number}
+        <a href={`tel:${registration.phone_number}`} className="hover:underline">
+          {registration.phone_number}
         </a>
       </div>
     ),
@@ -122,19 +102,17 @@ export const participantsColumns: TableColumn[] = [
     width: "250px",
     sortable: true,
     align: 'right',
-    render: (participant) => (
+    render: (registration) => (
       <div className="flex justify-end items-center gap-2 px-1">
         <Mail className="h-4 w-4 text-muted-foreground" />
         <a 
-          href={`mailto:${participant.email}`}
+          href={`mailto:${registration.email}`}
           className="text-blue-600 hover:text-blue-800 underline max-w-[250px] truncate"
-          title={participant.email}
+          title={registration.email}
         >
-          {participant.email}
+          {registration.email}
         </a>
       </div>
     ),
   },
-
-
 ];

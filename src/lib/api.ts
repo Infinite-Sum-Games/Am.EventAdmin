@@ -24,6 +24,7 @@ export const api = {
 
   // People
   FETCH_ALL_PEOPLE: `${CURRENT_BASE_URL}/people/`,
+  FETCH_ALL_STUDENTS: `${CURRENT_BASE_URL}/people/students`,
   CREATE_PEOPLE: `${CURRENT_BASE_URL}/people`,  
   UPDATE_PEOPLE: (id: string) => `${CURRENT_BASE_URL}/people/${id}`,
   DELETE_PEOPLE: (id: string) => `${CURRENT_BASE_URL}/people/${id}`,

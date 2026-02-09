@@ -38,32 +38,30 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
-import { participantsColumns } from "./participants-table-columns";
-import type { Participant } from "@/types/participants";
+import { registrationsColumns } from "./registrations-table-columns";
+import type { Registration } from "@/types/registrations";
 
 const searchFields = [
   { value: "student_name", label: "Name" },
   { value: "email", label: "Email" },
   { value: "college", label: "College" },
-  { value: "city", label: "City" },
   { value: "phone_number", label: "Phone" },
-  { value: "team_name", label: "Team" },
 ];
 
-interface ParticipantsTableProps {
-  data: Participant[];
+interface RegistrationsTableProps {
+  data: Registration[];
   loading?: boolean;
-  onSortChange?: (column: keyof Participant, direction: "asc" | "desc") => void;
-  sortColumn?: keyof Participant | null;
+  onSortChange?: (column: keyof Registration, direction: "asc" | "desc") => void;
+  sortColumn?: keyof Registration | null;
   sortDirection?: "asc" | "desc";
-  onRowClick?: (participant: Participant) => void;
+  onRowClick?: (registration: Registration) => void;
   selectedIds?: string[];
   onSelectionChange?: (ids: string[]) => void;
   className?: string;
   defaultPageSize?: number;
 }
 
-export function ParticipantsTable({
+export function RegistrationsTable({
   data,
   loading = false,
   onSortChange,
@@ -74,12 +72,12 @@ export function ParticipantsTable({
   onSelectionChange,
   className,
   defaultPageSize = 25,
-}: ParticipantsTableProps) {
+}: RegistrationsTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchField, setSearchField] = useState("student_name");
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const defaults: Record<string, boolean> = {};
-    participantsColumns.forEach((col) => {
+    registrationsColumns.forEach((col) => {
       defaults[col.key] = !col.hideOnMobile;
     });
     return defaults;
@@ -105,7 +103,7 @@ export function ParticipantsTable({
   }, [data, searchField, searchQuery, fuse]);
 
   const visibleColumns = useMemo(() => {
-    return participantsColumns.filter((col) => columnVisibility[col.key]);
+    return registrationsColumns.filter((col) => columnVisibility[col.key]);
   }, [columnVisibility]);
 
   const sortedData = useMemo(() => {
@@ -139,7 +137,7 @@ export function ParticipantsTable({
     return sortedData.slice(start, end);
   }, [sortedData, pagination.pageIndex, pagination.pageSize]);
 
-  const handleSort = (column: keyof Participant) => {
+  const handleSort = (column: keyof Registration) => {
     if (!onSortChange) return;
 
     const newDirection =
@@ -164,10 +162,10 @@ export function ParticipantsTable({
     onSelectionChange(checked ? selectableIds : []);
   };
 
-  const handleSelectRow = (participant: Participant, checked: boolean) => {
+  const handleSelectRow = (registration: Registration, checked: boolean) => {
     if (!onSelectionChange) return;
 
-    const id = participant.email;
+    const id = registration.email;
     if (checked) {
       onSelectionChange([...selectedIds, id]);
     } else {
@@ -226,7 +224,7 @@ export function ParticipantsTable({
           <DropdownMenuContent align="end" className="w-[150px]">
             <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {participantsColumns.map((column) => (
+            {registrationsColumns.map((column) => (
               <DropdownMenuCheckboxItem
                 key={column.key}
                 className="capitalize"
@@ -274,7 +272,7 @@ export function ParticipantsTable({
                           ? "justify-end"
                           : "justify-start"
                       }`}
-                      onClick={() => handleSort(column.key as keyof Participant)}
+                      onClick={() => handleSort(column.key as keyof Registration)}
                     >
                       {column.label}
                       {sortColumn === column.key &&
@@ -325,34 +323,34 @@ export function ParticipantsTable({
                 >
                   {searchQuery ? (
                     <div>
-                      <p className="text-lg font-medium">No participants found</p>
+                      <p className="text-lg font-medium">No registrations found</p>
                       <p className="text-sm text-muted-foreground">
                         Try adjusting your search or filter criteria
                       </p>
                     </div>
                   ) : (
                     <div>
-                      <p className="text-lg font-medium">No participants</p>
+                      <p className="text-lg font-medium">No registrations</p>
                       <p className="text-sm text-muted-foreground">
-                        No participants have been registered yet
+                        No one has registered yet
                       </p>
                     </div>
                   )}
                 </TableCell>
               </TableRow>
             ) : (
-              paginatedData.map((participant) => (
+              paginatedData.map((registration) => (
                 <TableRow
-                  key={participant.email}
+                  key={registration.email}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onRowClick?.(participant)}
+                  onClick={() => onRowClick?.(registration)}
                 >
                   {onSelectionChange && (
                     <TableCell>
                       <Checkbox
-                        checked={selectedIds.includes(participant.email)}
+                        checked={selectedIds.includes(registration.email)}
                         onCheckedChange={(checked) =>
-                          handleSelectRow(participant, !!checked)
+                          handleSelectRow(registration, !!checked)
                         }
                         aria-label="Select row"
                         onClick={(e) => e.stopPropagation()}
@@ -361,7 +359,7 @@ export function ParticipantsTable({
                   )}
                   {visibleColumns.map((column) => (
                     <TableCell key={column.key}>
-                      {column.render(participant, 0)}
+                      {column.render(registration, 0)}
                     </TableCell>
                   ))}
                 </TableRow>
